@@ -1,14 +1,14 @@
 # Portafolio
 Hola! Soy Camila 👋
 
-Estudiante de Ingeniería Informática de la UNLAM.
+Estudiante de Ingeniería Informática de la UNLAM 👩‍💻 💚.
 
-Actualmente aprendiendo:
+## Actualmente aprendiendo:
 - JavaScript
 - Desarrollo Web
 - SQL
 - CSS
 - HTML
 
-Proyectos: 
+## Proyectos: 
 - Calculadora Web
