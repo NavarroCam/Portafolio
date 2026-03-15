@@ -1,14 +1,16 @@
-# Portafolio
-Hola! Soy Camila 👋
+# Calculadora Web
 
-Estudiante de Ingeniería Informática de la UNLAM.
+Calculadora desarrollada con JavaScript que permite
+sumar, restar, multiplicar y dividir.
 
-Actualmente aprendiendo:
-- JavaScript
-- Desarrollo Web
-- SQL
-- CSS
+## Tecnologías
+
 - HTML
+- CSS
+- JavaScript
 
-Proyectos: 
-- Calculadora Web
+## Funcionalidades
+
+- Operaciones básicas
+- Botón limpiar
+- Validación de datos
