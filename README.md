@@ -11,4 +11,7 @@ Estudiante de Ingeniería Informática de la UNLAM 👩‍💻 💚.
 - HTML
 
 ## Proyectos: 
-- Calculadora Web
+- Calculadora
+-  To do list
+-  Piedra papel o tijeras
+-  Buscador Pokemón
