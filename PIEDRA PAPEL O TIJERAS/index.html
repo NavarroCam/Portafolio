@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="shortcut icon" href="favicon.png" type="image/x-icon">
+  <title>Piedra, Papel o Tijera - Le Wagon</title>
+</head>
+<body>
+    <div class="contenedor">
+
+      <!-- Logo  -->
+      <div class="logo">
+        <img src="logo.png" alt="Logo Le Wagon">
+      </div>
+
+      <!-- Área principal del juego con las tres cartas -->
+      <div class="area-juego">
+
+          <!-- Carta del Jugador 1 -->
+          <div class="carta" id="cartaJugador">
+            <div class="carta-titulo">Jugador 1</div>
+            <div class="carta-emoji" id="emojiJugador">👊</div>
+          </div>
+
+          <!-- Carta del Resultado -->
+          <div class="carta carta-resultado">
+            <div id="versus">VS</div>
+            <div class="resultado-texto" id="textoResultado"></div>
+          </div>
+
+          <!-- Carta del Jugador 2 (Computadora) -->
+          <div class="carta" id="cartaComputadora">
+            <div class="carta-titulo">Jugador 2</div>
+            <div class="carta-emoji" id="emojiComputadora">🖐️</div>
+          </div>
+      </div>
+
+      <!-- Botones para elegir -->
+      <div class="opciones" id="opciones"> <!-- Puedes agregar style="display: none;" para que las opciones se oculten -->
+        <button class="boton-opcion" id="piedra" disabled>✊</button>
+        <button class="boton-opcion" id="papel" disabled>✋</button>
+        <button class="boton-opcion" id="tijeras" disabled>✌️</button>
+      </div>
+
+      <!-- Botón Let's Play -->
+      <button class="boton-jugar">Jugar</button>
+
+      <!-- Puntuación -->
+      <div class="puntuacion">
+        <div class="puntos">
+          <strong>Tu puntuación:</strong>
+          <span id="puntosJugador">0</span>
+        </div>
+        <div class="puntos">
+          <strong>Computadora:</strong>
+          <span id="puntosComputadora">0</span>
+        </div>
+      </div>
+
+      <!-- Pie de página -->
+      <div class="footer">
+        Hecho con 💜 por <a href="#">Cam</a>.
+      </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>

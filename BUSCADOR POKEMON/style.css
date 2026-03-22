@@ -1,0 +1,94 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-image: url('fondo.jpg'); 
+    background-size: cover;       
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.contenedor {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 600px; 
+}
+
+.image-comparison {
+    display: flex;
+    justify-content: space-around;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.img-box p {
+    font-size: 18px;
+    font-weight: bold;
+    color: #232420;
+    margin-bottom: 5px;
+}
+
+.main-img {
+    width: 220px;
+    filter: drop-shadow(0 8px 12px rgba(0,0,0,0.2));
+    transition: transform 0.3s ease;
+}
+
+.main-img:hover {
+    transform: scale(1.2);
+}
+
+.info-grid {
+    display: grid;
+    gap: 10px;
+    margin: 20px 0;
+    border-radius: 12px;
+}
+
+.stat-bar {
+    background: #cecbcb;
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.stat-bar span {
+    display: block;
+    height: 25px;
+    background: #0941bb;
+    color: rgb(211, 206, 206);
+    font-size: 13px;
+    line-height: 25px;
+    padding-left: 10px;
+}
+
+input {
+    padding: 12px;
+    width: 70%;
+    border: 2px solid #ff1c1c; 
+    border-radius: 8px 0 0 8px;
+    outline: none;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+button {
+    padding: 12px 20px;
+    background-color: #ff1c1c; 
+    color: white;
+    border: 2px solid #ff1c1c;
+    border-radius: 0 8px 8px 0;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #cc0000;
+    border-color: #cc0000;
+}
