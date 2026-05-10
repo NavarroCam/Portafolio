@@ -1,0 +1,31 @@
+# depslib dependency file v1.0
+1778376964 source:c:\users\camila navarro\onedrive\escritorio\portafolio\agenda de contactos\archivo.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"archivo.h"
+
+1778376241 source:c:\users\camila navarro\onedrive\escritorio\portafolio\agenda de contactos\menu.c
+	<stdio.h>
+	"menu.h"
+
+1778376200 c:\users\camila navarro\onedrive\escritorio\portafolio\agenda de contactos\menu.h
+
+1778376200 source:c:\users\camila navarro\onedrive\escritorio\portafolio\agenda de contactos\contacto.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"contacto.h"
+
+1778376200 c:\users\camila navarro\onedrive\escritorio\portafolio\agenda de contactos\contacto.h
+
+1778377002 c:\users\camila navarro\onedrive\escritorio\portafolio\agenda de contactos\archivo.h
+	"contacto.h"
+
+1778376441 source:c:\users\camila navarro\onedrive\escritorio\portafolio\agenda de contactos\main.c
+	<stdio.h>
+	<stdlib.h>
+	"menu.h"
+	"contacto.h"
+	"archivo.h"
+
