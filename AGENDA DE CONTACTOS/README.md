@@ -1,6 +1,4 @@
-## 📒 AGENDA DE CONTACTOS EN C
-
-==================================================
+# 📒 AGENDA DE CONTACTOS EN C
 
 ## 📌 DESCRIPCIÓN
 
@@ -15,7 +13,6 @@ El programa fue desarrollado utilizando:
 - Búsquedas
 - Validaciones de datos
 
-==================================================
 
 ## 🎯 OBJETIVO DEL PROYECTO
 
@@ -28,11 +25,10 @@ Desarrollar un sistema de gestión de contactos aplicando conceptos fundamentale
 - Modularización
 - Validación de datos
 
-==================================================
 
 ## ✨ FUNCIONALIDADES IMPLEMENTADAS
 
-## ➕ AGREGAR CONTACTO
+### ➕ AGREGAR CONTACTO
 
 Permite ingresar un nuevo contacto con:
 
@@ -44,7 +40,7 @@ Cada contacto recibe un ID único autoincremental.
 
 --------------------------------------------------
 
-## 📋 LISTAR CONTACTOS
+### 📋 LISTAR CONTACTOS
 
 Muestra todos los contactos almacenados en memoria.
 
@@ -57,7 +53,7 @@ Información mostrada:
 
 --------------------------------------------------
 
-## 🔎 BUSCAR CONTACTO POR NOMBRE
+### 🔎 BUSCAR CONTACTO POR NOMBRE
 
 Permite buscar contactos mediante coincidencia parcial.
 
@@ -73,13 +69,13 @@ Martina
 
 --------------------------------------------------
 
-## 🆔 BUSCAR CONTACTO POR ID
+### 🆔 BUSCAR CONTACTO POR ID
 
 Permite encontrar un contacto específico utilizando su identificador único.
 
 --------------------------------------------------
 
-## ✏️ EDITAR CONTACTO
+### ✏️ EDITAR CONTACTO
 
 Permite modificar:
 
@@ -91,7 +87,7 @@ de un contacto existente.
 
 --------------------------------------------------
 
-## ❌ ELIMINAR CONTACTO
+### ❌ ELIMINAR CONTACTO
 
 Permite borrar un contacto utilizando su ID.
 
@@ -100,13 +96,13 @@ realloc().
 
 --------------------------------------------------
 
-## 🔤 ORDENAR CONTACTOS
+### 🔤 ORDENAR CONTACTOS
 
 Ordena los contactos alfabéticamente por nombre.
 
 --------------------------------------------------
 
-## 💾 PERSISTENCIA DE DATOS
+### 💾 PERSISTENCIA DE DATOS
 
 Los contactos se almacenan automáticamente en:
 
@@ -120,7 +116,7 @@ Al cerrar el programa:
 
 ✓ Los datos se guardan automáticamente.
 
-==================================================
+--------------------------------------------------
 
 ## ✅ VALIDACIONES IMPLEMENTADAS
 
@@ -133,37 +129,48 @@ El sistema incluye validaciones para evitar errores:
 - Control de memoria (realloc)
 - Manejo de errores de archivo
 
-==================================================
 
 ## 🗂️ ESTRUCTURA DEL PROYECTO
 
 AgendaContactos/
 
 │── main.c
+
 │── contacto.c
+
 │── contacto.h
+
 │── menu.c
+
 │── menu.h
+
 │── archivo.c
+
 │── archivo.h
+
 │── contactos.txt
+
 │── README.md
 
-
-==================================================
 
 ## 🧠 CONCEPTOS DE PROGRAMACIÓN UTILIZADOS
 
 Este proyecto implementa:
 
 ✓ Structs
-✓ Memoria dinámica
-✓ Punteros
-✓ Modularización
-✓ Manejo de archivos
-✓ Búsquedas
-✓ Ordenamiento
-✓ Validación de datos
-✓ Manejo de errores
 
-==================================================
+✓ Memoria dinámica
+
+✓ Punteros
+
+✓ Modularización
+
+✓ Manejo de archivos
+
+✓ Búsquedas
+
+✓ Ordenamiento
+
+✓ Validación de datos
+
+✓ Manejo de errores

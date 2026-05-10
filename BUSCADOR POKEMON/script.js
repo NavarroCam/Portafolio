@@ -1,4 +1,5 @@
-async function buscarPokemon() {
+async function buscarPokemon() 
+{
     const input = document.getElementById("pokemonInput");
     const nombre = input.value.toLowerCase().trim();
     const resultado = document.getElementById("resultado");
@@ -7,7 +8,8 @@ async function buscarPokemon() {
 
     resultado.innerHTML = "<p class='loading'>Consultando base de datos...</p>";
 
-    try {
+    try 
+    {
         const respuesta = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
         if (!respuesta.ok) throw new Error("Pokémon no encontrado");
 
@@ -20,7 +22,6 @@ async function buscarPokemon() {
         const hp = datos.stats[0].base_stat;
         const ataque = datos.stats[1].base_stat;
         const defensa = datos.stats[2].base_stat;
-
 
         const arteOficial = datos.sprites.other['official-artwork'].front_default;
         const imagenShiny = datos.sprites.other['official-artwork'].front_shiny || datos.sprites.front_shiny;
@@ -54,8 +55,9 @@ async function buscarPokemon() {
                 </div>
             </div>
         `;
-
-    } catch (error) {
+    } 
+    catch (error) 
+    {
         resultado.innerHTML = "<p class='error'>❌ No se encontró el Pokémon.</p>";
     }
 }

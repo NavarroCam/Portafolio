@@ -1,4 +1,5 @@
-function agregarTarea() {
+function agregarTarea() 
+{
     let input = document.getElementById("tareaInput");
     let texto = input.value;
 
@@ -15,7 +16,8 @@ function agregarTarea() {
     let span = document.createElement("span");
     span.textContent = texto;
 
-    checkbox.addEventListener("change", function () {
+    checkbox.addEventListener("change", function () 
+    {
         span.classList.toggle("completada");
     });
 
@@ -25,7 +27,8 @@ function agregarTarea() {
     let borrar = document.createElement("button");
     borrar.textContent = "🗑️";
 
-    borrar.addEventListener("click", function () {
+    borrar.addEventListener("click", function () 
+    {
         li.remove();
     });
 

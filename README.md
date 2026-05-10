@@ -1,7 +1,7 @@
-Hola! Soy Camila 👋
-🎓 Estudiante de Ingeniería Informática de la UNLAM 💚.
+## Portafolio
 
-==================================================
+Hola! Soy Camila 👋
+Estudiante de Ingeniería Informática de la UNLAM 💚.
 
 ## 💻 Actualmente aprendiendo:
 
@@ -12,7 +12,6 @@ Hola! Soy Camila 👋
 - CSS
 - HTML
 
-==================================================
 
 ## 🗂️ Proyectos: 
 📌 Cada proyecto cuenta con su propio README con descripción, funcionalidades y tecnologías utilizadas.
@@ -23,7 +22,6 @@ Hola! Soy Camila 👋
 -  Buscador Pokemón 🔍
 -  Agenda de contactos 📒
 
-==================================================
 
 ## 📫 Contacto
 

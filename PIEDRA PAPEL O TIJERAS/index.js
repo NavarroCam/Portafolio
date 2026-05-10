@@ -14,9 +14,9 @@ let marcadorJugador = document.querySelector("#puntosJugador")
 let marcadorComputadora = document.querySelector("#puntosComputadora")
 
 
-
 // Ahora empezamos agregando funcionalidad cuando damos click en jugar
-boton_jugar.addEventListener("click", () => {
+boton_jugar.addEventListener("click", () => 
+    {
     opciones.forEach((opcion) => {
         opcion.removeAttribute("disabled")
     })
@@ -26,7 +26,6 @@ boton_jugar.addEventListener("click", () => {
 })
 
 // Luego creemos la funcionalidad cuando seleccionemos una opcion
-
 let mi_opcion = ''
 
 let emojis = {
@@ -36,7 +35,6 @@ let emojis = {
 }
 
 let opciones_computadora = ["piedra", "papel", "tijeras"]
-
 opciones.forEach((opcion) => {
     opcion.addEventListener("click", () => {
         mi_opcion = opcion.getAttribute("id")
@@ -44,32 +42,28 @@ opciones.forEach((opcion) => {
 
         // Al final agregaremos la funcionalidad cuando la computadora piensa
         let numero_aleatorio = Math.floor(Math.random() * 3)
-
         let eleccion_computadora = opciones_computadora[numero_aleatorio]
         
         computadora.textContent = emojis[eleccion_computadora]   
-        
         versus.style.display = 'none'
 
-        if (mi_opcion == eleccion_computadora) {
+        if (mi_opcion == eleccion_computadora) 
+        {
             resultado.textContent = "EMPATE 🤝"
-        }else if ((mi_opcion == "piedra" && eleccion_computadora == "tijeras") || 
+        }
+        else if ((mi_opcion == "piedra" && eleccion_computadora == "tijeras") || 
                 (mi_opcion == "tijeras" && eleccion_computadora == "papel") || 
                 (mi_opcion == "papel" && eleccion_computadora == "piedra"))
             {
                 resultado.textContent = "GANASTE 👏"
                 puntosJugador++
-            }else{
+            }
+            else
+            {
                 resultado.textContent = "PERDISTE 🤏"
                 puntosComputadora++
             }
         marcadorJugador.textContent = puntosJugador
         marcadorComputadora.textContent = puntosComputadora
-    })
-    
+    })  
 })
-
-
-
-
-

@@ -36,7 +36,7 @@ Practicar manipulación del DOM, eventos y lógica condicional en JavaScript, de
 ![alt text](vista-previa.png)
 
 
-## ▶️ Cómo usar
+## ▶️ Cómo usar:
 
 1. Presionar el botón **"Jugar"**  
 2. Elegir una opción (piedra, papel o tijeras)  
