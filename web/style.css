@@ -218,52 +218,170 @@ section h2 {
     color: var(--accent-primary);
 }
 
-/* Proyectos */
+/* Proyectos - Carrusel */
 .projects {
     background-color: var(--bg-primary);
 }
 
-.projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
+.carousel {
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.carousel-inner {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+    background-color: var(--bg-secondary);
+}
+
+.carousel-item {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+}
+
+.carousel-item.active {
+    display: block;
+    opacity: 1;
 }
 
 .project-card {
-    background-color: var(--bg-secondary);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: var(--shadow);
-    transition: all var(--transition);
-    border: 2px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem;
+    min-height: 600px;
 }
 
-.project-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 8px 24px rgba(44, 90, 160, 0.15);
-    border-color: var(--accent-primary);
+.project-image {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+}
+
+.project-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
 .project-placeholder {
     width: 100%;
-    height: 200px;
-    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 3rem;
+    font-size: 4rem;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
 }
 
-.project-card h3 {
-    padding: 1.5rem 1.5rem 0.5rem;
-    font-size: 1.3rem;
-    color: var(--text-primary);
+.project-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
-.project-card p {
-    padding: 0 1.5rem 1.5rem;
+.project-info h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.project-description {
+    font-size: 1.1rem;
     color: var(--text-secondary);
-    font-size: 0.95rem;
+    line-height: 1.8;
+}
+
+.project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    padding-top: 1rem;
+    border-top: 2px solid var(--border-color);
+}
+
+.tech-tag {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Botones de navegación del carrusel */
+.carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--accent-primary);
+    color: white;
+    border: none;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.carousel-btn:hover {
+    background-color: var(--accent-secondary);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-prev {
+    left: -70px;
+}
+
+.carousel-next {
+    right: -70px;
+}
+
+/* Puntos indicadores */
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 2rem;
+    padding-bottom: 1rem;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: var(--border-color);
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.dot:hover {
+    background-color: var(--accent-secondary);
+}
+
+.dot.active {
+    background-color: var(--accent-primary);
+    width: 30px;
+    border-radius: 6px;
 }
 
 /* Contacto */
@@ -358,9 +476,40 @@ section h2 {
         font-size: 0.95rem;
     }
 
-    .projects-grid {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
+    .project-card {
+        min-height: auto;
+        padding: 1.5rem;
+    }
+
+    .project-image {
+        height: 250px;
+    }
+
+    .project-info h3 {
+        font-size: 1.5rem;
+    }
+
+    .project-description {
+        font-size: 1rem;
+    }
+
+    .tech-tag {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .carousel-prev {
+        left: 10px;
+    }
+
+    .carousel-next {
+        right: 10px;
+    }
+
+    .carousel-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
     }
 
     .contact-grid {
@@ -430,6 +579,33 @@ section h2 {
 
     .skill-card h3 {
         font-size: 0.85rem;
+    }
+
+    .project-card {
+        min-height: auto;
+        padding: 1rem;
+        gap: 1rem;
+    }
+
+    .project-image {
+        height: 200px;
+    }
+
+    .project-info h3 {
+        font-size: 1.3rem;
+    }
+
+    .project-description {
+        font-size: 0.9rem;
+    }
+
+    .tech-tag {
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+
+    .project-tech {
+        justify-content: center;
     }
 
     .contact-icon {
