@@ -78,13 +78,115 @@
     <section class="projects" id="proyectos">
         <div class="container">
             <h2>Proyectos</h2>
-            <div class="projects-grid">
-                <div class="project-card">
-                    <div class="project-placeholder">
-                        <span>🚀</span>
+            
+            <!-- Carrusel -->
+            <div class="carousel">
+                <div class="carousel-inner">
+                    <!-- Proyecto 1 -->
+                    <div class="carousel-item active">
+                        <div class="project-card">
+                            <div class="project-image">
+                                <img src="https://raw.githubusercontent.com/NavarroCam/Portafolio/main/CALCULADORA/vista-previa.png" alt="Calculadora">
+                            </div>
+                            <div class="project-info">
+                                <h3>🧮 Calculadora</h3>
+                                <p class="project-description">Calculadora funcional y moderna que permite realizar operaciones aritméticas básicas</p>
+                                <div class="project-tech">
+                                    <span class="tech-tag">HTML5</span>
+                                    <span class="tech-tag">CSS3</span>
+                                    <span class="tech-tag">JavaScript</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h3>Próximamente</h3>
-                    <p>Mis proyectos estarán aquí</p>
+
+                    <!-- Proyecto 2 -->
+                    <div class="carousel-item">
+                        <div class="project-card">
+                            <div class="project-image">
+                                <img src="https://raw.githubusercontent.com/NavarroCam/Portafolio/main/TO%20DO%20LIST/vista-previa.png" alt="To Do List">
+                            </div>
+                            <div class="project-info">
+                                <h3>📝 To Do List</h3>
+                                <p class="project-description">Lista de tareas interactiva con interfaz simétrica, acciones rápidas y diseño responsive</p>
+                                <div class="project-tech">
+                                    <span class="tech-tag">HTML5</span>
+                                    <span class="tech-tag">CSS3</span>
+                                    <span class="tech-tag">JavaScript</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proyecto 3 -->
+                    <div class="carousel-item">
+                        <div class="project-card">
+                            <div class="project-image">
+                                <img src="https://raw.githubusercontent.com/NavarroCam/Portafolio/main/PIEDRA%20PAPEL%20O%20TIJERAS/vista-previa.png" alt="Piedra Papel o Tijeras">
+                            </div>
+                            <div class="project-info">
+                                <h3>🎮 Piedra Papel o Tijeras</h3>
+                                <p class="project-description">Juego interactivo donde compites contra la computadora con sistema de puntuación acumulativa</p>
+                                <div class="project-tech">
+                                    <span class="tech-tag">HTML5</span>
+                                    <span class="tech-tag">CSS3</span>
+                                    <span class="tech-tag">JavaScript</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proyecto 4 -->
+                    <div class="carousel-item">
+                        <div class="project-card">
+                            <div class="project-image">
+                                <img src="https://raw.githubusercontent.com/NavarroCam/Portafolio/main/BUSCADOR%20POKEMON/vista-previa.png" alt="Buscador Pokémon">
+                            </div>
+                            <div class="project-info">
+                                <h3>🔍 Buscador Pokémon</h3>
+                                <p class="project-description">Buscador interactivo con PokéAPI que muestra datos técnicos, visualización dual y estadísticas dinámicas</p>
+                                <div class="project-tech">
+                                    <span class="tech-tag">HTML5</span>
+                                    <span class="tech-tag">CSS3</span>
+                                    <span class="tech-tag">JavaScript ES6+</span>
+                                    <span class="tech-tag">PokéAPI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Proyecto 5 -->
+                    <div class="carousel-item">
+                        <div class="project-card">
+                            <div class="project-image">
+                                <div class="project-placeholder">
+                                    <span>📒</span>
+                                </div>
+                            </div>
+                            <div class="project-info">
+                                <h3>📒 Agenda de Contactos</h3>
+                                <p class="project-description">Sistema de gestión de contactos en C con almacenamiento persistente, búsquedas y validaciones</p>
+                                <div class="project-tech">
+                                    <span class="tech-tag">C</span>
+                                    <span class="tech-tag">Structs</span>
+                                    <span class="tech-tag">Memoria Dinámica</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones de navegación -->
+                <button class="carousel-btn carousel-prev" id="prevBtn" aria-label="Proyecto anterior">❮</button>
+                <button class="carousel-btn carousel-next" id="nextBtn" aria-label="Siguiente proyecto">❯</button>
+
+                <!-- Puntos indicadores -->
+                <div class="carousel-dots">
+                    <span class="dot active" data-slide="0"></span>
+                    <span class="dot" data-slide="1"></span>
+                    <span class="dot" data-slide="2"></span>
+                    <span class="dot" data-slide="3"></span>
+                    <span class="dot" data-slide="4"></span>
                 </div>
             </div>
         </div>
