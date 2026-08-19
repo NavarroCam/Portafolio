@@ -50,5 +50,70 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
+// ===== CARRUSEL DE PROYECTOS =====
+let currentSlide = 0;
+let autoSlideInterval;
+
+const carouselItems = document.querySelectorAll('.carousel-item');
+const dots = document.querySelectorAll('.dot');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+
+// Mostrar slide específico
+function showSlide(n) {
+    carouselItems.forEach(item => item.classList.remove('active'));
+    dots.forEach(dot => dot.classList.remove('active'));
+    
+    carouselItems[n].classList.add('active');
+    dots[n].classList.add('active');
+}
+
+// Siguiente slide
+function nextSlide() {
+    currentSlide = (currentSlide + 1) % carouselItems.length;
+    showSlide(currentSlide);
+    resetAutoSlide();
+}
+
+// Slide anterior
+function prevSlide() {
+    currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length;
+    showSlide(currentSlide);
+    resetAutoSlide();
+}
+
+// Auto-avance cada 5 segundos
+function autoSlide() {
+    nextSlide();
+}
+
+// Reiniciar el contador de auto-avance
+function resetAutoSlide() {
+    clearInterval(autoSlideInterval);
+    autoSlideInterval = setInterval(autoSlide, 5000);
+}
+
+// Event listeners para botones
+prevBtn.addEventListener('click', prevSlide);
+nextBtn.addEventListener('click', nextSlide);
+
+// Event listeners para dots
+dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+        currentSlide = index;
+        showSlide(currentSlide);
+        resetAutoSlide();
+    });
+});
+
+// Inicializar carrusel
+function initCarousel() {
+    showSlide(0);
+    autoSlideInterval = setInterval(autoSlide, 5000);
+}
+
 // Inicializar tema al cargar
-document.addEventListener('DOMContentLoaded', initTheme);
+document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
+    initCarousel();
+});
