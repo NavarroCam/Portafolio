@@ -3,222 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Camila Navarro - Portafolio</title>
+    <title>Camila Navarro | QA & Desarrollo de Software</title>
+    <meta name="description" content="Portfolio de Camila Navarro: estudiante de Ingeniería en Informática (UNLaM), pasante de IT en Mercedes-Benz Camiones y Buses Argentina y QA Tester manual.">
+
+    <!-- Vista previa al compartir (LinkedIn, WhatsApp) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Camila Navarro | QA & Desarrollo de Software">
+    <meta property="og:description" content="Estudiante de Ingeniería en Informática, pasante de IT y QA Tester. Conocé mi experiencia, proyectos y CV.">
+    <meta property="og:url" content="https://portafolio-jade-five-33.vercel.app/">
+    <meta property="og:image" content="https://portafolio-jade-five-33.vercel.app/assets/og-image.png">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+
+    <!-- Aplica el tema antes de pintar la página (evita el parpadeo) -->
+    <script>
+        (function () {
+            var theme;
+            try { theme = localStorage.getItem('theme'); } catch (e) {}
+            if (!theme) theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+
     <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-content">
-            <div class="logo">CN</div>
-            <button class="theme-toggle" id="themeToggle" aria-label="Cambiar tema">
-                <span class="theme-icon">🌙</span>
-            </button>
-        </div>
-    </nav>
+    <header class="navbar">
+        <nav class="navbar-content" aria-label="Principal">
+            <a href="#inicio" class="logo" aria-label="Inicio">CN</a>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Camila Navarro</h1>
-            <p class="role">Estudiante de Ingeniería Informática</p>
-            <p class="subtitle">QA Trainee | Testing & Desarrollo Software</p>
-            <div class="cta-buttons">
-                <a href="#contacto" class="btn btn-primary">Contactarme</a>
-                <a href="#proyectos" class="btn btn-secondary">Ver Proyectos</a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#sobre-mi">Sobre mí</a></li>
+                <li><a href="#experiencia">Experiencia</a></li>
+                <li><a href="#formacion">Formación</a></li>
+                <li><a href="#skills">Habilidades</a></li>
+                <li><a href="#proyectos">Proyectos</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" aria-label="Cambiar a modo oscuro">
+                    <span class="theme-icon" aria-hidden="true">🌙</span>
+                </button>
+                <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="navLinks">
+                    <span></span><span></span><span></span>
+                </button>
             </div>
-        </div>
-    </section>
+        </nav>
+    </header>
 
-    <!-- Conocimientos -->
-    <section class="skills" id="skills">
-        <div class="container">
-            <h2>Conocimientos</h2>
-            <div class="skills-grid">
-                <div class="skill-card">
-                    <div class="skill-icon">🧪</div>
-                    <h3>QA Manual</h3>
+    <main id="main">
+        <!-- Hero -->
+        <section class="hero" id="inicio">
+            <div class="hero-content">
+                <p class="hero-kicker">Hola, soy</p>
+                <h1>Camila Navarro</h1>
+                <p class="role">Estudiante de Ingeniería en Informática · QA Tester</p>
+                <p class="subtitle">Pasante de IT en Mercedes-Benz Camiones y Buses Argentina</p>
+                <div class="cta-buttons">
+                    <a href="assets/CV_Camila_Navarro.pdf" class="btn btn-primary" download>Descargar CV</a>
+                    <a href="#proyectos" class="btn btn-secondary">Ver proyectos</a>
                 </div>
-                <div class="skill-card">
-                    <div class="skill-icon">🔍</div>
-                    <h3>Testing</h3>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon">💻</div>
-                    <h3>Desarrollo Software</h3>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon">🌐</div>
-                    <h3>Desarrollo Web</h3>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon">⚙️</div>
-                    <h3>C</h3>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon">📝</div>
-                    <h3>JavaScript</h3>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon">🎨</div>
-                    <h3>HTML & CSS</h3>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon">🗄️</div>
-                    <h3>SQL</h3>
-                </div>
+                <ul class="hero-social">
+                    <li><a href="https://github.com/NavarroCam" target="_blank" rel="noopener">GitHub</a></li>
+                    <li><a href="https://www.linkedin.com/in/camila-micaela-navarro-ojeda-1017151a5/" target="_blank" rel="noopener">LinkedIn</a></li>
+                    <li><a href="mailto:navarrocamila081@gmail.com">Email</a></li>
+                </ul>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Proyectos -->
-    <section class="projects" id="proyectos">
-        <div class="container">
-            <h2>Proyectos</h2>
-            
-            <!-- Carrusel -->
-            <div class="carousel">
-                <div class="carousel-inner">
-                    <!-- Proyecto 1 -->
-                    <div class="carousel-item active">
-                        <div class="project-card">
-                            <div class="project-image">
-                                <img src="https://raw.githubusercontent.com/NavarroCam/Portafolio/main/CALCULADORA/vista-previa.png" alt="Calculadora">
-                            </div>
-                            <div class="project-info">
-                                <h3>🧮 Calculadora</h3>
-                                <p class="project-description">Calculadora funcional y moderna que permite realizar operaciones aritméticas básicas como suma, resta, multiplicación y división. Incluye función de limpieza y validación de datos para asegurar cálculos correctos.</p>
-                                <div class="project-tech">
-                                    <span class="tech-tag">HTML5</span>
-                                    <span class="tech-tag">CSS3</span>
-                                    <span class="tech-tag">JavaScript</span>
-                                </div>
-                            </div>
-                        </div>
+        <!-- Sobre mí -->
+        <section class="about" id="sobre-mi">
+            <div class="container">
+                <h2>Sobre mí</h2>
+                <div class="about-grid">
+                    <div class="about-text">
+                        <p>Soy estudiante de <strong>Ingeniería en Informática en la UNLaM</strong> y actualmente trabajo como <strong>pasante de IT en Mercedes-Benz Camiones y Buses Argentina</strong>, en el área de Sistemas de la Planta Zárate.</p>
+                        <p>Me gradué de la <strong>Diplomatura en Testing QA</strong> (UTN y Fundación Empujar) y hoy me estoy formando en <strong>automatización de pruebas con Selenium y Python</strong>. Tengo experiencia en diseño y ejecución de casos de prueba, reporte de bugs, documentación, SQL, Jira y metodologías ágiles.</p>
+                        <p>Me interesa seguir creciendo en IT, aportando pensamiento analítico, atención al detalle, ganas de aprender y trabajo en equipo.</p>
                     </div>
-
-                    <!-- Proyecto 2 -->
-                    <div class="carousel-item">
-                        <div class="project-card">
-                            <div class="project-image">
-                                <img src="https://raw.githubusercontent.com/NavarroCam/Portafolio/main/TO%20DO%20LIST/vista-previa.png" alt="To Do List">
-                            </div>
-                            <div class="project-info">
-                                <h3>📝 To Do List</h3>
-                                <p class="project-description">Lista de tareas interactiva con interfaz simétrica y diseño moderno. Permite agregar tareas, marcarlas como completadas con efecto de tachado, eliminar tareas individuales y cuenta con diseño responsive adaptable a diferentes tamaños de pantalla.</p>
-                                <div class="project-tech">
-                                    <span class="tech-tag">HTML5</span>
-                                    <span class="tech-tag">CSS3</span>
-                                    <span class="tech-tag">JavaScript</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Proyecto 3 -->
-                    <div class="carousel-item">
-                        <div class="project-card">
-                            <div class="project-image">
-                                <img src="https://raw.githubusercontent.com/NavarroCam/Portafolio/main/PIEDRA%20PAPEL%20O%20TIJERAS/vista-previa.png" alt="Piedra Papel o Tijeras">
-                            </div>
-                            <div class="project-info">
-                                <h3>🎮 Piedra Papel o Tijeras</h3>
-                                <p class="project-description">Juego interactivo donde compites contra la computadora. Selecciona tu jugada, la computadora genera la suya aleatoriamente y visualiza resultados en tiempo real. Incluye sistema de puntuación acumulativa e interfaz intuitiva con emojis representativos.</p>
-                                <div class="project-tech">
-                                    <span class="tech-tag">HTML5</span>
-                                    <span class="tech-tag">CSS3</span>
-                                    <span class="tech-tag">JavaScript</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Proyecto 4 -->
-                    <div class="carousel-item">
-                        <div class="project-card">
-                            <div class="project-image">
-                                <img src="https://raw.githubusercontent.com/NavarroCam/Portafolio/main/BUSCADOR%20POKEMON/vista-previa.png" alt="Buscador Pokémon">
-                            </div>
-                            <div class="project-info">
-                                <h3>🔍 Buscador Pokémon</h3>
-                                <p class="project-description">Buscador interactivo que utiliza PokéAPI para obtener datos en tiempo real. Busca cualquier Pokémon por nombre, visualiza arte oficial y versión Shiny simultáneamente, extrae información técnica como tipo, peso y altura, e incluye barras dinámicas para HP, Ataque y Defensa.</p>
-                                <div class="project-tech">
-                                    <span class="tech-tag">HTML5</span>
-                                    <span class="tech-tag">CSS3</span>
-                                    <span class="tech-tag">JavaScript ES6+</span>
-                                    <span class="tech-tag">PokéAPI</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Proyecto 5 -->
-                    <div class="carousel-item">
-                        <div class="project-card">
-                            <div class="project-image">
-                                <div class="project-placeholder">
-                                    <span>📒</span>
-                                </div>
-                            </div>
-                            <div class="project-info">
-                                <h3>📒 Agenda de Contactos</h3>
-                                <p class="project-description">Sistema de gestión de contactos desarrollado en C con almacenamiento persistente en archivos. Permite agregar, editar, buscar y eliminar contactos, incluye validaciones de datos, manejo de memoria dinámica con structs, y funcionalidades avanzadas como ordenamiento alfabético.</p>
-                                <div class="project-tech">
-                                    <span class="tech-tag">C</span>
-                                    <span class="tech-tag">Structs</span>
-                                    <span class="tech-tag">Memoria Dinámica</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Botones de navegación -->
-                <button class="carousel-btn carousel-prev" id="prevBtn" aria-label="Proyecto anterior">❮</button>
-                <button class="carousel-btn carousel-next" id="nextBtn" aria-label="Siguiente proyecto">❯</button>
-
-                <!-- Puntos indicadores -->
-                <div class="carousel-dots">
-                    <span class="dot active" data-slide="0"></span>
-                    <span class="dot" data-slide="1"></span>
-                    <span class="dot" data-slide="2"></span>
-                    <span class="dot" data-slide="3"></span>
-                    <span class="dot" data-slide="4"></span>
+                    <ul class="about-facts">
+                        <li><span class="fact-label">Ubicación</span><span>Buenos Aires, Argentina</span></li>
+                        <li><span class="fact-label">Enfoque</span><span>QA Manual · Automatización · Desarrollo</span></li>
+                        <li><span class="fact-label">Idiomas</span><span>Español nativo · Inglés Senior 2 (AACI)</span></li>
+                        <li><span class="fact-label">Disponibilidad</span><span>Abierta a nuevas oportunidades</span></li>
+                    </ul>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Contacto -->
-    <section class="contact" id="contacto">
-        <div class="container">
-            <h2>Contacto</h2>
-            <div class="contact-grid">
-                <a href="mailto:navarrocamila081@gmail.com" class="contact-card">
-                    <div class="contact-icon">✉️</div>
-                    <h3>Email</h3>
-                    <p>navarrocamila081@gmail.com</p>
-                </a>
-                <a href="tel:+541154081053" class="contact-card">
-                    <div class="contact-icon">📱</div>
-                    <h3>Teléfono</h3>
-                    <p>+54 11 5408-1053</p>
-                </a>
-                <a href="https://www.linkedin.com/in/camila-micaela-navarro-ojeda-1017151a5/" target="_blank" class="contact-card">
-                    <div class="contact-icon">💼</div>
-                    <h3>LinkedIn</h3>
-                    <p>Camila Navarro</p>
-                </a>
+        <!-- Experiencia -->
+        <section class="experience" id="experiencia">
+            <div class="container">
+                <h2>Experiencia</h2>
+                <ol class="timeline">
+                    <li class="timeline-item">
+                        <div class="timeline-header">
+                            <h3>Pasante de IT</h3>
+                            <span class="timeline-date">2026 – Actualidad</span>
+                        </div>
+                        <p class="timeline-org">Mercedes-Benz Camiones y Buses Argentina · Sistemas – Planta Zárate</p>
+                        <ul>
+                            <li>Documentación y análisis de procesos del área de Sistemas.</li>
+                            <li>Elaboración y actualización de documentación de procesos, detectando datos repetidos o faltantes.</li>
+                            <li>Participación en iniciativas de mejora de la estructura de trabajo y de la información destinada a usuarios y equipos de distintos sectores.</li>
+                        </ul>
+                    </li>
+                    <li class="timeline-item">
+                        <div class="timeline-header">
+                            <h3>Responsable de Atención al Cliente</h3>
+                            <span class="timeline-date">2018 – 2026</span>
+                        </div>
+                        <p class="timeline-org">Negocio familiar</p>
+                        <ul>
+                            <li>Atención al cliente y resolución de consultas con comunicación efectiva y análisis de casos.</li>
+                            <li>Gestión y seguimiento de pedidos, ventas y casos, con control de stock y coordinación de entregas.</li>
+                            <li>Manejo de caja y control administrativo.</li>
+                        </ul>
+                    </li>
+                </ol>
             </div>
-        </div>
-    </section>
+        </section>
+
+        <!-- Formación -->
+        <section class="education" id="formacion">
+            <div class="container">
+                <h2>Formación</h2>
+                <div class="edu-grid">
+                    <article class="edu-card">
+                        <span class="edu-date">2021 – En curso</span>
+                        <h3>Ingeniería en Informática</h3>
+                        <p class="edu-org">Universidad Nacional de La Matanza (UNLaM)</p>
+                        <p>Programación, bases de datos, análisis de sistemas e ingeniería de software.</p>
+                    </article>
+                    <article class="edu-card">
+                        <span class="edu-date">Mar – Jul 2026 · 153 h</span>
+                        <h3>Diplomatura en Testing QA</h3>
+                        <p class="edu-org">Testing Master – UTN y Fundación Empujar</p>
+                        <p>Diseño de casos de prueba, sistema de tickets, resolución de incidentes, documentación y casos prácticos.</p>
+                    </article>
+                    <article class="edu-card">
+                        <span class="edu-date">2026 – En curso</span>
+                        <h3>Automatización QA</h3>
+                        <p class="edu-org">Formación práctica</p>
+                        <p>Automatización de pruebas con Selenium y Python, usando VS Code y Git Bash.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Habilidades -->
+        <section class="skills" id="skills">
+            <div class="container">
+                <h2>Habilidades</h2>
+                <div class="skills-grid">
+                    <div class="skill-group">
+                        <h3><span aria-hidden="true">🧪</span> Testing</h3>
+                        <ul class="chips">
+                            <li>Casos de prueba</li>
+                            <li>Testing manual</li>
+                            <li>Postman (APIs)</li>
+                            <li>Reporte de bugs</li>
+                            <li>Selenium</li>
+                        </ul>
+                    </div>
+                    <div class="skill-group">
+                        <h3><span aria-hidden="true">💻</span> Lenguajes</h3>
+                        <ul class="chips">
+                            <li>C</li>
+                            <li>Python</li>
+                            <li>JavaScript</li>
+                            <li>HTML</li>
+                            <li>CSS</li>
+                        </ul>
+                    </div>
+                    <div class="skill-group">
+                        <h3><span aria-hidden="true">🗄️</span> Bases de datos</h3>
+                        <ul class="chips">
+                            <li>SQL</li>
+                            <li>MongoDB (básico)</li>
+                        </ul>
+                    </div>
+                    <div class="skill-group">
+                        <h3><span aria-hidden="true">📋</span> Gestión y herramientas</h3>
+                        <ul class="chips">
+                            <li>Jira</li>
+                            <li>Scrum</li>
+                            <li>Kanban</li>
+                            <li>Git</li>
+                            <li>GitHub</li>
+                            <li>Power Apps</li>
+                            <li>Slack</li>
+                            <li>Microsoft Office</li>
+                            <li>IA generativa</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Proyectos -->
+        <section class="projects" id="proyectos">
+            <div class="container">
+                <h2>Proyectos</h2>
+                <div class="projects-grid">
+                    <article class="project-card">
+                        <div class="project-image">
+                            <img src="assets/img/buscador-pokemon.webp" alt="Captura del Buscador Pokémon" width="800" height="762" loading="lazy">
+                        </div>
+                        <div class="project-info">
+                            <h3>Buscador Pokémon</h3>
+                            <p class="project-description">Consume la PokéAPI en tiempo real: busca por nombre, muestra el arte oficial y la versión Shiny, datos de tipo, peso y altura, y barras dinámicas de HP, Ataque y Defensa.</p>
+                            <ul class="project-tech">
+                                <li>HTML5</li><li>CSS3</li><li>JavaScript ES6+</li><li>PokéAPI</li>
+                            </ul>
+                            <div class="project-links">
+                                <a href="https://github.com/NavarroCam/Portafolio/tree/main/BUSCADOR%20POKEMON" target="_blank" rel="noopener" class="project-link">Ver código</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="project-card">
+                        <div class="project-image project-placeholder" aria-hidden="true">
+                            <span>📒</span>
+                        </div>
+                        <div class="project-info">
+                            <h3>Agenda de Contactos</h3>
+                            <p class="project-description">Gestión de contactos en C con almacenamiento persistente en archivos: alta, edición, búsqueda y baja, validaciones, memoria dinámica con structs y ordenamiento alfabético.</p>
+                            <ul class="project-tech">
+                                <li>C</li><li>Structs</li><li>Memoria dinámica</li><li>Archivos</li>
+                            </ul>
+                            <div class="project-links">
+                                <a href="https://github.com/NavarroCam/Portafolio/tree/main/AGENDA%20DE%20CONTACTOS" target="_blank" rel="noopener" class="project-link">Ver código</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="project-card">
+                        <div class="project-image">
+                            <img src="assets/img/todo-list.webp" alt="Captura de la To Do List" width="800" height="759" loading="lazy">
+                        </div>
+                        <div class="project-info">
+                            <h3>To Do List</h3>
+                            <p class="project-description">Lista de tareas interactiva: agregar tareas, marcarlas como completadas con efecto de tachado y eliminarlas. Diseño responsive.</p>
+                            <ul class="project-tech">
+                                <li>HTML5</li><li>CSS3</li><li>JavaScript</li>
+                            </ul>
+                            <div class="project-links">
+                                <a href="https://github.com/NavarroCam/Portafolio/tree/main/TO%20DO%20LIST" target="_blank" rel="noopener" class="project-link">Ver código</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="project-card">
+                        <div class="project-image">
+                            <img src="assets/img/calculadora.webp" alt="Captura de la Calculadora" width="800" height="770" loading="lazy">
+                        </div>
+                        <div class="project-info">
+                            <h3>Calculadora</h3>
+                            <p class="project-description">Operaciones aritméticas básicas con función de limpieza y validación de datos para asegurar cálculos correctos.</p>
+                            <ul class="project-tech">
+                                <li>HTML5</li><li>CSS3</li><li>JavaScript</li>
+                            </ul>
+                            <div class="project-links">
+                                <a href="https://github.com/NavarroCam/Portafolio/tree/main/CALCULADORA" target="_blank" rel="noopener" class="project-link">Ver código</a>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="project-card">
+                        <div class="project-image">
+                            <img src="assets/img/piedra-papel-tijeras.webp" alt="Captura del juego Piedra, Papel o Tijeras" width="800" height="760" loading="lazy">
+                        </div>
+                        <div class="project-info">
+                            <h3>Piedra, Papel o Tijeras</h3>
+                            <p class="project-description">Juego contra la computadora con jugada aleatoria, resultados en tiempo real y puntuación acumulativa.</p>
+                            <ul class="project-tech">
+                                <li>HTML5</li><li>CSS3</li><li>JavaScript</li>
+                            </ul>
+                            <div class="project-links">
+                                <a href="https://github.com/NavarroCam/Portafolio/tree/main/PIEDRA%20PAPEL%20O%20TIJERAS" target="_blank" rel="noopener" class="project-link">Ver código</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contacto -->
+        <section class="contact" id="contacto">
+            <div class="container">
+                <h2>Contacto</h2>
+                <p class="section-intro">¿Tenés una propuesta o querés charlar? Escribime por cualquiera de estos medios.</p>
+                <div class="contact-grid">
+                    <a href="mailto:navarrocamila081@gmail.com" class="contact-card">
+                        <span class="contact-icon" aria-hidden="true">✉️</span>
+                        <h3>Email</h3>
+                        <p>navarrocamila081@gmail.com</p>
+                    </a>
+                    <a href="https://www.linkedin.com/in/camila-micaela-navarro-ojeda-1017151a5/" target="_blank" rel="noopener" class="contact-card">
+                        <span class="contact-icon" aria-hidden="true">💼</span>
+                        <h3>LinkedIn</h3>
+                        <p>Camila Navarro Ojeda</p>
+                    </a>
+                    <a href="https://github.com/NavarroCam" target="_blank" rel="noopener" class="contact-card">
+                        <span class="contact-icon" aria-hidden="true">🐙</span>
+                        <h3>GitHub</h3>
+                        <p>NavarroCam</p>
+                    </a>
+                    <a href="tel:+541154081053" class="contact-card">
+                        <span class="contact-icon" aria-hidden="true">📱</span>
+                        <h3>Teléfono</h3>
+                        <p>+54 11 5408-1053</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <!-- Footer -->
     <footer class="footer">
-        <p>&copy; 2026 Camila Navarro. Todos los derechos reservados.</p>
+        <p>&copy; <span id="year">2026</span> Camila Navarro · Hecho con HTML, CSS y JavaScript</p>
     </footer>
 
     <script src="script.js"></script>

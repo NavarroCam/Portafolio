@@ -1,119 +1,99 @@
-// Detectar preferencia de tema del sistema
-function initTheme() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const savedTheme = localStorage.getItem('theme');
-    
-    let theme = savedTheme || (prefersDark ? 'dark' : 'light');
-    
-    document.documentElement.setAttribute('data-theme', theme);
-    updateThemeIcon(theme);
-}
+// ===== TEMA (claro / oscuro) =====
+// El tema inicial se aplica en un script del <head> para evitar el parpadeo.
+const root = document.documentElement;
+const themeToggle = document.getElementById('themeToggle');
+const themeIcon = themeToggle.querySelector('.theme-icon');
 
-// Actualizar icono del tema
-function updateThemeIcon(theme) {
-    const icon = document.querySelector('.theme-icon');
-    if (icon) {
-        icon.textContent = theme === 'dark' ? '☀️' : '🌙';
+function getSavedTheme() {
+    try {
+        return localStorage.getItem('theme');
+    } catch (e) {
+        return null;
     }
 }
 
-// Toggle de tema
-document.getElementById('themeToggle').addEventListener('click', () => {
-    const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon(newTheme);
+function applyTheme(theme) {
+    root.setAttribute('data-theme', theme);
+    themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+    themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
+}
+
+applyTheme(root.getAttribute('data-theme') || 'light');
+
+themeToggle.addEventListener('click', () => {
+    const newTheme = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    applyTheme(newTheme);
+    try {
+        localStorage.setItem('theme', newTheme);
+    } catch (e) {
+        // Si el navegador bloquea el almacenamiento, el tema igual cambia.
+    }
 });
 
-// Detectar cambios en la preferencia del sistema
+// Si la persona no eligió un tema, seguir la preferencia del sistema
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('theme')) {
-        const newTheme = e.matches ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        updateThemeIcon(newTheme);
+    if (!getSavedTheme()) {
+        applyTheme(e.matches ? 'dark' : 'light');
     }
 });
 
-// Scroll suave para anclas
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            target.scrollIntoView({
-                behavior: 'smooth',
-                block: 'start'
+// ===== MENÚ MÓVIL =====
+const menuToggle = document.getElementById('menuToggle');
+const navLinks = document.getElementById('navLinks');
+
+function setMenu(open) {
+    navLinks.classList.toggle('open', open);
+    menuToggle.setAttribute('aria-expanded', String(open));
+    menuToggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+}
+
+menuToggle.addEventListener('click', () => {
+    setMenu(menuToggle.getAttribute('aria-expanded') !== 'true');
+});
+
+// Cerrar el menú al elegir una sección o al presionar Escape
+navLinks.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => setMenu(false));
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setMenu(false);
+});
+
+// ===== SECCIÓN ACTIVA EN LA NAVBAR =====
+const navAnchors = navLinks.querySelectorAll('a');
+const sections = document.querySelectorAll('main section[id]');
+
+const sectionObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            navAnchors.forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
             });
         }
     });
-});
+}, { rootMargin: '-45% 0px -50% 0px' });
 
-// ===== CARRUSEL DE PROYECTOS =====
-let currentSlide = 0;
-let autoSlideInterval;
+sections.forEach(section => sectionObserver.observe(section));
 
-const carouselItems = document.querySelectorAll('.carousel-item');
-const dots = document.querySelectorAll('.dot');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
+// ===== ANIMACIÓN DE APARICIÓN =====
+const revealTargets = document.querySelectorAll(
+    '.about-grid, .timeline-item, .edu-card, .skill-group, .project-card, .contact-card'
+);
 
-// Mostrar slide específico
-function showSlide(n) {
-    carouselItems.forEach(item => item.classList.remove('active'));
-    dots.forEach(dot => dot.classList.remove('active'));
-    
-    carouselItems[n].classList.add('active');
-    dots[n].classList.add('active');
-}
-
-// Siguiente slide
-function nextSlide() {
-    currentSlide = (currentSlide + 1) % carouselItems.length;
-    showSlide(currentSlide);
-    resetAutoSlide();
-}
-
-// Slide anterior
-function prevSlide() {
-    currentSlide = (currentSlide - 1 + carouselItems.length) % carouselItems.length;
-    showSlide(currentSlide);
-    resetAutoSlide();
-}
-
-// Auto-avance cada 5 segundos
-function autoSlide() {
-    nextSlide();
-}
-
-// Reiniciar el contador de auto-avance
-function resetAutoSlide() {
-    clearInterval(autoSlideInterval);
-    autoSlideInterval = setInterval(autoSlide, 5000);
-}
-
-// Event listeners para botones
-prevBtn.addEventListener('click', prevSlide);
-nextBtn.addEventListener('click', nextSlide);
-
-// Event listeners para dots
-dots.forEach((dot, index) => {
-    dot.addEventListener('click', () => {
-        currentSlide = index;
-        showSlide(currentSlide);
-        resetAutoSlide();
+const revealObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+        }
     });
+}, { threshold: 0.12 });
+
+revealTargets.forEach(el => {
+    el.classList.add('reveal');
+    revealObserver.observe(el);
 });
 
-// Inicializar carrusel
-function initCarousel() {
-    showSlide(0);
-    autoSlideInterval = setInterval(autoSlide, 5000);
-}
-
-// Inicializar tema al cargar
-document.addEventListener('DOMContentLoaded', () => {
-    initTheme();
-    initCarousel();
-});
+// ===== AÑO DEL FOOTER =====
+document.getElementById('year').textContent = new Date().getFullYear();
