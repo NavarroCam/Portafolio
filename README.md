@@ -21,6 +21,7 @@ Estudiante de Ingeniería Informática de la UNLAM 💚.
 -  Piedra papel o tijeras 🎮
 -  Buscador Pokemón 🔍
 -  Agenda de contactos 📒
+-  CineApp - Reserva de entradas de cine 🎬
 
 
 ## 📫 Contacto
