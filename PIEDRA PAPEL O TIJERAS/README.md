@@ -1,6 +1,8 @@
 # 🎮 Piedra, Papel o Tijeras
 Juego interactivo desarrollado con **HTML, CSS y JavaScript**, donde el usuario compite contra la computadora en el clásico *Piedra, Papel o Tijeras*.
 
+🌐 **Ver app en vivo:** https://rock-paper-scissors-game-cam.vercel.app/
+
 ## 🚀 Funcionalidades
 
 - Selección de jugada (piedra, papel o tijeras)

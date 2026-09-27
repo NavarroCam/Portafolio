@@ -78,7 +78,7 @@ sections.forEach(section => sectionObserver.observe(section));
 
 // ===== ANIMACIÓN DE APARICIÓN =====
 const revealTargets = document.querySelectorAll(
-    '.about-grid, .timeline-item, .edu-card, .skill-group, .project-card, .contact-card'
+    '.about-grid, .timeline-item, .edu-card, .skill-group, .carousel, .contact-card'
 );
 
 const revealObserver = new IntersectionObserver((entries, observer) => {
@@ -94,6 +94,75 @@ revealTargets.forEach(el => {
     el.classList.add('reveal');
     revealObserver.observe(el);
 });
+
+// ===== CARRUSEL DE PROYECTOS =====
+const track = document.getElementById('projectsTrack');
+
+if (track) {
+    const cards = Array.from(track.querySelectorAll('.project-card'));
+    const prevBtn = document.getElementById('projectsPrev');
+    const nextBtn = document.getElementById('projectsNext');
+    const dotsBox = document.getElementById('projectsDots');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    // Distancia entre el inicio de una tarjeta y la siguiente
+    const step = () => (cards.length > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : track.clientWidth);
+    const maxScroll = () => track.scrollWidth - track.clientWidth;
+    // Cantidad de posiciones posibles (según cuántas tarjetas entran en pantalla)
+    const positions = () => Math.max(1, Math.round(maxScroll() / step()) + 1);
+    const currentIndex = () => Math.min(positions() - 1, Math.round(track.scrollLeft / step()));
+
+    function goTo(index) {
+        const i = Math.max(0, Math.min(index, positions() - 1));
+        track.scrollTo({ left: i * step(), behavior: reduceMotion.matches ? 'auto' : 'smooth' });
+    }
+
+    function buildDots() {
+        dotsBox.innerHTML = '';
+        for (let i = 0; i < positions(); i++) {
+            const dot = document.createElement('button');
+            dot.type = 'button';
+            dot.className = 'carousel-dot';
+            dot.setAttribute('aria-label', 'Ir al proyecto ' + (i + 1));
+            dot.addEventListener('click', () => goTo(i));
+            dotsBox.appendChild(dot);
+        }
+        update();
+    }
+
+    function update() {
+        const i = currentIndex();
+        prevBtn.disabled = track.scrollLeft <= 2;
+        nextBtn.disabled = track.scrollLeft >= maxScroll() - 2;
+        dotsBox.querySelectorAll('.carousel-dot').forEach((dot, n) => {
+            dot.setAttribute('aria-current', String(n === i));
+        });
+    }
+
+    prevBtn.addEventListener('click', () => goTo(currentIndex() - 1));
+    nextBtn.addEventListener('click', () => goTo(currentIndex() + 1));
+
+    // Flechas del teclado cuando el carrusel tiene el foco
+    track.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight') { e.preventDefault(); goTo(currentIndex() + 1); }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(currentIndex() - 1); }
+    });
+
+    let ticking = false;
+    track.addEventListener('scroll', () => {
+        if (ticking) return;
+        ticking = true;
+        requestAnimationFrame(() => { update(); ticking = false; });
+    }, { passive: true });
+
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(buildDots, 150);
+    });
+
+    buildDots();
+}
 
 // ===== AÑO DEL FOOTER =====
 document.getElementById('year').textContent = new Date().getFullYear();

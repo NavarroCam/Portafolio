@@ -2,6 +2,8 @@
 
 Este proyecto es un buscador de Pokémon interactivo que utiliza la **PokéAPI** para obtener y visualizar datos en tiempo real. Está diseñado con un enfoque en la experiencia de usuario (UX) y una estética moderna inspirada en la franquicia Pokémon.
 
+🌐 **Ver app en vivo:** https://pokefinder-cam.vercel.app/
+
 
 ## 🚀 Características
 

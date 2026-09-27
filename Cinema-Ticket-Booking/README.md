@@ -2,6 +2,8 @@
 
 Aplicación web para reservar entradas de cine, desarrollada con **HTML5**, **CSS3** y **JavaScript**. Simula el proceso completo de compra de una ticketera real: desde elegir el cine hasta obtener el comprobante con código QR. Las películas se obtienen en tiempo real desde la API de **TMDB**.
 
+🌐 **Ver app en vivo:** https://cineapp-cam.vercel.app/
+
 
 ## 🚀 Características
 
