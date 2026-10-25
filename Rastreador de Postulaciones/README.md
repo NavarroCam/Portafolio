@@ -63,7 +63,7 @@ Aplicación web para organizar mi búsqueda laboral, desarrollada con **HTML5**,
 
 ## 📸 Vista Previa
 
-![Vista previa del Rastreador de Postulaciones](vista-previa.png)
+![Vista previa del Rastreador de Postulaciones](assets/vista-previa.png)
 
 
 ## ▶️ Cómo usar:
@@ -117,7 +117,7 @@ En este proyecto aprendí a definir primero un MVP chico, con historias de usuar
 index.html        Estructura de la página
 style.css         Estilos, temas claro y oscuro, diseño responsive
 script.js         Lógica: bienvenida, postulaciones, resumen, seguimientos, historial, exportación y festejo
-vista-previa.png  Captura para este README
+assets/vista-previa.png  Captura para este README
 ```
 
 
