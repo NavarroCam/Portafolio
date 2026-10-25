@@ -176,7 +176,7 @@ const emptyAction = $("#emptyAction");
 const sampleAction = $("#sampleAction");
 const demoNote = $("#demoNote");
 const demoMenu = $('[data-menu="demo"]');
-const themeToggle = $("#themeToggle");
+const themeToggles = document.querySelectorAll("[data-theme-toggle]"); // encabezado y bienvenida
 const importInput = $("#importInput");
 const toast = $("#toast");
 const toastText = $("#toastText");
@@ -990,18 +990,21 @@ document.addEventListener("click", (event) => {
 // ---------- Tema ----------
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
-  themeToggle.setAttribute("aria-label", theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro");
+  const label = theme === "dark" ? "Cambiar a tema claro" : "Cambiar a tema oscuro";
+  themeToggles.forEach((button) => button.setAttribute("aria-label", label));
 }
 
-themeToggle.addEventListener("click", () => {
-  const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-  applyTheme(next);
-  try {
-    localStorage.setItem(THEME_KEY, next);
-  } catch {
-    /* sin almacenamiento: el tema dura hasta recargar */
-  }
-});
+themeToggles.forEach((button) =>
+  button.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    try {
+      localStorage.setItem(THEME_KEY, next);
+    } catch {
+      /* sin almacenamiento: el tema dura hasta recargar */
+    }
+  })
+);
 
 // ---------- Sincronización entre pestañas ----------
 window.addEventListener("storage", (event) => {
