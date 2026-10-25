@@ -76,6 +76,26 @@ const sectionObserver = new IntersectionObserver((entries) => {
 
 sections.forEach(section => sectionObserver.observe(section));
 
+// ===== AVANCE DE LA CARRERA =====
+// Lee data-aprobadas y data-total y completa textos, porcentaje y barra.
+const degree = document.getElementById('degreeProgress');
+
+if (degree) {
+    const done = Number(degree.dataset.aprobadas) || 0;
+    const total = Number(degree.dataset.total) || 1;
+    const pct = Math.min(100, (done / total) * 100);
+    const bar = degree.querySelector('.degree-progress-bar');
+
+    degree.querySelector('.degree-done').textContent = done;
+    degree.querySelector('.degree-total').textContent = total;
+    degree.querySelector('.degree-pct').textContent = `${Math.round(pct)}%`;
+    degree.querySelector('.degree-remaining').textContent = Math.max(0, total - done);
+    degree.querySelector('.degree-progress-fill').style.setProperty('--pct', `${pct.toFixed(1)}%`);
+    bar.setAttribute('aria-valuenow', done);
+    bar.setAttribute('aria-valuemax', total);
+    bar.setAttribute('aria-valuetext', `${done} de ${total} materias aprobadas`);
+}
+
 // ===== ANIMACIÓN DE APARICIÓN =====
 const revealTargets = document.querySelectorAll(
     '.about-grid, .timeline-item, .edu-card, .skill-group, .carousel, .contact-card'

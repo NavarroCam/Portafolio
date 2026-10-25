@@ -10,8 +10,8 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Camila Navarro | QA & Desarrollo de Software">
     <meta property="og:description" content="Estudiante de Ingeniería en Informática, pasante de IT y QA Tester. Conocé mi experiencia, proyectos y CV.">
-    <meta property="og:url" content="https://portafolio-jade-five-33.vercel.app/">
-    <meta property="og:image" content="https://portafolio-jade-five-33.vercel.app/assets/og-image.png">
+    <meta property="og:url" content="https://portafolio-navarro-camila.vercel.app/">
+    <meta property="og:image" content="https://portafolio-navarro-camila.vercel.app/assets/og-image.png">
     <meta name="twitter:card" content="summary_large_image">
 
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
@@ -141,6 +141,17 @@
                         <span class="edu-date">2021 – En curso</span>
                         <h3>Ingeniería en Informática</h3>
                         <p class="edu-org">Universidad Nacional de La Matanza (UNLaM)</p>
+                        <!-- Para actualizar el avance, cambiá solo data-aprobadas y data-total -->
+                        <div class="degree-progress" id="degreeProgress" data-aprobadas="30" data-total="62">
+                            <div class="degree-progress-head">
+                                <span><strong class="degree-done">30</strong> de <span class="degree-total">62</span> materias aprobadas</span>
+                                <span class="degree-pct">48%</span>
+                            </div>
+                            <div class="degree-progress-bar" role="progressbar" aria-label="Materias aprobadas" aria-valuemin="0" aria-valuemax="62" aria-valuenow="30" aria-valuetext="30 de 62 materias aprobadas">
+                                <span class="degree-progress-fill" style="--pct: 48.4%"></span>
+                            </div>
+                            <p class="degree-left">Faltan <span class="degree-remaining">32</span> materias para recibirme.</p>
+                        </div>
                         <p>Programación, bases de datos, análisis de sistemas e ingeniería de software.</p>
                     </article>
                     <article class="edu-card">
@@ -215,6 +226,22 @@
                 <h2>Proyectos</h2>
                 <div class="carousel" role="region" aria-roledescription="carrusel" aria-label="Proyectos">
                 <div class="projects-grid carousel-track" id="projectsTrack" tabindex="0">
+                    <article class="project-card">
+                        <div class="project-image">
+                            <img src="assets/img/rastreador-postulaciones.webp" alt="Captura del Rastreador de postulaciones con el resumen por estado y la lista de seguimientos" width="800" height="560" loading="lazy">
+                        </div>
+                        <div class="project-info">
+                            <h3>Rastreador de postulaciones</h3>
+                            <p class="project-description">Registro de postulaciones laborales con estados, resumen por estado, historial de notas, recordatorios de seguimiento, exportación a Excel y festejo con confeti al recibir una oferta.</p>
+                            <ul class="project-tech">
+                                <li>HTML5</li><li>CSS3</li><li>JavaScript</li><li>localStorage</li><li>Vercel</li>
+                            </ul>
+                            <div class="project-links">
+                                <a href="https://rastreador-de-postulaciones.vercel.app/" target="_blank" rel="noopener" class="project-link">Ver demo</a>
+                                <a href="https://github.com/NavarroCam/Portafolio/tree/main/Rastreador%20de%20Postulaciones" target="_blank" rel="noopener" class="project-link">Ver código</a>
+                            </div>
+                        </div>
+                    </article>
                     <article class="project-card">
                         <div class="project-image">
                             <img src="assets/img/cinema-ticket-booking.webp" alt="Captura de CineApp con el comprobante de reserva" width="800" height="676" loading="lazy">
@@ -343,15 +370,11 @@
                         <h3>GitHub</h3>
                         <p>NavarroCam</p>
                     </a>
-                    <div class="contact-card contact-card--phone">
-                        <span class="contact-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2"/></svg></span>
-                        <h3>Teléfono</h3>
-                        <p>+54 11 5408-1053</p>
-                        <div class="contact-actions">
-                            <a href="https://wa.me/5491154081053?text=Hola%20Camila%2C%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte." target="_blank" rel="noopener" class="contact-action contact-action--wa"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg>WhatsApp</a>
-                            <a href="tel:+541154081053" class="contact-action"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M5 4h4l2 5l-2.5 1.5a11 11 0 0 0 5 5l1.5 -2.5l5 2v4a2 2 0 0 1 -2 2a16 16 0 0 1 -15 -15a2 2 0 0 1 2 -2"/></svg>Llamar</a>
-                        </div>
-                    </div>
+                    <a href="https://wa.me/5491154081053?text=Hola%20Camila%2C%20vi%20tu%20portafolio%20y%20me%20gustar%C3%ADa%20contactarte." target="_blank" rel="noopener" class="contact-card">
+                        <span class="contact-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 21l1.65 -3.8a9 9 0 1 1 3.4 2.9l-5.05 .9"/><path d="M9 10a.5 .5 0 0 0 1 0v-1a.5 .5 0 0 0 -1 0v1a5 5 0 0 0 5 5h1a.5 .5 0 0 0 0 -1h-1a.5 .5 0 0 0 0 1"/></svg></span>
+                        <h3>WhatsApp</h3>
+                        <p>Escribime un mensaje</p>
+                    </a>
                 </div>
             </div>
         </section>

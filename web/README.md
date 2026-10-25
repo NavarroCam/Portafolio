@@ -2,7 +2,7 @@
 
 Portfolio personal desarrollado con HTML, CSS y JavaScript vanilla.
 
-🌐 **Sitio en vivo:** https://portafolio-jade-five-33.vercel.app/
+🌐 **Sitio en vivo:** https://portafolio-navarro-camila.vercel.app/
 
 ## ✨ Características
 
@@ -18,10 +18,10 @@ Portfolio personal desarrollado con HTML, CSS y JavaScript vanilla.
 - **Inicio**: presentación, CV y redes
 - **Sobre mí**: perfil profesional
 - **Experiencia**: pasantía de IT y experiencia previa
-- **Formación**: carrera, diplomatura en Testing QA y automatización
+- **Formación**: carrera con barra de avance de materias aprobadas, diplomatura en Testing QA y automatización
 - **Habilidades**: agrupadas por testing, lenguajes, bases de datos y herramientas
 - **Proyectos**: tarjetas con captura, tecnologías y enlace al código
-- **Contacto**: email, LinkedIn, GitHub y teléfono
+- **Contacto**: email, LinkedIn, GitHub y WhatsApp
 
 ## 📦 Tecnologías
 
@@ -45,3 +45,5 @@ web/
 ```
 
 Para actualizar el CV, reemplazá `assets/CV_Camila_Navarro.pdf` manteniendo el mismo nombre.
+
+Para actualizar el avance de la carrera, en `index.html` cambiá `data-aprobadas` (y `data-total` si cambia el plan) en el bloque `degreeProgress`. El porcentaje y la barra se calculan solos.

@@ -22,6 +22,7 @@ Estudiante de Ingeniería Informática de la UNLAM 💚.
 -  Buscador Pokemón 🔍
 -  Agenda de contactos 📒
 -  CineApp - Reserva de entradas de cine 🎬
+-  Rastreador de postulaciones 📋
 
 
 ## 📫 Contacto
