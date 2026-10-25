@@ -334,6 +334,10 @@ function renderSummary() {
 }
 
 // ---------- Para hacer ----------
+function daysText(n) {
+  return n === 1 ? "1 día" : `${n} días`;
+}
+
 function getTodos() {
   const todos = [];
   const today = todayString();
@@ -347,8 +351,15 @@ function getTodos() {
         todos.push({
           id: item.id,
           company: item.company,
-          text: `Seguimiento: ${item.role}`,
-          when: diff > 0 ? `Hace ${diff} d` : diff === 0 ? "Hoy" : diff === -1 ? "Mañana" : `En ${-diff} d`,
+          role: item.role,
+          when:
+            diff > 0
+              ? `Vencido hace ${daysText(diff)}`
+              : diff === 0
+              ? "Te toca hoy"
+              : diff === -1
+              ? "Mañana"
+              : `En ${daysText(-diff)}`,
           urgency: diff > 0 ? "late" : diff === 0 ? "today" : "soon",
           order: -diff,
         });
@@ -361,8 +372,8 @@ function getTodos() {
       todos.push({
         id: item.id,
         company: item.company,
-        text: `Sin respuesta hace ${waiting} días. ¿Escribirles?`,
-        when: `${waiting} d`,
+        role: item.role,
+        when: `Sin respuesta hace ${daysText(waiting)}`,
         urgency: "idle",
         order: 1,
       });
@@ -375,16 +386,19 @@ function getTodos() {
 
 function renderTodos() {
   const todos = getTodos();
-  todoPanel.hidden = todos.length === 0;
+  // El panel aparece si hay postulaciones; si no hay seguimientos, explica cómo agendarlos.
+  todoPanel.hidden = applications.length === 0;
+  $("#todoEmpty").hidden = todos.length > 0;
   todoList.innerHTML = todos
     .map(
       (t) => `
-      <li>
-        <button class="todo-item" type="button" data-goto="${t.id}" data-urgency="${t.urgency}">
-          <span class="todo-when">${t.when}</span>
+      <li class="todo-item" data-urgency="${t.urgency}">
+        <button class="todo-main" type="button" data-goto="${t.id}" aria-label="Ir a ${escapeHtml(t.company)}">
           <span class="todo-company">${escapeHtml(t.company)}</span>
-          <span class="todo-text">${escapeHtml(t.text)}</span>
+          <span class="todo-role">${escapeHtml(t.role)}</span>
+          <span class="todo-when">${t.when}</span>
         </button>
+        <button class="todo-done" type="button" data-done="${t.id}" aria-label="Marcar como hecho el seguimiento a ${escapeHtml(t.company)}">Listo</button>
       </li>`
     )
     .join("");
@@ -811,9 +825,38 @@ statusTiles.addEventListener("click", (event) => {
 $("#clearFilter").addEventListener("click", clearFilters);
 
 todoList.addEventListener("click", (event) => {
+  const done = event.target.closest("[data-done]");
+  if (done) {
+    markFollowUpDone(done.dataset.done);
+    return;
+  }
   const item = event.target.closest("[data-goto]");
   if (item) goTo(item.dataset.goto);
 });
+
+// Marca el seguimiento como hecho: queda en el historial y, si todavía no respondieron,
+// se agenda otro recordatorio en 7 días para no perderle el rastro.
+function markFollowUpDone(id) {
+  const item = findApplication(id);
+  if (!item) return;
+  const previous = item.reminder;
+  item.history.push({ id: newId(), date: todayString(), type: "note", text: "Hice el seguimiento." });
+  item.reminder = item.status === "Enviado" ? shiftDays(7) : "";
+  saveApplications();
+  render();
+  showToast(
+    item.reminder ? `Listo. Te lo recuerdo de nuevo en 7 días.` : `Seguimiento a ${item.company} hecho`,
+    {
+      label: "Deshacer",
+      run: () => {
+        item.history.pop();
+        item.reminder = previous;
+        saveApplications();
+        render();
+      },
+    }
+  );
+}
 
 sortSelect.addEventListener("change", () => {
   sortOrder = sortSelect.value;
@@ -1055,6 +1098,7 @@ let offerItemId = null;
 
 function celebrateOffer(item) {
   offerItemId = item.id;
+  hideToast();
   $("#offerTitle").textContent = owner ? `¡Felicitaciones, ${owner}!` : "¡Felicitaciones!";
   $("#offerText").innerHTML = `<strong>${escapeHtml(item.company)}</strong> te ofreció el puesto de <strong>${escapeHtml(item.role)}</strong>`;
   if (typeof offerDialog.showModal === "function") offerDialog.showModal();
@@ -1080,7 +1124,9 @@ const confettiCanvas = $("#confetti");
 let confettiFrame = null;
 
 function launchConfetti() {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  // Con "reducir animaciones" activado (por ejemplo, Windows con los efectos de animación apagados)
+  // se muestra una versión suave: menos papelitos, que caen despacio y sin girar.
+  const gentle = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   const ctx = confettiCanvas.getContext("2d");
   const dpr = window.devicePixelRatio || 1;
@@ -1093,8 +1139,23 @@ function launchConfetti() {
   const styles = getComputedStyle(document.documentElement);
   const colors = ["--offer", "--sent", "--process", "--accent", "--reject"].map((v) => styles.getPropertyValue(v).trim());
 
-  const count = Math.min(180, Math.round(width / 5));
+  const count = gentle ? Math.min(60, Math.round(width / 16)) : Math.min(180, Math.round(width / 5));
   const pieces = Array.from({ length: count }, (_, i) => {
+    if (gentle) {
+      return {
+        x: Math.random() * width,
+        y: -20 - Math.random() * height * 0.5,
+        vx: 0,
+        vy: 1.6 + Math.random() * 1.4,
+        w: 6 + Math.random() * 5,
+        h: 8 + Math.random() * 6,
+        rot: Math.random() * Math.PI,
+        spin: 0,
+        tilt: 0,
+        gentle: true,
+        color: colors[i % colors.length],
+      };
+    }
     const fromLeft = i % 2 === 0;
     const angle = (fromLeft ? -60 : -120) + (Math.random() * 40 - 20);
     const speed = 9 + Math.random() * 9;
@@ -1123,6 +1184,16 @@ function launchConfetti() {
     ctx.globalAlpha = elapsed > duration - 700 ? Math.max(0, (duration - elapsed) / 700) : 1;
 
     pieces.forEach((p) => {
+      if (p.gentle) {
+        p.y += p.vy; // caída lenta y constante
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+        return;
+      }
       p.vy += 0.32; // gravedad
       p.vx *= 0.985; // resistencia del aire
       p.vy *= 0.985;

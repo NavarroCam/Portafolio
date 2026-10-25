@@ -321,7 +321,14 @@ h1 {
   transition: flex-grow 0.35s ease;
 }
 
-/* ---------- Para hacer ---------- */
+/* ---------- Seguimientos ---------- */
+.todo-intro {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
 .todo-list {
   display: grid;
   gap: 2px;
@@ -332,52 +339,103 @@ h1 {
 
 .todo-item {
   display: grid;
-  grid-template-columns: 76px 1fr;
-  gap: 2px 12px;
-  width: 100%;
-  padding: 10px 8px;
-  border: none;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
   border-radius: 10px;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
 }
 
 .todo-item:hover {
   background: var(--surface-sunk);
 }
 
-.todo-when {
-  grid-row: span 2;
-  align-self: start;
-  padding: 4px 6px;
-  border-radius: 8px;
-  background: var(--surface-sunk);
-  color: var(--muted);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
+.todo-main {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding: 10px 8px 10px 20px;
+  position: relative;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
 }
 
-.todo-item[data-urgency="late"] .todo-when {
-  background: var(--process-bg);
-  color: var(--process);
+/* Punto de color según la urgencia */
+.todo-main::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  top: 17px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line-strong);
 }
 
-.todo-item[data-urgency="today"] .todo-when {
-  background: var(--accent);
-  color: var(--accent-ink);
-}
+.todo-item[data-urgency="late"] .todo-main::before { background: var(--process); }
+.todo-item[data-urgency="today"] .todo-main::before { background: var(--accent); }
 
 .todo-company {
   font-weight: 700;
   overflow-wrap: anywhere;
 }
 
-.todo-text {
+.todo-role {
   color: var(--muted);
   font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+
+.todo-when {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.todo-item[data-urgency="late"] .todo-when {
+  color: var(--process);
+}
+
+.todo-item[data-urgency="today"] .todo-when {
+  color: var(--accent);
+}
+
+.todo-done {
+  min-height: 36px;
+  margin-right: 8px;
+  padding: 4px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.todo-done:hover {
+  border-color: var(--offer);
+  background: var(--offer-bg);
+  color: var(--offer);
+}
+
+.todo-empty {
+  margin: 12px 0 0;
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--surface-sunk);
+  color: var(--muted);
+  font-size: 0.875rem;
+  line-height: 1.45;
+}
+
+.todo-empty[hidden] {
+  display: none;
+}
+
+.todo-empty strong {
+  color: var(--ink);
 }
 
 /* ---------- Layout ---------- */
