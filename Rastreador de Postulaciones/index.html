@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Rastreador de postulaciones</title>
+    <title>Mis postulaciones</title>
     <meta name="description" content="Registro personal de postulaciones laborales: empresas, roles, estados y notas de seguimiento." />
     <meta property="og:title" content="Rastreador de postulaciones" />
     <meta property="og:description" content="Dónde aplicaste, en qué quedó y qué falta hacer." />
@@ -63,14 +63,18 @@
       <header class="topbar">
         <div class="brand">
           <div id="titleView" class="title-view">
-            <h1 id="appTitle">Rastreador de postulaciones</h1>
-            <button id="editTitle" class="title-edit" type="button" aria-label="Editar título">
+            <h1 id="appTitle">Mis postulaciones - <span id="ownerName"></span></h1>
+            <button id="editTitle" class="title-edit" type="button" aria-label="Editar tu nombre">
               <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16Z" /><path d="m13.5 6.5 4 4" /></svg>
             </button>
           </div>
-          <form id="titleForm" class="title-form" hidden>
-            <label class="visually-hidden" for="titleInput">Título de la app</label>
-            <input id="titleInput" type="text" maxlength="60" placeholder="Ej: Postulaciones de Cami" autocomplete="off" />
+          <form id="titleForm" class="title-form" novalidate hidden>
+            <div class="title-edit-row">
+              <span class="title-prefix" aria-hidden="true">Mis postulaciones -</span>
+              <label class="visually-hidden" for="titleInput">Tu nombre</label>
+              <input id="titleInput" type="text" maxlength="30" placeholder="Tu nombre" autocomplete="given-name" />
+            </div>
+            <p class="field-error" id="titleError" hidden>Escribí tu nombre.</p>
             <div class="title-actions">
               <button class="btn btn-primary" type="submit">Guardar</button>
               <button id="cancelTitle" class="btn btn-quiet" type="button">Cancelar</button>

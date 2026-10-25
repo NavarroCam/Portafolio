@@ -1092,15 +1092,28 @@ input[type="file"] {
 .title-form {
   display: grid;
   gap: 10px;
-  max-width: 560px;
+  max-width: 640px;
 }
 
+.title-edit-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.title-prefix,
 #titleInput {
   font-family: var(--font-display);
   font-size: clamp(1.375rem, 5vw, 2rem);
   font-weight: 700;
   line-height: 1.15;
-  padding: 6px 12px;
+}
+
+#titleInput {
+  flex: 1 1 160px;
+  max-width: 280px;
+  padding: 4px 12px;
 }
 
 .title-actions {

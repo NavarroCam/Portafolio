@@ -1019,15 +1019,12 @@ window.addEventListener("storage", (event) => {
   }
 });
 
-// ---------- Título editable ----------
-const TITLE_KEY = "application-title";
-const DEFAULT_TITLE = "Rastreador de postulaciones";
+// ---------- Encabezado: "Mis postulaciones - Nombre" (solo el nombre es editable) ----------
+const OWNER_KEY = "application-owner";
 const titleView = $("#titleView");
 const titleForm = $("#titleForm");
 const titleInput = $("#titleInput");
-const appTitle = $("#appTitle");
-
-const OWNER_KEY = "application-owner";
+const titleError = $("#titleError");
 
 function readStorage(key) {
   try {
@@ -1047,28 +1044,33 @@ function writeStorage(key, value) {
 }
 
 let owner = readStorage(OWNER_KEY);
+writeStorage("application-title", ""); // limpia el título libre de la versión anterior
 
-function titleFor(name) {
-  return name ? `Postulaciones de ${name}` : DEFAULT_TITLE;
+function cleanName(value) {
+  return value.trim().replace(/\s+/g, " ");
 }
 
-function loadTitle() {
-  return readStorage(TITLE_KEY) || titleFor(owner);
+function applyOwner() {
+  $("#ownerName").textContent = owner;
+  document.title = `Mis postulaciones - ${owner}`;
 }
 
-function applyTitle(title) {
-  appTitle.textContent = title;
-  document.title = title;
+function setTitleError(show) {
+  titleError.hidden = !show;
+  titleInput.setAttribute("aria-invalid", show ? "true" : "false");
+  if (show) titleInput.setAttribute("aria-describedby", "titleError");
+  else titleInput.removeAttribute("aria-describedby");
 }
 
 function closeTitleEditor() {
+  setTitleError(false);
   titleForm.hidden = true;
   titleView.hidden = false;
   $("#editTitle").focus();
 }
 
 $("#editTitle").addEventListener("click", () => {
-  titleInput.value = appTitle.textContent;
+  titleInput.value = owner;
   titleView.hidden = true;
   titleForm.hidden = false;
   titleInput.focus();
@@ -1077,11 +1079,21 @@ $("#editTitle").addEventListener("click", () => {
 
 titleForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const title = titleInput.value.trim() || titleFor(owner);
-  applyTitle(title);
-  writeStorage(TITLE_KEY, title === titleFor(owner) ? "" : title);
+  const name = cleanName(titleInput.value);
+  if (!name) {
+    setTitleError(true);
+    titleInput.focus();
+    return;
+  }
+  owner = name;
+  writeStorage(OWNER_KEY, owner);
+  applyOwner();
   closeTitleEditor();
-  showToast("Título actualizado");
+  showToast("Nombre actualizado");
+});
+
+titleInput.addEventListener("input", () => {
+  if (titleInput.value.trim()) setTitleError(false);
 });
 
 $("#cancelTitle").addEventListener("click", closeTitleEditor);
@@ -1229,12 +1241,12 @@ const ownerInput = $("#ownerInput");
 function showApp() {
   document.documentElement.dataset.welcome = "false";
   $("#welcome").hidden = true;
-  applyTitle(loadTitle());
+  applyOwner();
 }
 
 welcomeForm.addEventListener("submit", (event) => {
   event.preventDefault();
-  const name = ownerInput.value.trim().replace(/\s+/g, " ");
+  const name = cleanName(ownerInput.value);
   const error = $("#ownerError");
   ownerInput.setAttribute("aria-invalid", name ? "false" : "true");
   error.hidden = Boolean(name);
