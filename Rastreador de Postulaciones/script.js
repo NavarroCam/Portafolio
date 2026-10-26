@@ -815,11 +815,23 @@ list.addEventListener("submit", (event) => {
 });
 
 // ---------- Resumen, filtros, orden y búsqueda ----------
+// Al elegir un estado en el Resumen, filtra y baja directo a la lista,
+// así no hay que deslizar para ver las postulaciones de ese tipo.
+function scrollToList() {
+  const panel = document.querySelector(".list-panel");
+  const top = panel.getBoundingClientRect().top;
+  if (top >= 0 && top < window.innerHeight * 0.4) return; // la lista ya está a la vista
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  panel.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+}
+
 statusTiles.addEventListener("click", (event) => {
   const tile = event.target.closest("[data-filter]");
   if (!tile) return;
-  statusFilter = statusFilter === tile.dataset.filter ? "all" : tile.dataset.filter;
+  const turningOff = statusFilter === tile.dataset.filter;
+  statusFilter = turningOff ? "all" : tile.dataset.filter;
   render();
+  if (!turningOff) scrollToList();
 });
 
 $("#clearFilter").addEventListener("click", clearFilters);

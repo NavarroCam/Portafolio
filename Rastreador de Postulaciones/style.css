@@ -483,10 +483,25 @@ h2 {
   gap: 12px;
 }
 
-@media (max-width: 359px) {
+/* En el celular, Fecha y Estado van uno debajo del otro para que no se encimen */
+@media (max-width: 479px) {
   .field-row {
     grid-template-columns: 1fr;
   }
+}
+
+/* Safari en iPhone le da al campo de fecha un ancho propio que desborda la columna */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  max-width: 100%;
+  text-align: left;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  margin: 0;
+  text-align: left;
 }
 
 label {
@@ -609,6 +624,10 @@ textarea {
 }
 
 /* ---------- Lista ---------- */
+.list-panel {
+  scroll-margin-top: 16px;
+}
+
 .list-header {
   display: flex;
   align-items: baseline;
