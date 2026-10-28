@@ -99,11 +99,17 @@ Aplicación web para organizar mi búsqueda laboral, desarrollada con **HTML5**,
 
 ## 🔁 v1 vs v2
 
-| | v1: CineApp | v2: Rastreador de Postulaciones |
+| | v1: MVP | v2: Versión final |
 |---|---|---|
-| **Uso** | Proyecto de práctica: una ticketera de cine | Herramienta que uso en mi búsqueda laboral |
-| **Datos** | Horarios, salas y precios simulados | Mis propias postulaciones, que persisten al recargar |
-| **Forma de trabajo** | Construir la app paso a paso | Partir del repo existente, pedir propuestas, verlas en capturas y elegir qué aplicar |
+| **Postulaciones** | Alta con empresa, rol, fecha y estado | Además se editan la fecha, la fecha de seguimiento, el link de la vacante y el nombre del CV |
+| **Lista** | Todas las postulaciones, con mensaje si no hay ninguna | Búsqueda, orden por fecha, empresa o seguimiento, y eliminar con opción de deshacer |
+| **Estados** | Selector con Enviado, En proceso, Rechazado y Oferta | Cada cambio queda en el historial y pasar a Oferta muestra un festejo con confeti |
+| **Notas** | Una nota por postulación | Historial de notas con fecha |
+| **Resumen** | Cantidad por estado | Barra de proporciones, porcentaje de respuesta y filtro al tocar un estado |
+| **Seguimiento** | No estaba | Panel Seguimientos con vencidos, los de la semana y los que no responden hace 2 semanas |
+| **Datos** | Persisten en `localStorage` | Exportar e importar copia (.json), archivo para Excel (.csv) y postulaciones ficticias para probar |
+| **Experiencia** | Diseño simple | Bienvenida con tu nombre, tema claro y oscuro, mobile-first y accesible con teclado |
+| **Forma de trabajo** | Un prompt por historia de usuario, probando cada criterio | Pedir propuestas, verlas en capturas y elegir qué aplicar |
 
 
 ## 💭 Reflexión
