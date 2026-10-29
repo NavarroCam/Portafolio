@@ -132,15 +132,18 @@ button, input, select, textarea { font: inherit; color: inherit; }
   flex-direction: column;
   gap: 16px;
   padding: 20px 20px 28px;
-  padding-top: max(20px, env(safe-area-inset-top));
+  /* Respeta la barra de estado y la barra del navegador del celular */
+  padding-top: calc(16px + env(safe-area-inset-top));
+  padding-bottom: calc(32px + env(safe-area-inset-bottom));
 }
-.has-tabbar .screen { padding-bottom: 100px; }
+.has-tabbar .screen { padding-bottom: calc(100px + env(safe-area-inset-bottom)); }
 
 .screen--dark {
   background: #121A15;
   color: #FFFFFF;
 }
 .screen--chat { gap: 0; padding: 0; height: 100vh; height: 100dvh; flex: none; }
+.screen--chat .chat-head { padding-top: calc(16px + env(safe-area-inset-top)); }
 .has-tabbar .screen--chat { padding-bottom: 76px; }
 
 /* ---------- Tipografía ---------- */
@@ -172,6 +175,13 @@ h1, h2, h3, p { margin: 0; }
 .stack-xs { display: flex; flex-direction: column; gap: 8px; }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+/* En pantallas angostas, estas filas pasan a una columna */
+@media (max-width: 440px) {
+  .grid-2--wrap { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 359px) {
+  .grid-3--wrap { grid-template-columns: minmax(0, 1fr); }
+}
 .row-between { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .row-between.baseline { align-items: baseline; }
 .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
@@ -228,6 +238,24 @@ h1, h2, h3, p { margin: 0; }
   padding: 0 14px; font-size: 16px;
 }
 .field textarea { padding: 12px 14px; line-height: 1.45; resize: vertical; }
+.field label { overflow-wrap: anywhere; }
+
+/* Fechas y selects en iOS: sin esto el campo se sale de su columna */
+.field input[type="date"], .field input[type="time"], .field select {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  line-height: normal;
+}
+.field input[type="date"]::-webkit-date-and-time-value { text-align: left; min-height: 1.4em; }
+.field input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.6; }
+.field select {
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 36px;
+}
 .field input::placeholder, textarea::placeholder { color: var(--muted); opacity: 0.85; }
 .field--dark input { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.25); color: #FFFFFF; }
 .field--dark input::placeholder { color: rgba(255, 255, 255, 0.6); }
@@ -255,6 +283,7 @@ h1, h2, h3, p { margin: 0; }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .chip {
+  max-width: 100%; text-align: left;
   min-height: 42px; padding: 0 14px; border-radius: 21px;
   border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink);
   font-size: 14px; font-weight: 600; cursor: pointer;
@@ -337,13 +366,30 @@ h1, h2, h3, p { margin: 0; }
 }
 .dropzone small { font-weight: 500; font-size: 12px; }
 .file-row { display: flex; align-items: center; gap: 10px; }
+.file-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.file-main .name { font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.file-status { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.file-error { font-size: 12px; color: var(--warn); line-height: 1.35; }
+.link-btn { border: none; background: none; color: var(--accent-text); font-weight: 700; font-size: 13px; padding: 6px 2px; cursor: pointer; text-decoration: underline; }
+.icon-btn--plain { border: none; background: transparent; color: var(--muted); }
+.icon-btn--plain svg { width: 20px; height: 20px; }
+.spinner.spinner--sm { width: 16px; height: 16px; border-width: 2px; }
+.sticky-action {
+  position: sticky; bottom: 0; z-index: 5;
+  margin: 0 -20px -32px; padding: 12px 20px calc(16px + env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, transparent, var(--bg) 24%);
+  display: flex; flex-direction: column; gap: 8px;
+}
+.sticky-action p:empty { display: none; }
 .file-ico { width: 32px; height: 38px; border-radius: 6px; background: var(--warn-soft); color: var(--warn); font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.file-row span.name { flex: 1; font-weight: 600; font-size: 14px; word-break: break-word; }
+
 .rules { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .rules li {
   font-size: 13px; font-weight: 600; background: var(--accent-soft); color: var(--accent-soft-ink);
   padding: 4px 4px 4px 10px; border-radius: 10px; display: inline-flex; align-items: center; gap: 4px;
+  max-width: 100%; overflow-wrap: anywhere; line-height: 1.35;
 }
+.rules li button { flex-shrink: 0; }
 .rules button { width: 28px; height: 28px; border: none; background: none; color: inherit; cursor: pointer; border-radius: 8px; font-size: 16px; line-height: 1; }
 .rules:empty::before { content: 'Todavía no hay reglas. Subí un PDF o agregalas a mano.'; font-size: 13px; color: var(--muted); }
 

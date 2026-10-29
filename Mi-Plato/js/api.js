@@ -89,6 +89,87 @@ const Api = (() => {
     });
   }
 
+  /* ---------- PDFs: se leen en el celular, no se suben enteros ----------
+     Con pdf.js sacamos el texto en el navegador y mandamos solo eso
+     (pocos KB, aunque el PDF pese 20 MB). Si el PDF es escaneado o
+     casi sin texto, mandamos fotos chicas de las primeras páginas. */
+  const PDFJS = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+  let pdfjsCargando = null;
+
+  function cargarPdfJs() {
+    if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+    if (!pdfjsCargando) {
+      pdfjsCargando = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = PDFJS + 'pdf.min.js';
+        s.onload = () => {
+          window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS + 'pdf.worker.min.js';
+          resolve(window.pdfjsLib);
+        };
+        const fallar = () => { pdfjsCargando = null; s.remove(); reject(new Error('No se pudo cargar el lector de PDF. Revisá tu conexión y reintentá.')); };
+        s.onerror = fallar;
+        setTimeout(() => { if (!window.pdfjsLib) fallar(); }, 20000);
+        document.head.appendChild(s);
+      });
+    }
+    return pdfjsCargando;
+  }
+
+  const MAX_PAGINAS_TEXTO = 40;
+  const MAX_PAGINAS_IMAGEN = 4;
+  const MAX_CARACTERES = 60000;
+
+  async function prepararPDF(file) {
+    const pdfjs = await cargarPdfJs();
+    let doc;
+    try {
+      doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise;
+    } catch (e) {
+      throw new Error(e && e.name === 'PasswordException' ? 'El PDF tiene contraseña.' : 'El archivo no es un PDF válido.');
+    }
+
+    // 1) Texto
+    let texto = '';
+    const paginas = Math.min(doc.numPages, MAX_PAGINAS_TEXTO);
+    for (let i = 1; i <= paginas && texto.length < MAX_CARACTERES; i++) {
+      const page = await doc.getPage(i);
+      const c = await page.getTextContent();
+      let linea = '';
+      let ultimoY = null;
+      for (const it of c.items) {
+        const y = it.transform ? Math.round(it.transform[5]) : null;
+        if (ultimoY !== null && y !== null && Math.abs(y - ultimoY) > 2) { texto += linea.trim() + '\n'; linea = ''; }
+        linea += it.str + (it.hasEOL ? '\n' : ' ');
+        ultimoY = y;
+      }
+      texto += linea.trim() + '\n\n';
+    }
+    texto = texto.replace(/[ \t]+/g, ' ').replace(/\n{3,}/g, '\n\n').trim().slice(0, MAX_CARACTERES);
+    if (texto.replace(/\s/g, '').length >= 150) {
+      doc.destroy();
+      return { texto };
+    }
+
+    // 2) Poco texto: fotos de las primeras páginas
+    const imagenes = [];
+    for (let i = 1; i <= Math.min(doc.numPages, MAX_PAGINAS_IMAGEN); i++) {
+      const page = await doc.getPage(i);
+      const v1 = page.getViewport({ scale: 1 });
+      const escala = Math.min(2, 1200 / Math.max(v1.width, v1.height));
+      const vp = page.getViewport({ scale: escala });
+      const c = document.createElement('canvas');
+      c.width = Math.round(vp.width);
+      c.height = Math.round(vp.height);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillRect(0, 0, c.width, c.height);
+      await page.render({ canvasContext: ctx, viewport: vp }).promise;
+      imagenes.push(partes(c.toDataURL('image/jpeg', 0.7)));
+    }
+    doc.destroy();
+    return { imagenes };
+  }
+
   function partes(dataURL) {
     const m = /^data:([^;]+);base64,(.*)$/.exec(dataURL || '');
     return m ? { mime: m[1], data: m[2] } : null;
@@ -103,9 +184,10 @@ const Api = (() => {
     chat(mensajes) {
       return llamar('chat', { mensajes });
     },
-    /** Lee un PDF de pautas y devuelve reglas */
-    leerPautas(pdfDataURL, nombre) {
-      return llamar('leer-pautas', { pdf: partes(pdfDataURL), nombre });
+    /** Lee un PDF de pautas (en el navegador) y devuelve { reglas } */
+    async leerPautas(file) {
+      const contenido = await prepararPDF(file);
+      return llamar('leer-pautas', { ...contenido, nombre: file.name });
     },
     leerComoDataURL, comprimirImagen, miniatura
   };

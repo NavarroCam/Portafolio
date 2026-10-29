@@ -178,15 +178,31 @@ Screens.nutri = {
   }
 };
 
-/* ---------- Pautas (PDF) ---------- */
+/* ---------- Pautas (PDF) ----------
+   Los archivos se leen en paralelo (de a 3). Cada uno guarda las
+   reglas que aportó, así al borrarlo se van también sus reglas. */
+const MAX_PDF_MB = 25;
+const EN_PARALELO = 3;
+
 Screens.pautas = {
-  leyendo: {}, // nombre de archivo -> estado mientras se procesa
+  cola: [],      // archivos en proceso: { id, file, nombre, estado: 'esperando'|'leyendo'|'error', error }
+  activos: 0,
 
   init() {
-    document.getElementById('pautas-input').addEventListener('change', async e => {
+    document.getElementById('pautas-input').addEventListener('change', e => {
       const files = [...e.target.files];
       e.target.value = '';
-      for (const file of files) await this.procesar(file);
+      this.agregar(files);
+    });
+
+    document.getElementById('pautas-archivos').addEventListener('click', e => {
+      const borrar = e.target.closest('[data-borrar]');
+      if (borrar) { this.borrar(borrar.dataset.borrar); return; }
+      const reintentar = e.target.closest('[data-reintentar]');
+      if (reintentar) {
+        const item = this.cola.find(x => x.id === reintentar.dataset.reintentar);
+        if (item) { item.estado = 'esperando'; item.error = ''; this.siguiente(); this.render(); }
+      }
     });
 
     document.getElementById('pautas-reglas').addEventListener('click', e => {
@@ -207,6 +223,9 @@ Screens.pautas = {
     });
 
     document.getElementById('pautas-listo').addEventListener('click', () => {
+      if (this.pendientes() > 0) return;
+      // Los que quedaron con error no se guardan
+      this.cola = this.cola.filter(x => x.estado !== 'error');
       if (!Store.u.onboarding) {
         Store.update(u => { u.onboarding = true; });
         UI.toast('¡Listo! Ya podés cargar tu primera comida.');
@@ -217,49 +236,117 @@ Screens.pautas = {
     });
   },
 
-  async procesar(file) {
-    if (file.type !== 'application/pdf') { UI.toast(file.name + ' no es un PDF.'); return; }
-    if (file.size > 3 * 1024 * 1024) { UI.toast(file.name + ' pesa más de 3 MB.'); return; }
-    this.leyendo[file.name] = 'Leyendo…';
+  pendientes() {
+    return this.cola.filter(x => x.estado === 'esperando' || x.estado === 'leyendo').length;
+  },
+
+  agregar(files) {
+    for (const file of files) {
+      const esPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+      if (!esPdf) { UI.toast(file.name + ' no es un PDF.'); continue; }
+      if (file.size > MAX_PDF_MB * 1024 * 1024) { UI.toast(`${file.name} pesa más de ${MAX_PDF_MB} MB.`); continue; }
+      this.cola.push({ id: UI.uid(), file, nombre: file.name, estado: 'esperando', error: '' });
+    }
+    this.siguiente();
+    this.render();
+  },
+
+  /** Arranca los archivos en espera, de a EN_PARALELO */
+  siguiente() {
+    while (this.activos < EN_PARALELO) {
+      const item = this.cola.find(x => x.estado === 'esperando');
+      if (!item) break;
+      this.procesar(item);
+    }
+  },
+
+  async procesar(item) {
+    item.estado = 'leyendo';
+    this.activos++;
     this.render();
     try {
-      const dataURL = await Api.leerComoDataURL(file);
-      const r = await Api.leerPautas(dataURL, file.name);
-      const nuevas = Array.isArray(r.reglas) ? r.reglas : [];
+      const r = await Api.leerPautas(item.file);
+      if (!this.cola.includes(item)) return; // lo borraron mientras se leía
+      const nuevas = (Array.isArray(r.reglas) ? r.reglas : []).map(x => String(x).trim()).filter(Boolean);
       Store.update(u => {
         const set = new Set(u.pautas.reglas.map(x => x.toLowerCase()));
-        nuevas.forEach(x => {
-          const t = String(x).trim();
-          if (t && !set.has(t.toLowerCase())) { u.pautas.reglas.push(t); set.add(t.toLowerCase()); }
+        nuevas.forEach(t => {
+          if (!set.has(t.toLowerCase())) { u.pautas.reglas.push(t); set.add(t.toLowerCase()); }
         });
-        u.pautas.archivos = u.pautas.archivos.filter(a => a.nombre !== file.name);
-        u.pautas.archivos.push({ nombre: file.name, fecha: new Date().toISOString(), reglas: nuevas.length });
+        u.pautas.archivos.push({ id: item.id, nombre: item.nombre, fecha: new Date().toISOString(), reglas: nuevas });
       });
-      delete this.leyendo[file.name];
-      UI.toast(`Encontré ${nuevas.length} reglas en ${file.name}`);
+      this.cola = this.cola.filter(x => x !== item);
+      if (!nuevas.length) UI.toast(`No encontré pautas en ${item.nombre}.`);
     } catch (err) {
-      this.leyendo[file.name] = 'Error';
-      UI.toast(err.message, 6000);
+      item.estado = 'error';
+      item.error = err.message;
+    } finally {
+      this.activos--;
+      this.siguiente();
+      this.render();
     }
+  },
+
+  borrar(id) {
+    const enCola = this.cola.find(x => x.id === id);
+    if (enCola) {
+      this.cola = this.cola.filter(x => x !== enCola);
+      this.render();
+      return;
+    }
+    Store.update(u => {
+      const arch = u.pautas.archivos.find(a => (a.id || a.nombre) === id);
+      if (!arch) return;
+      u.pautas.archivos = u.pautas.archivos.filter(a => a !== arch);
+      // Quitamos sus reglas, salvo las que también vienen de otro archivo
+      const propias = Array.isArray(arch.reglas) ? arch.reglas.map(x => x.toLowerCase()) : [];
+      const deOtros = new Set(u.pautas.archivos.flatMap(a => Array.isArray(a.reglas) ? a.reglas.map(x => x.toLowerCase()) : []));
+      u.pautas.reglas = u.pautas.reglas.filter(r => !propias.includes(r.toLowerCase()) || deOtros.has(r.toLowerCase()));
+    });
+    UI.toast('Archivo eliminado');
     this.render();
   },
 
   render() {
     const p = Store.u.pautas;
-    const archivos = p.archivos.map(a => ({ nombre: a.nombre, estado: `${a.reglas} reglas`, ok: true }));
-    Object.entries(this.leyendo).forEach(([nombre, estado]) => {
-      if (!archivos.some(a => a.nombre === nombre)) archivos.push({ nombre, estado, ok: false });
-    });
-    document.getElementById('pautas-archivos').innerHTML = archivos.map(a => `
-      <li class="file-row">
+    const filas = [
+      ...p.archivos.map(a => ({
+        id: a.id || a.nombre, nombre: a.nombre, estado: 'listo',
+        texto: `${Array.isArray(a.reglas) ? a.reglas.length : a.reglas} reglas`
+      })),
+      ...this.cola.map(x => ({
+        id: x.id, nombre: x.nombre, estado: x.estado, error: x.error,
+        texto: x.estado === 'error' ? 'Error' : x.estado === 'leyendo' ? 'Leyendo…' : 'En espera'
+      }))
+    ];
+
+    document.getElementById('pautas-archivos').innerHTML = filas.map(f => `
+      <li class="file-row ${f.estado === 'error' ? 'file-row--error' : ''}">
         <span class="file-ico">PDF</span>
-        <span class="name">${UI.esc(a.nombre)}</span>
-        <span class="tag ${a.ok ? 'tag--ok' : 'tag--muted'}">${UI.esc(a.estado)}</span>
+        <span class="file-main">
+          <span class="name">${UI.esc(f.nombre)}</span>
+          <span class="file-status">
+            ${f.estado === 'leyendo' ? '<span class="spinner spinner--sm" aria-hidden="true"></span>' : ''}
+            <span class="tag ${f.estado === 'listo' ? 'tag--ok' : f.estado === 'error' ? 'tag--warn' : 'tag--muted'}">${UI.esc(f.texto)}</span>
+            ${f.estado === 'error' ? `<button type="button" class="link-btn" data-reintentar="${f.id}">Reintentar</button>` : ''}
+          </span>
+          ${f.error ? `<span class="file-error">${UI.esc(f.error)}</span>` : ''}
+        </span>
+        <button type="button" class="icon-btn icon-btn--plain" data-borrar="${UI.esc(f.id)}" aria-label="Eliminar ${UI.esc(f.nombre)}"><svg><use href="#i-trash"></use></svg></button>
       </li>`).join('');
 
     document.getElementById('pautas-reglas').innerHTML = p.reglas.map((r, i) => `
       <li>${UI.esc(r)}<button type="button" data-i="${i}" aria-label="Quitar regla: ${UI.esc(r)}">×</button></li>`).join('');
 
-    document.getElementById('pautas-listo').textContent = Store.u.onboarding ? 'Volver' : 'Listo, empezar';
+    const pend = this.pendientes();
+    const btn = document.getElementById('pautas-listo');
+    btn.disabled = pend > 0;
+    btn.textContent = pend > 0
+      ? `Leyendo ${pend} archivo${pend > 1 ? 's' : ''}…`
+      : (Store.u.onboarding ? 'Volver' : 'Listo, empezar');
+    const errores = this.cola.filter(x => x.estado === 'error').length;
+    document.getElementById('pautas-aviso').textContent = pend > 0
+      ? 'Podés seguir agregando archivos o reglas mientras tanto.'
+      : errores ? `${errores} archivo${errores > 1 ? 's' : ''} con error: reintentá o eliminalo${errores > 1 ? 's' : ''}. Si seguís, no se van a usar.` : '';
   }
 };

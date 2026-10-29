@@ -9,7 +9,7 @@ Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de 
 
 * **Ingreso y registro:** Cuenta con email y contraseña (guardada como hash SHA-256).
 * **Configuración inicial:** Condiciones de salud, alergias, datos de tu nutricionista y tu objetivo.
-* **Pautas en PDF:** Subís los PDFs de tu nutricionista y Gemini los convierte en reglas que podés editar.
+* **Pautas en PDF:** Subís varios PDFs a la vez (hasta 25 MB cada uno). El texto se extrae en el celular con pdf.js y Gemini lo convierte en reglas que podés editar; si te equivocás, borrás el archivo y se van sus reglas.
 * **Análisis por foto:** Cargás lo que vas a comer o ya comiste y la app te dice si "va bien" o "ajustalo", con la distribución del plato y una sugerencia.
 * **Agua diaria:** Seguimiento de los 2 L con vasos y recordatorios (cada 2 horas, con almuerzo y cena, y si vas atrasada).
 * **Mi semana:** Comidas "va bien" por día, límites semanales (papa, choclo, batata), actividad física y días con 2 L.
@@ -28,6 +28,7 @@ Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de 
 * **Gemini API:** Análisis de fotos, lectura de PDFs y chat.
 * **Vercel:** Publicación del sitio y función serverless que protege la clave de la API.
 * **jsPDF:** Generación del resumen semanal en PDF.
+* **pdf.js:** Lectura de los PDFs de pautas en el navegador.
 
 
 ## 📸 Vista Previa
@@ -53,6 +54,7 @@ Mi-Plato/
 │   ├── perfil.js      # mi usuario, progreso, metas y consultas
 │   └── app.js         # arranque
 ├── api/gemini.js      # función serverless (Vercel)
+├── vercel.json        # tiempo máximo de la función
 ├── vista-previa.png
 ├── .env.example
 └── .gitignore

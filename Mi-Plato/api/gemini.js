@@ -99,6 +99,10 @@ const ESQUEMA_PAUTAS = {
 };
 
 /* ---------- Llamada a Gemini ---------- */
+// Pensamiento "bajo": responde mucho más rápido y alcanza para estas tareas.
+// Si el modelo configurado no acepta ese parámetro, se reintenta sin él.
+let usarThinking = true;
+
 async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
   const body = {
     systemInstruction: { parts: [{ text: system }] },
@@ -109,12 +113,24 @@ async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
     body.generationConfig.responseMimeType = 'application/json';
     body.generationConfig.responseSchema = esquema;
   }
-  const r = await fetch(URL_API(MODELO), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-    body: JSON.stringify(body)
-  });
-  const json = await r.json().catch(() => ({}));
+
+  const pedir = async conThinking => {
+    const b = JSON.parse(JSON.stringify(body));
+    if (conThinking) b.generationConfig.thinkingConfig = { thinkingLevel: 'low' };
+    const r = await fetch(URL_API(MODELO), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+      body: JSON.stringify(b)
+    });
+    const json = await r.json().catch(() => ({}));
+    return { r, json };
+  };
+
+  let { r, json } = await pedir(usarThinking);
+  if (!r.ok && usarThinking && r.status === 400 && /think/i.test(JSON.stringify(json))) {
+    usarThinking = false;
+    ({ r, json } = await pedir(false));
+  }
   if (!r.ok) {
     const msg = (json.error && json.error.message) || ('Gemini respondió ' + r.status);
     const err = new Error(msg);
@@ -123,7 +139,7 @@ async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
   }
   const cand = json.candidates && json.candidates[0];
   const texto = cand && cand.content && cand.content.parts
-    ? cand.content.parts.map(p => p.text || '').join('')
+    ? cand.content.parts.filter(p => !p.thought).map(p => p.text || '').join('')
     : '';
   if (!texto) throw new Error('Gemini no devolvió respuesta (puede haber sido bloqueada por seguridad).');
   return esquema ? JSON.parse(texto) : texto;
@@ -193,19 +209,32 @@ Si la pregunta no tiene que ver con alimentación, respondé amablemente que sol
 }
 
 async function leerPautas(key, b) {
-  if (!archivoValido(b.pdf, ['application/pdf'])) {
-    return { status: 400, json: { error: 'El PDF no es válido o pesa más de 3 MB.' } };
+  // La app manda el texto del PDF (extraído en el celular) o, si es
+  // escaneado, fotos de las primeras páginas. También acepta el PDF entero.
+  const nombre = String(b.nombre || 'pautas').slice(0, 100);
+  const parts = [];
+  if (typeof b.texto === 'string' && b.texto.trim().length > 20) {
+    parts.push({ text: 'CONTENIDO DEL DOCUMENTO "' + nombre + '":\n\n' + b.texto.slice(0, 60000) });
+  } else if (Array.isArray(b.imagenes) && b.imagenes.length) {
+    const imgs = b.imagenes.slice(0, 4).filter(i => archivoValido(i, ['image/jpeg', 'image/png']));
+    const total = imgs.reduce((n, i) => n + i.data.length, 0);
+    if (!imgs.length || total > MAX_BASE64) {
+      return { status: 400, json: { error: 'Las páginas del PDF son demasiado pesadas.' } };
+    }
+    imgs.forEach(i => parts.push({ inlineData: { mimeType: i.mime, data: i.data } }));
+  } else if (archivoValido(b.pdf, ['application/pdf'])) {
+    parts.push({ inlineData: { mimeType: 'application/pdf', data: b.pdf.data } });
+  } else {
+    return { status: 400, json: { error: 'No se pudo leer el contenido del PDF.' } };
   }
+  parts.push({
+    text: `Del documento "${nombre}", devolvé las pautas de alimentación como reglas cortas y concretas, por ejemplo: "Papa, choclo o batata: máximo 2 por semana", "Evitar frituras", "Huevo: máximo 1 por día", "Tomar 2 litros de agua por día".
+Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté en el documento. Si el documento no tiene pautas de alimentación, devolvé una lista vacía. Máximo 25 reglas.`
+  });
+
   const r = await gemini(key, {
     system: 'Extraés pautas de alimentación de documentos de nutricionistas. Respondés en español rioplatense.',
-    contents: [{
-      role: 'user',
-      parts: [
-        { inlineData: { mimeType: 'application/pdf', data: b.pdf.data } },
-        { text: `Leé este documento ("${String(b.nombre || 'pautas').slice(0, 100)}") y devolvé las pautas como reglas cortas y concretas, por ejemplo: "Papa, choclo o batata: máximo 2 por semana", "Evitar frituras", "Huevo: máximo 1 por día", "Tomar 2 litros de agua por día".
-Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté en el documento. Máximo 25 reglas.` }
-      ]
-    }],
+    contents: [{ role: 'user', parts }],
     esquema: ESQUEMA_PAUTAS,
     temperatura: 0.1
   });
