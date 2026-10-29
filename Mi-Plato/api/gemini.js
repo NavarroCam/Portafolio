@@ -22,6 +22,16 @@ const MODELOS = [...new Set([
 let modeloOk = null;
 const URL_API = m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
 
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+
+/** Segundos que Google pide esperar ante un 429 (RetryInfo), o 5 por defecto */
+function segundosDeEspera(json) {
+  const det = (json.error && json.error.details) || [];
+  const info = det.find(d => d && d.retryDelay);
+  const m = info && /([\d.]+)s/.exec(info.retryDelay);
+  return m ? Math.ceil(Number(m[1])) : 5;
+}
+
 /** Lee la clave y le saca espacios o comillas pegadas por error */
 function leerClave() {
   return String(process.env.GEMINI_API_KEY || '').trim().replace(/^["']|["']$/g, '').trim();
@@ -142,18 +152,27 @@ async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
 
   const modelos = modeloOk ? [modeloOk, ...MODELOS.filter(m => m !== modeloOk)] : MODELOS;
   let r, json;
+  buscar:
   for (const modelo of modelos) {
-    ({ r, json } = await pedir(modelo, usarThinking));
-    if (!r.ok && usarThinking && r.status === 400 && /think/i.test(JSON.stringify(json))) {
-      usarThinking = false;
-      ({ r, json } = await pedir(modelo, false));
+    for (let intento = 0; intento < 2; intento++) {
+      ({ r, json } = await pedir(modelo, usarThinking));
+      if (!r.ok && usarThinking && r.status === 400 && /think/i.test(JSON.stringify(json))) {
+        usarThinking = false;
+        ({ r, json } = await pedir(modelo, false));
+      }
+      if (r.ok) { modeloOk = modelo; break buscar; }
+      const msg = JSON.stringify(json.error || {});
+      const sinCuota = r.status === 429 && /limit: 0/i.test(msg);
+      // Límite por minuto: si Google pide esperar poco, esperamos y reintentamos
+      if (r.status === 429 && !sinCuota && intento === 0) {
+        const espera = segundosDeEspera(json);
+        if (espera <= 15) { await dormir(espera * 1000 + 300); continue; }
+      }
+      const probarOtro = r.status === 404 || r.status === 429 ||
+        (r.status === 400 && /not (found|supported)|is not available/i.test(msg));
+      if (!probarOtro) break buscar; // otro tipo de error: no tiene sentido probar otro modelo
+      break; // siguiente modelo (cada modelo tiene su propio límite)
     }
-    const msg = JSON.stringify(json.error || {});
-    const modeloNoDisponible = r.status === 404 ||
-      (r.status === 400 && /not (found|supported)|is not available/i.test(msg)) ||
-      (r.status === 429 && /limit: 0/i.test(msg)); // el plan gratuito no incluye ese modelo
-    if (r.ok) { modeloOk = modelo; break; }
-    if (!modeloNoDisponible) break; // otro tipo de error: no tiene sentido probar otro modelo
   }
   if (!r.ok) {
     const err = new Error((json.error && json.error.message) || ('Gemini respondió ' + r.status));
@@ -266,6 +285,64 @@ Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté
   return { status: 200, json: { reglas } };
 }
 
+/* Varios PDFs en un solo pedido: evita pasar el límite por minuto */
+const ESQUEMA_LOTE = {
+  type: 'OBJECT',
+  properties: {
+    documentos: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          id: { type: 'STRING' },
+          reglas: { type: 'ARRAY', items: { type: 'STRING' }, description: 'Reglas cortas, máx. 12 palabras cada una' }
+        },
+        required: ['id', 'reglas']
+      }
+    }
+  },
+  required: ['documentos']
+};
+
+async function leerPautasLote(key, b) {
+  const docs = Array.isArray(b.documentos) ? b.documentos.slice(0, 12) : [];
+  if (!docs.length) return { status: 400, json: { error: 'No llegaron documentos.' } };
+  const parts = [];
+  let pesoImgs = 0;
+  const ids = [];
+  for (const d of docs) {
+    const id = String(d.id || '').slice(0, 40);
+    const nombre = String(d.nombre || 'documento').slice(0, 100);
+    if (!id) continue;
+    ids.push(id);
+    parts.push({ text: `\n=== DOCUMENTO id="${id}" nombre="${nombre}" ===` });
+    if (typeof d.texto === 'string' && d.texto.trim()) {
+      parts.push({ text: d.texto.slice(0, 40000) });
+    } else if (Array.isArray(d.imagenes)) {
+      d.imagenes.slice(0, 4).filter(i => archivoValido(i, ['image/jpeg', 'image/png'])).forEach(i => {
+        pesoImgs += i.data.length;
+        parts.push({ inlineData: { mimeType: i.mime, data: i.data } });
+      });
+    }
+  }
+  if (pesoImgs > MAX_BASE64) return { status: 413, json: { error: 'Los documentos escaneados son demasiado pesados para leerlos juntos.' } };
+  parts.push({
+    text: `Para CADA documento de arriba (usá su id), devolvé sus pautas de alimentación como reglas cortas y concretas, por ejemplo: "Papa, choclo o batata: máximo 2 por semana", "Evitar frituras", "Huevo: máximo 1 por día", "Tomar 2 litros de agua por día".
+Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté en el documento. No repitas en un documento una regla que ya pusiste en otro. Si un documento no tiene pautas, devolvé su lista vacía. Máximo 25 reglas por documento.`
+  });
+  const r = await gemini(key, {
+    system: 'Extraés pautas de alimentación de documentos de nutricionistas. Respondés en español rioplatense.',
+    contents: [{ role: 'user', parts }],
+    esquema: ESQUEMA_LOTE,
+    temperatura: 0.1
+  });
+  const porId = {};
+  (r.documentos || []).forEach(d => {
+    porId[String(d.id)] = (d.reglas || []).map(x => String(x).trim()).filter(Boolean).slice(0, 25);
+  });
+  return { status: 200, json: { documentos: ids.map(id => ({ id, reglas: porId[id] || [] })) } };
+}
+
 /* ---------- Errores en palabras simples ---------- */
 function explicar(err) {
   const m = String(err.message || '');
@@ -288,7 +365,7 @@ function explicar(err) {
   if (st === 429) {
     return /limit: 0/i.test(m)
       ? { status: 429, error: 'Tu clave no tiene cuota para este modelo en el plan gratuito. Probá poniendo GEMINI_MODEL = gemini-2.5-flash en Vercel.' }
-      : { status: 429, error: 'Se alcanzó el límite de uso de Gemini. Probá de nuevo en un minuto.' };
+      : { status: 429, error: 'Gemini está recibiendo muchos pedidos (límite del plan gratuito). Esperá un minuto y tocá Reintentar.' };
   }
   if (err instanceof SyntaxError) {
     return { status: 502, error: 'Gemini devolvió una respuesta incompleta. Probá de nuevo.' };
@@ -347,6 +424,7 @@ module.exports = async function handler(req, res) {
     if (b.accion === 'analizar-plato') r = await analizarPlato(key, b);
     else if (b.accion === 'chat') r = await chat(key, b);
     else if (b.accion === 'leer-pautas') r = await leerPautas(key, b);
+    else if (b.accion === 'leer-pautas-lote') r = await leerPautasLote(key, b);
     else r = { status: 400, json: { error: 'Acción desconocida.' } };
     res.status(r.status).json(r.json);
   } catch (err) {

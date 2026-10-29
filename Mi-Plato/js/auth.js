@@ -179,14 +179,19 @@ Screens.nutri = {
 };
 
 /* ---------- Pautas (PDF) ----------
-   Los archivos se leen en paralelo (de a 3). Cada uno guarda las
-   reglas que aportó, así al borrarlo se van también sus reglas. */
+   1) Cada PDF se lee en el celular (texto o fotos de páginas), de a 3.
+   2) Cuando todos están preparados, se mandan JUNTOS a Gemini en un solo
+      pedido, así no se pasa el límite por minuto del plan gratuito.
+   Cada archivo guarda las reglas que aportó: al borrarlo se van sus reglas. */
 const MAX_PDF_MB = 25;
 const EN_PARALELO = 3;
+const MAX_LOTE_BYTES = 3.2 * 1024 * 1024;
 
 Screens.pautas = {
-  cola: [],      // archivos en proceso: { id, file, nombre, estado: 'esperando'|'leyendo'|'error', error }
-  activos: 0,
+  // estado: 'esperando' → 'preparando' → 'listo' → 'leyendo' → (se guarda) | 'error'
+  cola: [],
+  preparando: 0,
+  enviando: false,
 
   init() {
     document.getElementById('pautas-input').addEventListener('change', e => {
@@ -199,10 +204,7 @@ Screens.pautas = {
       const borrar = e.target.closest('[data-borrar]');
       if (borrar) { this.borrar(borrar.dataset.borrar); return; }
       const reintentar = e.target.closest('[data-reintentar]');
-      if (reintentar) {
-        const item = this.cola.find(x => x.id === reintentar.dataset.reintentar);
-        if (item) { item.estado = 'esperando'; item.error = ''; this.siguiente(); this.render(); }
-      }
+      if (reintentar) this.reintentar(reintentar.dataset.reintentar);
     });
 
     document.getElementById('pautas-borrar-todo').addEventListener('click', () => {
@@ -234,7 +236,6 @@ Screens.pautas = {
 
     document.getElementById('pautas-listo').addEventListener('click', () => {
       if (this.pendientes() > 0) return;
-      // Los que quedaron con error no se guardan
       this.cola = this.cola.filter(x => x.estado !== 'error');
       if (!Store.u.onboarding) {
         Store.update(u => { u.onboarding = true; });
@@ -247,7 +248,7 @@ Screens.pautas = {
   },
 
   pendientes() {
-    return this.cola.filter(x => x.estado === 'esperando' || x.estado === 'leyendo').length;
+    return this.cola.filter(x => x.estado !== 'error').length;
   },
 
   agregar(files) {
@@ -255,45 +256,87 @@ Screens.pautas = {
       const esPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
       if (!esPdf) { UI.toast(file.name + ' no es un PDF.'); continue; }
       if (file.size > MAX_PDF_MB * 1024 * 1024) { UI.toast(`${file.name} pesa más de ${MAX_PDF_MB} MB.`); continue; }
-      this.cola.push({ id: UI.uid(), file, nombre: file.name, estado: 'esperando', error: '' });
+      this.cola.push({ id: UI.uid(), file, nombre: file.name, estado: 'esperando', error: '', contenido: null });
     }
-    this.siguiente();
+    this.preparar();
     this.render();
   },
 
-  /** Arranca los archivos en espera, de a EN_PARALELO */
-  siguiente() {
-    while (this.activos < EN_PARALELO) {
+  reintentar(id) {
+    const item = this.cola.find(x => x.id === id);
+    if (!item) return;
+    item.error = '';
+    item.estado = item.contenido ? 'listo' : 'esperando';
+    this.preparar();
+    this.enviar();
+    this.render();
+  },
+
+  /** Paso 1: leer los PDF en el celular */
+  preparar() {
+    while (this.preparando < EN_PARALELO) {
       const item = this.cola.find(x => x.estado === 'esperando');
       if (!item) break;
-      this.procesar(item);
+      item.estado = 'preparando';
+      this.preparando++;
+      Api.prepararPDF(item.file)
+        .then(contenido => { item.contenido = contenido; item.estado = 'listo'; })
+        .catch(err => { item.estado = 'error'; item.error = err.message; })
+        .finally(() => {
+          this.preparando--;
+          this.preparar();
+          this.enviar();
+          this.render();
+        });
     }
   },
 
-  async procesar(item) {
-    item.estado = 'leyendo';
-    this.activos++;
+  /** Paso 2: mandar a Gemini todos los preparados juntos */
+  async enviar() {
+    if (this.enviando) return;
+    // Esperamos a que terminen de prepararse todos, para mandarlos en un solo pedido
+    if (this.cola.some(x => x.estado === 'esperando' || x.estado === 'preparando')) return;
+    const listos = this.cola.filter(x => x.estado === 'listo');
+    if (!listos.length) return;
+
+    // Armamos un lote que no supere el tamaño que acepta el servidor
+    const lote = [];
+    let peso = 0;
+    for (const item of listos) {
+      const p = JSON.stringify(item.contenido).length;
+      if (lote.length && peso + p > MAX_LOTE_BYTES) break;
+      lote.push(item);
+      peso += p;
+    }
+
+    this.enviando = true;
+    lote.forEach(x => { x.estado = 'leyendo'; });
     this.render();
     try {
-      const r = await Api.leerPautas(item.file);
-      if (!this.cola.includes(item)) return; // lo borraron mientras se leía
-      const nuevas = (Array.isArray(r.reglas) ? r.reglas : []).map(x => String(x).trim()).filter(Boolean);
+      const r = await Api.leerPautasLote(lote.map(x => ({ id: x.id, nombre: x.nombre, ...x.contenido })));
+      const porId = {};
+      (r.documentos || []).forEach(d => { porId[d.id] = Array.isArray(d.reglas) ? d.reglas : []; });
+      const sinPautas = [];
       Store.update(u => {
         const set = new Set(u.pautas.reglas.map(x => x.toLowerCase()));
-        nuevas.forEach(t => {
-          if (!set.has(t.toLowerCase())) { u.pautas.reglas.push(t); set.add(t.toLowerCase()); }
-        });
-        u.pautas.archivos.push({ id: item.id, nombre: item.nombre, fecha: new Date().toISOString(), reglas: nuevas });
+        for (const item of lote) {
+          if (!this.cola.includes(item)) continue; // lo borraron mientras se leía
+          const nuevas = (porId[item.id] || []).map(x => String(x).trim()).filter(Boolean);
+          nuevas.forEach(t => {
+            if (!set.has(t.toLowerCase())) { u.pautas.reglas.push(t); set.add(t.toLowerCase()); }
+          });
+          u.pautas.archivos.push({ id: item.id, nombre: item.nombre, fecha: new Date().toISOString(), reglas: nuevas });
+          if (!nuevas.length) sinPautas.push(item.nombre);
+        }
       });
-      this.cola = this.cola.filter(x => x !== item);
-      if (!nuevas.length) UI.toast(`No encontré pautas en ${item.nombre}.`);
+      this.cola = this.cola.filter(x => !lote.includes(x));
+      if (sinPautas.length) UI.toast(`No encontré pautas en ${sinPautas.join(', ')}.`, 4500);
     } catch (err) {
-      item.estado = 'error';
-      item.error = err.message;
+      lote.forEach(x => { if (x.estado === 'leyendo') { x.estado = 'error'; x.error = err.message; } });
     } finally {
-      this.activos--;
-      this.siguiente();
+      this.enviando = false;
       this.render();
+      this.enviar(); // si quedaron más (lote grande o agregados mientras tanto)
     }
   },
 
@@ -302,6 +345,7 @@ Screens.pautas = {
     if (enCola) {
       this.cola = this.cola.filter(x => x !== enCola);
       this.render();
+      this.enviar(); // por si era el único que faltaba preparar
       return;
     }
     Store.update(u => {
@@ -325,7 +369,11 @@ Screens.pautas = {
       })),
       ...this.cola.map(x => ({
         id: x.id, nombre: x.nombre, estado: x.estado, error: x.error,
-        texto: x.estado === 'error' ? 'Error' : x.estado === 'leyendo' ? 'Leyendo…' : 'En espera'
+        texto: x.estado === 'error' ? 'Error'
+          : x.estado === 'leyendo' ? 'Sacando reglas…'
+          : x.estado === 'preparando' ? 'Abriendo…'
+          : x.estado === 'listo' ? 'Preparado'
+          : 'En espera'
       }))
     ];
 
@@ -335,7 +383,7 @@ Screens.pautas = {
         <span class="file-main">
           <span class="name">${UI.esc(f.nombre)}</span>
           <span class="file-status">
-            ${f.estado === 'leyendo' ? '<span class="spinner spinner--sm" aria-hidden="true"></span>' : ''}
+            ${f.estado === 'leyendo' || f.estado === 'preparando' ? '<span class="spinner spinner--sm" aria-hidden="true"></span>' : ''}
             <span class="tag ${f.estado === 'listo' ? 'tag--ok' : f.estado === 'error' ? 'tag--warn' : 'tag--muted'}">${UI.esc(f.texto)}</span>
             ${f.estado === 'error' ? `<button type="button" class="link-btn" data-reintentar="${f.id}">Reintentar</button>` : ''}
           </span>

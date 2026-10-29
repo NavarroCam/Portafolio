@@ -184,10 +184,11 @@ const Api = (() => {
     chat(mensajes) {
       return llamar('chat', { mensajes });
     },
-    /** Lee un PDF de pautas (en el navegador) y devuelve { reglas } */
-    async leerPautas(file) {
-      const contenido = await prepararPDF(file);
-      return llamar('leer-pautas', { ...contenido, nombre: file.name });
+    /** Saca el texto (o fotos) de un PDF en el navegador */
+    prepararPDF,
+    /** Manda varios PDFs ya preparados en un solo pedido → { documentos: [{ id, reglas }] } */
+    leerPautasLote(documentos) {
+      return llamar('leer-pautas-lote', { documentos });
     },
     leerComoDataURL, comprimirImagen, miniatura
   };
