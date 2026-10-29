@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
   // Inicializa cada pantalla una sola vez
   Object.values(Screens).forEach(s => { if (s.init) s.init(); });
+  Festejo.init();
 
   // Botones de tema (login, registro, perfil): alternan claro/oscuro
   document.querySelectorAll('.js-theme-toggle').forEach(b => {

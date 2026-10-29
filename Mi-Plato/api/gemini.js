@@ -17,7 +17,8 @@ const MODELOS = [...new Set([
   'gemini-flash-latest',
   'gemini-3.6-flash',
   'gemini-3.5-flash',
-  'gemini-2.5-flash'
+  'gemini-2.5-flash',
+  'gemini-2.5-flash-lite'
 ].filter(Boolean))];
 let modeloOk = null;
 const URL_API = m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
@@ -163,12 +164,15 @@ async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
       if (r.ok) { modeloOk = modelo; break buscar; }
       const msg = JSON.stringify(json.error || {});
       const sinCuota = r.status === 429 && /limit: 0/i.test(msg);
+      const saturado = r.status === 503 || r.status === 500 || /overloaded|high demand|UNAVAILABLE/i.test(msg);
       // Límite por minuto: si Google pide esperar poco, esperamos y reintentamos
       if (r.status === 429 && !sinCuota && intento === 0) {
         const espera = segundosDeEspera(json);
         if (espera <= 15) { await dormir(espera * 1000 + 300); continue; }
       }
-      const probarOtro = r.status === 404 || r.status === 429 ||
+      // Modelo saturado: un reintento corto y, si sigue, pasamos a otro modelo
+      if (saturado && intento === 0) { await dormir(1500); continue; }
+      const probarOtro = r.status === 404 || r.status === 429 || saturado ||
         (r.status === 400 && /not (found|supported)|is not available/i.test(msg));
       if (!probarOtro) break buscar; // otro tipo de error: no tiene sentido probar otro modelo
       break; // siguiente modelo (cada modelo tiene su propio límite)
@@ -366,6 +370,9 @@ function explicar(err) {
     return /limit: 0/i.test(m)
       ? { status: 429, error: 'Tu clave no tiene cuota para este modelo en el plan gratuito. Probá poniendo GEMINI_MODEL = gemini-2.5-flash en Vercel.' }
       : { status: 429, error: 'Gemini está recibiendo muchos pedidos (límite del plan gratuito). Esperá un minuto y tocá Reintentar.' };
+  }
+  if (st === 503 || st === 500 || /overloaded|high demand|UNAVAILABLE/i.test(m)) {
+    return { status: 503, error: 'Gemini está saturado en este momento (le pasa a todos los usuarios, no a tu cuenta). Esperá un par de minutos y tocá Reintentar.' };
   }
   if (err instanceof SyntaxError) {
     return { status: 502, error: 'Gemini devolvió una respuesta incompleta. Probá de nuevo.' };

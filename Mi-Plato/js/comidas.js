@@ -86,6 +86,7 @@ Screens.resultado = {
   analisis: null,
 
   init() {
+    document.getElementById('res-reintentar').addEventListener('click', () => this.render());
     document.getElementById('res-descartar').addEventListener('click', () => {
       this.pendiente = null;
       Screens.cargar.reset();
@@ -132,7 +133,7 @@ Screens.resultado = {
       `${tipo ? tipo.nombre : ''} · ${p.momento === 'antes' ? 'lo vas a comer' : 'ya lo comiste'}`;
 
     const cargando = document.getElementById('res-cargando');
-    const error = document.getElementById('res-error');
+    const error = document.getElementById('res-error-wrap');
     const contenido = document.getElementById('res-contenido');
     cargando.hidden = false; error.hidden = true; contenido.hidden = true;
     this.analisis = null;
@@ -144,7 +145,7 @@ Screens.resultado = {
       this.pintar(a, p);
       contenido.hidden = false;
     } catch (err) {
-      error.innerHTML = `<strong>No pude analizar el plato.</strong><br>${UI.esc(err.message)}`;
+      document.getElementById('res-error').innerHTML = `<strong>No pude analizar el plato.</strong><br>${UI.esc(err.message)}`;
       error.hidden = false;
     } finally {
       cargando.hidden = true;

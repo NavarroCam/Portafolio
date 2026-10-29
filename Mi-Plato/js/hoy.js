@@ -29,16 +29,122 @@ const VASO = 250;
 
 const Agua = {
   hoy() { return Store.u.agua[Fechas.clave()] || 0; },
+  /** Guarda el total del día. Devuelve true si con esto se llegó a la meta */
   set(ml) {
-    Store.update(u => { u.agua[Fechas.clave()] = Math.max(0, Math.min(ml, 5000)); });
+    const antes = this.hoy();
+    const clave = Fechas.clave();
+    Store.update(u => { u.agua[clave] = Math.max(0, Math.min(ml, 5000)); });
+    const llego = antes < META_AGUA && this.hoy() >= META_AGUA;
+    // Festejamos una sola vez por día (si desmarcás y volvés a marcar, no se repite)
+    if (llego && !(Store.u.festejos || {})[clave]) {
+      Store.update(u => { u.festejos = { ...(u.festejos || {}), [clave]: true }; });
+      Festejo.mostrar();
+      return true;
+    }
+    return false;
   },
   sumar(ml) {
-    const antes = this.hoy();
-    this.set(antes + ml);
-    if (antes < META_AGUA && this.hoy() >= META_AGUA) UI.toast('¡Llegaste a los 2 L de hoy!');
-    else UI.toast(`+${ml} ml · llevás ${UI.litros(this.hoy())}`);
+    if (!this.set(this.hoy() + ml)) UI.toast(`+${ml} ml · llevás ${UI.litros(this.hoy())}`);
+  },
+  /** Días seguidos (hasta hoy) con 2 L */
+  racha() {
+    let n = 0;
+    let d = new Date();
+    while ((Store.u.agua[Fechas.clave(d)] || 0) >= META_AGUA) { n++; d = Fechas.sumarDias(d, -1); }
+    return n;
   },
   faltanVasos() { return Math.max(0, Math.ceil((META_AGUA - this.hoy()) / VASO)); }
+};
+
+/* ---------- Festejo al llegar a los 2 L: mensaje + confeti ---------- */
+const Festejo = {
+  mostrar() {
+    const modal = document.getElementById('festejo');
+    const u = Store.u;
+    const racha = Agua.racha();
+    document.getElementById('festejo-titulo').textContent = `¡Llegaste a los 2 litros${u.perfil.nombre ? ', ' + u.perfil.nombre : ''}!`;
+    document.getElementById('festejo-texto').textContent = racha > 1
+      ? `Llevás ${racha} días seguidos cumpliendo la meta de agua. ¡Seguí así!`
+      : 'Cumpliste la meta de agua de hoy. Tu cuerpo te lo agradece.';
+    this.anterior = document.activeElement;
+    modal.hidden = false;
+    document.getElementById('festejo-ok').focus();
+    if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) this.confeti();
+  },
+
+  cerrar() {
+    document.getElementById('festejo').hidden = true;
+    if (this.anterior && this.anterior.focus) this.anterior.focus();
+  },
+
+  init() {
+    document.getElementById('festejo-ok').addEventListener('click', () => this.cerrar());
+    document.getElementById('festejo').addEventListener('click', e => { if (e.target.id === 'festejo') this.cerrar(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !document.getElementById('festejo').hidden) this.cerrar();
+    });
+  },
+
+  /** Confeti con canvas, sin librerías */
+  confeti(duracion = 3200) {
+    const c = document.createElement('canvas');
+    c.className = 'confeti';
+    c.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(c);
+    const ctx = c.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const ajustar = () => {
+      c.width = innerWidth * dpr; c.height = innerHeight * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    ajustar();
+    window.addEventListener('resize', ajustar);
+
+    const colores = ['#2F6B4F', '#7FC29B', '#1F5FA8', '#9CC3F0', '#C9A227', '#B5541C', '#F0A673'];
+    const W = innerWidth, H = innerHeight;
+    // Dos "cañones" desde abajo a los costados + una lluvia desde arriba
+    const piezas = [];
+    const crear = (x, y, vx, vy) => piezas.push({
+      x, y, vx, vy,
+      w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
+      rot: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3,
+      color: colores[(Math.random() * colores.length) | 0],
+      forma: Math.random() < 0.3 ? 'circulo' : 'papel',
+      osc: Math.random() * Math.PI * 2
+    });
+    for (let i = 0; i < 70; i++) {
+      crear(0, H * 0.75, 4 + Math.random() * 8, -(10 + Math.random() * 9));
+      crear(W, H * 0.75, -(4 + Math.random() * 8), -(10 + Math.random() * 9));
+    }
+    for (let i = 0; i < 60; i++) crear(Math.random() * W, -20 - Math.random() * H * 0.5, (Math.random() - 0.5) * 2, 2 + Math.random() * 3);
+
+    const inicio = performance.now();
+    const cuadro = ahora => {
+      const t = ahora - inicio;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalAlpha = t > duracion - 600 ? Math.max(0, (duracion - t) / 600) : 1;
+      for (const p of piezas) {
+        p.vy += 0.28;            // gravedad
+        p.vx *= 0.985;           // rozamiento del aire
+        p.vy = Math.min(p.vy, 6);
+        p.osc += 0.1;
+        p.x += p.vx + Math.sin(p.osc) * 0.6;
+        p.y += p.vy;
+        p.rot += p.vr;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.color;
+        if (p.forma === 'circulo') { ctx.beginPath(); ctx.arc(0, 0, p.w / 2, 0, Math.PI * 2); ctx.fill(); }
+        else ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.osc)) + 2);
+        ctx.restore();
+      }
+      if (t < duracion) requestAnimationFrame(cuadro);
+      else { window.removeEventListener('resize', ajustar); c.remove(); }
+    };
+    requestAnimationFrame(cuadro);
+  }
 };
 
 /* ---------- Recordatorios (mientras la app está abierta) ---------- */

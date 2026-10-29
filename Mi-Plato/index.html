@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=4">
+  <link rel="stylesheet" href="css/styles.css?v=6">
 </head>
 <body>
 
@@ -253,7 +253,11 @@
           <div class="spinner" aria-hidden="true"></div>
           <p>Mirando tu plato…</p>
         </div>
-        <div id="res-error" class="card error-card" hidden></div>
+        <div id="res-error-wrap" class="stack-sm" hidden>
+          <div id="res-error" class="card error-card"></div>
+          <button class="btn btn--primary" type="button" id="res-reintentar">Reintentar</button>
+          <a class="btn btn--outline" href="#cargar">Volver a la foto</a>
+        </div>
         <div id="res-contenido" class="stack" hidden>
           <div class="res-head">
             <img id="res-foto" class="res-foto" alt="Foto analizada">
@@ -480,20 +484,33 @@
     </nav>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- Festejo al llegar a los 2 L -->
+    <div class="festejo" id="festejo" hidden>
+      <div class="festejo-card" role="dialog" aria-modal="true" aria-labelledby="festejo-titulo" aria-describedby="festejo-texto">
+        <div class="festejo-gota" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z" fill="currentColor"/></svg>
+          <span>2 L</span>
+        </div>
+        <h2 class="title" id="festejo-titulo">¡Llegaste a los 2 litros!</h2>
+        <p class="muted" id="festejo-texto"></p>
+        <button class="btn btn--water" type="button" id="festejo-ok">¡Gracias!</button>
+      </div>
+    </div>
   </div>
 
   <!-- jsPDF para exportar la semana -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script src="js/storage.js?v=4"></script>
-  <script src="js/ui.js?v=4"></script>
-  <script src="js/api.js?v=4"></script>
-  <script src="js/auth.js?v=4"></script>
-  <script src="js/hoy.js?v=4"></script>
-  <script src="js/comidas.js?v=4"></script>
-  <script src="js/semana.js?v=4"></script>
-  <script src="js/chat.js?v=4"></script>
-  <script src="js/perfil.js?v=4"></script>
-  <script src="js/app.js?v=4"></script>
+  <script src="js/storage.js?v=6"></script>
+  <script src="js/ui.js?v=6"></script>
+  <script src="js/api.js?v=6"></script>
+  <script src="js/auth.js?v=6"></script>
+  <script src="js/hoy.js?v=6"></script>
+  <script src="js/comidas.js?v=6"></script>
+  <script src="js/semana.js?v=6"></script>
+  <script src="js/chat.js?v=6"></script>
+  <script src="js/perfil.js?v=6"></script>
+  <script src="js/app.js?v=6"></script>
 </body>
 </html>
