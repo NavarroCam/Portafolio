@@ -1,0 +1,204 @@
+/* ==========================================================
+   hoy.js — pantalla "Hoy", agua y recordatorios
+   ========================================================== */
+
+const TIPOS = [
+  { id: 'desayuno', nombre: 'Desayuno', hora: '8:00', guia: 'Infusión + 1 hidrato + 1 proteína + 1 fibra' },
+  { id: 'almuerzo', nombre: 'Almuerzo', hora: '13:00', guia: '½ vegetales · ¼ proteína · ¼ cereal' },
+  { id: 'merienda', nombre: 'Merienda', hora: '17:00', guia: 'Infusión + 1 hidrato + 1 proteína + 1 fibra' },
+  { id: 'cena', nombre: 'Cena', hora: '21:00', guia: '½ vegetales · ¼ proteína · ¼ cereal' }
+];
+
+/** Tipo de comida sugerido según la hora */
+function tipoPorHora(d = new Date()) {
+  const h = d.getHours();
+  if (h < 11) return 'desayuno';
+  if (h < 16) return 'almuerzo';
+  if (h < 19) return 'merienda';
+  return 'cena';
+}
+
+/** Comidas guardadas de un día (clave AAAA-MM-DD) */
+function comidasDelDia(clave) {
+  return Store.u.comidas.filter(c => Fechas.clave(new Date(c.fecha)) === clave);
+}
+
+/* ---------- Agua ---------- */
+const META_AGUA = 2000;
+const VASO = 250;
+
+const Agua = {
+  hoy() { return Store.u.agua[Fechas.clave()] || 0; },
+  set(ml) {
+    Store.update(u => { u.agua[Fechas.clave()] = Math.max(0, Math.min(ml, 5000)); });
+  },
+  sumar(ml) {
+    const antes = this.hoy();
+    this.set(antes + ml);
+    if (antes < META_AGUA && this.hoy() >= META_AGUA) UI.toast('¡Llegaste a los 2 L de hoy!');
+    else UI.toast(`+${ml} ml · llevás ${UI.litros(this.hoy())}`);
+  },
+  faltanVasos() { return Math.max(0, Math.ceil((META_AGUA - this.hoy()) / VASO)); }
+};
+
+/* ---------- Recordatorios (mientras la app está abierta) ---------- */
+const Recordatorios = {
+  ultimo: null,
+
+  async pedirPermiso() {
+    if (!('Notification' in window)) return 'no-soportado';
+    if (Notification.permission === 'default') return Notification.requestPermission();
+    return Notification.permission;
+  },
+
+  avisar(titulo, cuerpo) {
+    UI.toast(titulo + ' · ' + cuerpo, 5000);
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try { new Notification(titulo, { body: cuerpo, tag: 'agua' }); } catch (e) { /* algunos celulares no lo permiten fuera de un service worker */ }
+    }
+  },
+
+  revisar() {
+    const u = Store.u;
+    if (!u || !u.onboarding) return;
+    const r = u.recordatorios;
+    const ahora = new Date();
+    const h = ahora.getHours();
+    const marca = Fechas.clave(ahora) + '-' + h;
+    if (this.ultimo === marca) return;
+
+    const total = Agua.hoy();
+    if (r.atrasada && h === 18 && total < 1000) {
+      this.ultimo = marca;
+      this.avisar('Vas atrasada con el agua', `Llevás ${UI.litros(total)}. Te faltan ${Agua.faltanVasos()} vasos.`);
+      return;
+    }
+    if (r.cada2 && h >= 9 && h <= 21 && (h - 9) % 2 === 0 && total < META_AGUA) {
+      this.ultimo = marca;
+      this.avisar('Hora de un vaso de agua', `Vas ${UI.litros(total)} de 2 L · te faltan ${Agua.faltanVasos()}`);
+    }
+  },
+
+  iniciar() {
+    setInterval(() => this.revisar(), 60 * 1000);
+    this.revisar();
+  }
+};
+
+/* ---------- Pantalla Hoy ---------- */
+Screens.hoy = {
+  init() {
+    document.getElementById('hoy-agua-mas').addEventListener('click', () => {
+      Agua.sumar(VASO);
+      this.render();
+    });
+  },
+
+  render() {
+    const u = Store.u;
+    const hoy = new Date();
+    document.getElementById('hoy-fecha').textContent = Fechas.largo(hoy);
+    document.getElementById('hoy-saludo').textContent = 'Hola, ' + (u.perfil.nombre || '');
+
+    // Agua
+    const ml = Agua.hoy();
+    document.getElementById('hoy-agua').textContent = UI.litros(ml);
+    document.getElementById('hoy-agua-bar').style.width = Math.min(100, ml / META_AGUA * 100) + '%';
+    document.getElementById('hoy-agua-texto').textContent = ml >= META_AGUA
+      ? '¡Meta cumplida!'
+      : `Te faltan ${Agua.faltanVasos()} vasos`;
+
+    // Comidas
+    const delDia = comidasDelDia(Fechas.clave(hoy));
+    document.getElementById('hoy-comidas').innerHTML = TIPOS.map(t => {
+      const c = delDia.filter(x => x.tipo === t.id).pop();
+      if (!c) {
+        return `
+          <a class="meal meal--pending" href="#cargar" data-tipo="${t.id}">
+            <span class="meal-ico meal-ico--pending"><svg><use href="#i-clock"></use></svg></span>
+            <span class="meal-body"><strong>${t.nombre} · ${t.hora}</strong><span>${t.guia}</span></span>
+            <span class="meal-action">Cargar</span>
+          </a>`;
+      }
+      const ok = c.analisis && c.analisis.veredicto === 'ok';
+      const nombres = c.analisis && c.analisis.items ? c.analisis.items.map(i => i.nombre).join(', ') : (c.descripcion || '');
+      return `
+        <div class="meal">
+          <span class="meal-ico ${ok ? 'meal-ico--ok' : 'meal-ico--warn'}">
+            ${c.foto ? `<img src="${c.foto}" alt="">` : `<svg><use href="#i-${ok ? 'check' : 'alert'}"></use></svg>`}
+          </span>
+          <span class="meal-body"><strong>${t.nombre} · ${Fechas.hora(c.fecha)}</strong><span>${UI.esc(nombres)}</span></span>
+          <span class="tag ${ok ? 'tag--ok' : 'tag--warn'}">${ok ? 'Va bien' : 'Ajustar'}</span>
+        </div>`;
+    }).join('');
+
+    document.querySelectorAll('#hoy-comidas a[data-tipo]').forEach(a => {
+      a.addEventListener('click', () => { Screens.cargar.tipoElegido = a.dataset.tipo; });
+    });
+
+    // Contadores del día (salen del análisis de cada comida)
+    const sum = k => delDia.reduce((n, c) => n + ((c.analisis && c.analisis.conteos && Number(c.analisis.conteos[k])) || 0), 0);
+    const lunes = Fechas.lunes(hoy);
+    const tuberculosSemana = Store.u.comidas
+      .filter(c => new Date(c.fecha) >= lunes)
+      .reduce((n, c) => n + ((c.analisis && c.analisis.conteos && Number(c.analisis.conteos.tuberculos)) || 0), 0);
+    document.getElementById('hoy-contadores').innerHTML = `
+      <div class="mini-card stat"><span>Frutas</span><strong>${sum('frutas')} <small>de 3–4</small></strong></div>
+      <div class="mini-card stat"><span>Huevo</span><strong>${sum('huevos')} <small>máx. 1</small></strong></div>
+      <div class="mini-card stat"><span>Papa/choclo</span><strong>${tuberculosSemana} <small>de 2/sem</small></strong></div>`;
+  }
+};
+
+/* ---------- Pantalla Agua ---------- */
+Screens.agua = {
+  init() {
+    document.getElementById('agua-vasos').addEventListener('click', e => {
+      const b = e.target.closest('.glass');
+      if (!b) return;
+      const i = Number(b.dataset.i);
+      const lleno = (i + 1) * VASO;
+      // Tocar el último vaso lleno lo vacía; si no, llena hasta ese vaso
+      Agua.set(Agua.hoy() === lleno ? i * VASO : lleno);
+      this.render();
+    });
+
+    document.querySelectorAll('#screen-agua [data-ml]').forEach(b => {
+      b.addEventListener('click', () => { Agua.sumar(Number(b.dataset.ml)); this.render(); });
+    });
+
+    const map = { 'rec-cada2': 'cada2', 'rec-comidas': 'comidas', 'rec-atrasada': 'atrasada' };
+    Object.entries(map).forEach(([id, key]) => {
+      document.getElementById(id).addEventListener('change', async e => {
+        const on = e.target.checked;
+        Store.update(u => { u.recordatorios[key] = on; });
+        if (on && key !== 'comidas') {
+          const p = await Recordatorios.pedirPermiso();
+          this.textoPermiso(p);
+        }
+      });
+    });
+  },
+
+  textoPermiso(p) {
+    const el = document.getElementById('agua-permiso');
+    const estado = p || ('Notification' in window ? Notification.permission : 'no-soportado');
+    if (estado === 'granted') el.textContent = 'Los avisos llegan mientras la app esté abierta (también en otra pestaña).';
+    else if (estado === 'denied') el.textContent = 'Bloqueaste las notificaciones del navegador. Igual te avisamos dentro de la app.';
+    else if (estado === 'no-soportado') el.textContent = 'Tu navegador no soporta notificaciones: te avisamos dentro de la app.';
+    else el.textContent = 'Al activar un recordatorio te vamos a pedir permiso para mandarte notificaciones.';
+  },
+
+  render() {
+    const ml = Agua.hoy();
+    document.getElementById('agua-total').textContent = UI.litros(ml);
+    const llenos = Math.floor(ml / VASO);
+    document.getElementById('agua-vasos').innerHTML = Array.from({ length: 8 }, (_, i) =>
+      `<button type="button" class="glass ${i < llenos ? 'full' : ''}" data-i="${i}" aria-label="Vaso ${i + 1}, ${i < llenos ? 'tomado' : 'pendiente'}"></button>`
+    ).join('');
+    const r = Store.u.recordatorios;
+    document.getElementById('rec-cada2').checked = r.cada2;
+    document.getElementById('rec-comidas').checked = r.comidas;
+    document.getElementById('rec-atrasada').checked = r.atrasada;
+    this.textoPermiso();
+  }
+};
