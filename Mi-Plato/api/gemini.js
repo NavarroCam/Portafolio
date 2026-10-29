@@ -10,8 +10,22 @@
    - leer-pautas: PDF de la nutricionista → lista de reglas
    ========================================================== */
 
-const MODELO = process.env.GEMINI_MODEL || 'gemini-flash-latest';
+// Se prueba el primer modelo; si Google dice que no existe o no está
+// disponible para la clave, se pasa al siguiente y se recuerda el que anduvo.
+const MODELOS = [...new Set([
+  (process.env.GEMINI_MODEL || '').trim(),
+  'gemini-flash-latest',
+  'gemini-3.6-flash',
+  'gemini-3.5-flash',
+  'gemini-2.5-flash'
+].filter(Boolean))];
+let modeloOk = null;
 const URL_API = m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
+
+/** Lee la clave y le saca espacios o comillas pegadas por error */
+function leerClave() {
+  return String(process.env.GEMINI_API_KEY || '').trim().replace(/^["']|["']$/g, '').trim();
+}
 const MAX_BASE64 = 4 * 1024 * 1024; // ~3 MB de archivo
 
 /* ---------- Contexto del usuario ---------- */
@@ -114,10 +128,10 @@ async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
     body.generationConfig.responseSchema = esquema;
   }
 
-  const pedir = async conThinking => {
+  const pedir = async (modelo, conThinking) => {
     const b = JSON.parse(JSON.stringify(body));
     if (conThinking) b.generationConfig.thinkingConfig = { thinkingLevel: 'low' };
-    const r = await fetch(URL_API(MODELO), {
+    const r = await fetch(URL_API(modelo), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
       body: JSON.stringify(b)
@@ -126,15 +140,25 @@ async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
     return { r, json };
   };
 
-  let { r, json } = await pedir(usarThinking);
-  if (!r.ok && usarThinking && r.status === 400 && /think/i.test(JSON.stringify(json))) {
-    usarThinking = false;
-    ({ r, json } = await pedir(false));
+  const modelos = modeloOk ? [modeloOk, ...MODELOS.filter(m => m !== modeloOk)] : MODELOS;
+  let r, json;
+  for (const modelo of modelos) {
+    ({ r, json } = await pedir(modelo, usarThinking));
+    if (!r.ok && usarThinking && r.status === 400 && /think/i.test(JSON.stringify(json))) {
+      usarThinking = false;
+      ({ r, json } = await pedir(modelo, false));
+    }
+    const msg = JSON.stringify(json.error || {});
+    const modeloNoDisponible = r.status === 404 ||
+      (r.status === 400 && /not (found|supported)|is not available/i.test(msg)) ||
+      (r.status === 429 && /limit: 0/i.test(msg)); // el plan gratuito no incluye ese modelo
+    if (r.ok) { modeloOk = modelo; break; }
+    if (!modeloNoDisponible) break; // otro tipo de error: no tiene sentido probar otro modelo
   }
   if (!r.ok) {
-    const msg = (json.error && json.error.message) || ('Gemini respondió ' + r.status);
-    const err = new Error(msg);
+    const err = new Error((json.error && json.error.message) || ('Gemini respondió ' + r.status));
     err.status = r.status;
+    err.codigo = json.error && json.error.status;
     throw err;
   }
   const cand = json.candidates && json.candidates[0];
@@ -242,14 +266,70 @@ Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté
   return { status: 200, json: { reglas } };
 }
 
+/* ---------- Errores en palabras simples ---------- */
+function explicar(err) {
+  const m = String(err.message || '');
+  const st = err.status || 502;
+  if (/API key not valid|API_KEY_INVALID|invalid api key/i.test(m)) {
+    return { status: 401, error: 'La clave de Gemini no es válida. Revisá GEMINI_API_KEY en Vercel (sin espacios ni comillas) y hacé Redeploy.' };
+  }
+  if (/expired/i.test(m)) {
+    return { status: 401, error: 'La clave de Gemini venció. Creá una nueva en aistudio.google.com/apikey y actualizala en Vercel.' };
+  }
+  if (/location is not supported|User location/i.test(m)) {
+    return { status: 403, error: 'Gemini no está disponible desde la región del servidor. En Vercel: Settings › Functions › Region, elegí Washington (iad1) y hacé Redeploy.' };
+  }
+  if (st === 403 || /PERMISSION_DENIED|SERVICE_DISABLED/i.test(m + err.codigo)) {
+    return { status: 403, error: 'La clave no tiene permiso para usar la API de Gemini. Creá una clave nueva desde aistudio.google.com/apikey.' };
+  }
+  if (st === 404) {
+    return { status: 502, error: 'El modelo de Gemini configurado no existe. Borrá la variable GEMINI_MODEL en Vercel (o corregila) y hacé Redeploy.' };
+  }
+  if (st === 429) {
+    return /limit: 0/i.test(m)
+      ? { status: 429, error: 'Tu clave no tiene cuota para este modelo en el plan gratuito. Probá poniendo GEMINI_MODEL = gemini-2.5-flash en Vercel.' }
+      : { status: 429, error: 'Se alcanzó el límite de uso de Gemini. Probá de nuevo en un minuto.' };
+  }
+  if (err instanceof SyntaxError) {
+    return { status: 502, error: 'Gemini devolvió una respuesta incompleta. Probá de nuevo.' };
+  }
+  return { status: 502, error: 'Gemini respondió con un error: ' + m.slice(0, 200) };
+}
+
+/* ---------- Diagnóstico: abrí /api/gemini en el navegador ---------- */
+async function diagnostico(res) {
+  const key = leerClave();
+  const info = {
+    clave_configurada: !!key,
+    clave_formato_ok: /^AIza[0-9A-Za-z_\-]{30,}$/.test(key),
+    modelos_que_prueba: MODELOS,
+    prueba: null
+  };
+  if (key) {
+    try {
+      const t = await gemini(key, { system: 'Respondé solo con la palabra OK.', contents: [{ role: 'user', parts: [{ text: 'Probando' }] }], temperatura: 0 });
+      info.prueba = 'OK: Gemini respondió "' + String(t).trim().slice(0, 20) + '"';
+      info.modelo_usado = modeloOk;
+    } catch (err) {
+      info.prueba = 'ERROR: ' + explicar(err).error;
+      info.detalle_google = String(err.message || err).slice(0, 300);
+    }
+  } else {
+    info.prueba = 'ERROR: falta GEMINI_API_KEY. Cargala en Vercel › Settings › Environment Variables y hacé Redeploy.';
+  }
+  res.setHeader('Cache-Control', 'no-store');
+  res.status(200).json(info);
+}
+
 /* ---------- Handler ---------- */
 module.exports = async function handler(req, res) {
+  if (req.method === 'GET') { await diagnostico(res); return; }
   if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
+    res.setHeader('Allow', 'GET, POST');
     res.status(405).json({ error: 'Método no permitido.' });
     return;
   }
-  const key = process.env.GEMINI_API_KEY;
+  const key = leerClave();
   if (!key) {
     res.status(500).json({ error: 'Falta configurar la variable de entorno GEMINI_API_KEY en Vercel.' });
     return;
@@ -270,13 +350,9 @@ module.exports = async function handler(req, res) {
     else r = { status: 400, json: { error: 'Acción desconocida.' } };
     res.status(r.status).json(r.json);
   } catch (err) {
-    const limite = err.status === 429;
-    res.status(limite ? 429 : 502).json({
-      error: limite
-        ? 'Se alcanzó el límite de uso de Gemini. Probá de nuevo en un minuto.'
-        : 'No se pudo hablar con Gemini. Probá de nuevo.',
-      detalle: String(err.message || err)
-    });
+    const e = explicar(err);
+    console.error('[gemini]', b.accion, err.status, err.message);
+    res.status(e.status).json({ error: e.error, detalle: String(err.message || err).slice(0, 300) });
   }
 };
 

@@ -205,6 +205,16 @@ Screens.pautas = {
       }
     });
 
+    document.getElementById('pautas-borrar-todo').addEventListener('click', () => {
+      const total = Store.u.pautas.archivos.length + this.cola.length;
+      if (!total) return;
+      if (!confirm(`¿Eliminar ${total === 1 ? 'el documento' : 'los ' + total + ' documentos'} y las reglas que salieron de ${total === 1 ? 'él' : 'ellos'}?`)) return;
+      this.cola = [];
+      [...Store.u.pautas.archivos].forEach(a => this.borrar(a.id || a.nombre, true));
+      UI.toast('Documentos eliminados');
+      this.render();
+    });
+
     document.getElementById('pautas-reglas').addEventListener('click', e => {
       const b = e.target.closest('button[data-i]');
       if (!b) return;
@@ -287,7 +297,7 @@ Screens.pautas = {
     }
   },
 
-  borrar(id) {
+  borrar(id, silencioso = false) {
     const enCola = this.cola.find(x => x.id === id);
     if (enCola) {
       this.cola = this.cola.filter(x => x !== enCola);
@@ -303,8 +313,7 @@ Screens.pautas = {
       const deOtros = new Set(u.pautas.archivos.flatMap(a => Array.isArray(a.reglas) ? a.reglas.map(x => x.toLowerCase()) : []));
       u.pautas.reglas = u.pautas.reglas.filter(r => !propias.includes(r.toLowerCase()) || deOtros.has(r.toLowerCase()));
     });
-    UI.toast('Archivo eliminado');
-    this.render();
+    if (!silencioso) { UI.toast('Documento eliminado'); this.render(); }
   },
 
   render() {
@@ -332,11 +341,13 @@ Screens.pautas = {
           </span>
           ${f.error ? `<span class="file-error">${UI.esc(f.error)}</span>` : ''}
         </span>
-        <button type="button" class="icon-btn icon-btn--plain" data-borrar="${UI.esc(f.id)}" aria-label="Eliminar ${UI.esc(f.nombre)}"><svg><use href="#i-trash"></use></svg></button>
+        <button type="button" class="del-btn" data-borrar="${UI.esc(f.id)}" aria-label="Eliminar ${UI.esc(f.nombre)}"><svg><use href="#i-trash"></use></svg><span>Eliminar</span></button>
       </li>`).join('');
 
     document.getElementById('pautas-reglas').innerHTML = p.reglas.map((r, i) => `
       <li>${UI.esc(r)}<button type="button" data-i="${i}" aria-label="Quitar regla: ${UI.esc(r)}">×</button></li>`).join('');
+
+    document.getElementById('pautas-borrar-todo').hidden = filas.length < 2;
 
     const pend = this.pendientes();
     const btn = document.getElementById('pautas-listo');
