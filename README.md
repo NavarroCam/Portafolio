@@ -23,6 +23,7 @@ Estudiante de Ingeniería Informática de la UNLAM 💚.
 -  Agenda de contactos 📒
 -  CineApp - Reserva de entradas de cine 🎬
 -  Rastreador de postulaciones 📋
+-  Mi Plato - Seguimiento de comidas 🥗
 
 
 ## 📫 Contacto

@@ -54,7 +54,8 @@ Screens.chat = {
     const log = document.getElementById('chat-log');
     const msgs = Store.u.chat;
     if (!msgs.length) {
-      log.innerHTML = `<p class="chat-empty">Preguntame por recetas, ingredientes o qué comer.<br>Respondo según tus pautas${Store.u.pautas.reglas.length ? '' : ' (todavía no cargaste ninguna)'}.</p>`;
+      const quien = nombreCorto();
+      log.innerHTML = `<p class="chat-empty">${quien ? `¡Hola, ${UI.esc(quien)}! ` : ''}Preguntame por recetas, ingredientes o qué comer.<br>Respondo según tus pautas${Store.u.pautas.reglas.length ? '' : ' (todavía no cargaste ninguna)'}.</p>`;
     } else {
       log.innerHTML = msgs.map(m => m.role === 'user'
         ? `<div class="msg msg--user">${UI.esc(m.text)}</div>`

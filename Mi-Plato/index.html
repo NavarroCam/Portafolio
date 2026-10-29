@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=6">
+  <link rel="stylesheet" href="css/styles.css?v=7">
 </head>
 <body>
 
@@ -79,6 +79,11 @@
           <div class="grid-2">
             <div class="field"><label for="reg-nombre">Nombre</label><input id="reg-nombre" name="nombre" autocomplete="given-name" required></div>
             <div class="field"><label for="reg-apellido">Apellido</label><input id="reg-apellido" name="apellido" autocomplete="family-name" required></div>
+          </div>
+          <div class="field">
+            <label for="reg-apodo">Apodo <span class="muted">(opcional)</span></label>
+            <input id="reg-apodo" name="apodo" autocomplete="nickname" maxlength="24" placeholder="Ej.: Mica">
+            <small class="hint">Así te va a saludar la app.</small>
           </div>
           <div class="field"><label for="reg-email">Email</label><input id="reg-email" name="email" type="email" autocomplete="email" required></div>
           <div class="grid-2 grid-2--wrap">
@@ -395,6 +400,11 @@
           <a class="list-link" href="#nutri"><span><strong>Mi nutricionista</strong><small class="muted" id="perfil-nutri-txt"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
         </div>
         <div class="field">
+          <label for="perfil-apodo">Apodo <span class="muted">(opcional)</span></label>
+          <input id="perfil-apodo" maxlength="24" autocomplete="nickname" placeholder="¿Cómo querés que te digamos?">
+          <small class="hint">Si lo dejás vacío, usamos tu nombre.</small>
+        </div>
+        <div class="field">
           <label for="perfil-notas">Notas y dudas para el próximo control</label>
           <textarea id="perfil-notas" rows="4" placeholder="Escribí lo que le quieras preguntar"></textarea>
         </div>
@@ -502,15 +512,15 @@
   <!-- jsPDF para exportar la semana -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script src="js/storage.js?v=6"></script>
-  <script src="js/ui.js?v=6"></script>
-  <script src="js/api.js?v=6"></script>
-  <script src="js/auth.js?v=6"></script>
-  <script src="js/hoy.js?v=6"></script>
-  <script src="js/comidas.js?v=6"></script>
-  <script src="js/semana.js?v=6"></script>
-  <script src="js/chat.js?v=6"></script>
-  <script src="js/perfil.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/storage.js?v=7"></script>
+  <script src="js/ui.js?v=7"></script>
+  <script src="js/api.js?v=7"></script>
+  <script src="js/auth.js?v=7"></script>
+  <script src="js/hoy.js?v=7"></script>
+  <script src="js/comidas.js?v=7"></script>
+  <script src="js/semana.js?v=7"></script>
+  <script src="js/chat.js?v=7"></script>
+  <script src="js/perfil.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>

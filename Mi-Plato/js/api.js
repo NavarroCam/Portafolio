@@ -17,7 +17,8 @@ const Api = (() => {
       reglas: u.pautas.reglas,
       condiciones: cond,
       alergias: u.salud.alergias,
-      objetivo: u.nutri.objetivo
+      objetivo: u.nutri.objetivo,
+      apodo: nombreCorto()
     };
   }
 

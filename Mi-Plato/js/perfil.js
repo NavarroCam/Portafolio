@@ -20,6 +20,12 @@ Screens.perfil = {
       UI.toast('Notas guardadas');
     });
     document.getElementById('perfil-tema').addEventListener('change', e => UI.setTema(e.target.value));
+    document.getElementById('perfil-apodo').addEventListener('change', e => {
+      const apodo = e.target.value.trim().slice(0, 24);
+      Store.update(u => { u.perfil.apodo = apodo; });
+      UI.toast(apodo ? `¡Listo, ${apodo}!` : 'Apodo borrado: te vamos a decir por tu nombre');
+      this.render();
+    });
     document.getElementById('perfil-salir').addEventListener('click', () => {
       Store.logout();
       UI.ir('login');
@@ -30,7 +36,8 @@ Screens.perfil = {
     const u = Store.u;
     const p = u.perfil;
     document.getElementById('perfil-iniciales').textContent = ((p.nombre[0] || '') + (p.apellido[0] || '')).toUpperCase();
-    document.getElementById('perfil-nombre').textContent = `${p.nombre} ${p.apellido}`.trim();
+    document.getElementById('perfil-nombre').textContent = `${p.nombre} ${p.apellido}`.trim() + (p.apodo ? ` (${p.apodo})` : '');
+    document.getElementById('perfil-apodo').value = p.apodo || '';
     document.getElementById('perfil-objetivo').textContent = u.nutri.objetivo ? 'Objetivo: ' + u.nutri.objetivo : Store.email;
 
     // Tarjeta de nutricionista: solo si indicó que tiene uno

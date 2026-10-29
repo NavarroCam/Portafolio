@@ -49,7 +49,8 @@ function contextoUsuario(b) {
       : 'Todavía no cargó pautas de su nutricionista: usá criterios generales de alimentación saludable (plato con ½ vegetales, ¼ proteína magra, ¼ cereal integral o legumbre, evitar frituras y ultraprocesados).',
     cond.length ? 'Condiciones de salud que indicó: ' + cond.join(', ') + '.' : '',
     b.alergias ? 'Alergias o alimentos que no puede comer: ' + String(b.alergias).slice(0, 300) + '.' : '',
-    b.objetivo ? 'Su objetivo: ' + String(b.objetivo).slice(0, 200) + '.' : ''
+    b.objetivo ? 'Su objetivo: ' + String(b.objetivo).slice(0, 200) + '.' : '',
+    b.apodo ? 'Se llama "' + String(b.apodo).slice(0, 24).replace(/["\n]/g, '') + '": si la/lo nombrás, usá ese nombre (sin abusar).' : ''
   ].filter(Boolean).join('\n');
 }
 

@@ -62,7 +62,8 @@ const Festejo = {
     const modal = document.getElementById('festejo');
     const u = Store.u;
     const racha = Agua.racha();
-    document.getElementById('festejo-titulo').textContent = `¡Llegaste a los 2 litros${u.perfil.nombre ? ', ' + u.perfil.nombre : ''}!`;
+    const quien = nombreCorto();
+    document.getElementById('festejo-titulo').textContent = `¡Llegaste a los 2 litros${quien ? ', ' + quien : ''}!`;
     document.getElementById('festejo-texto').textContent = racha > 1
       ? `Llevás ${racha} días seguidos cumpliendo la meta de agua. ¡Seguí así!`
       : 'Cumpliste la meta de agua de hoy. Tu cuerpo te lo agradece.';
@@ -204,7 +205,7 @@ Screens.hoy = {
     const u = Store.u;
     const hoy = new Date();
     document.getElementById('hoy-fecha').textContent = Fechas.largo(hoy);
-    document.getElementById('hoy-saludo').textContent = 'Hola, ' + (u.perfil.nombre || '');
+    document.getElementById('hoy-saludo').textContent = nombreCorto() ? 'Hola, ' + nombreCorto() : 'Hola';
 
     // Agua
     const ml = Agua.hoy();

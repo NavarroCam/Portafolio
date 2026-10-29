@@ -33,7 +33,7 @@ const Store = (() => {
     return {
       creado: new Date().toISOString(),
       passHash: datos.passHash,
-      perfil: { nombre: datos.nombre, apellido: datos.apellido, nacimiento: datos.nacimiento || '', altura: datos.altura || '' },
+      perfil: { nombre: datos.nombre, apellido: datos.apellido, apodo: datos.apodo || '', nacimiento: datos.nacimiento || '', altura: datos.altura || '' },
       onboarding: false,
       salud: { condiciones: [], otra: '', alergias: '' },
       nutri: { tiene: true, nombre: '', telefono: '', email: '', proximo: '', frecuencia: 'Cada 15 días', objetivo: '' },
@@ -73,6 +73,13 @@ const Store = (() => {
     }
   };
 })();
+
+/** Cómo le habla la app al usuario: el apodo si lo cargó, si no el nombre */
+function nombreCorto() {
+  const p = Store.u ? Store.u.perfil : null;
+  if (!p) return '';
+  return (p.apodo || p.nombre || '').trim();
+}
 
 /* ---------- Fechas ---------- */
 const Fechas = {

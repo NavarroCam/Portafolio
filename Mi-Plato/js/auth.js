@@ -55,6 +55,7 @@ Screens.registro = {
         passHash: await hashPass(email, f.pass.value),
         nombre: f.nombre.value.trim(),
         apellido: f.apellido.value.trim(),
+        apodo: f.apodo.value.trim(),
         nacimiento: f.nacimiento.value,
         altura: f.altura.value
       });
@@ -239,7 +240,7 @@ Screens.pautas = {
       this.cola = this.cola.filter(x => x.estado !== 'error');
       if (!Store.u.onboarding) {
         Store.update(u => { u.onboarding = true; });
-        UI.toast('¡Listo! Ya podés cargar tu primera comida.');
+        UI.toast(`¡Listo${nombreCorto() ? ', ' + nombreCorto() : ''}! Ya podés cargar tu primera comida.`);
         UI.ir('hoy');
       } else {
         UI.ir('perfil');
