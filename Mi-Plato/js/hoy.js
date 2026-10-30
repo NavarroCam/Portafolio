@@ -3,19 +3,30 @@
    ========================================================== */
 
 const TIPOS = [
-  { id: 'desayuno', nombre: 'Desayuno', hora: '8:00', guia: 'Infusión + 1 hidrato + 1 proteína + 1 fibra' },
+  { id: 'desayuno', nombre: 'Desayuno', hora: '08:00', guia: 'Infusión + 1 hidrato + 1 proteína + 1 fibra' },
   { id: 'almuerzo', nombre: 'Almuerzo', hora: '13:00', guia: '½ vegetales · ¼ proteína · ¼ cereal' },
   { id: 'merienda', nombre: 'Merienda', hora: '17:00', guia: 'Infusión + 1 hidrato + 1 proteína + 1 fibra' },
   { id: 'cena', nombre: 'Cena', hora: '21:00', guia: '½ vegetales · ¼ proteína · ¼ cereal' }
 ];
 
-/** Tipo de comida sugerido según la hora */
+/** Horario de cada comida ('HH:MM'): el que eligió el usuario o el de fábrica */
+function horaDe(tipo) {
+  const propios = (Store.u && Store.u.horarios) || {};
+  return propios[tipo] || TIPOS.find(t => t.id === tipo).hora;
+}
+const aMinutos = hhmm => { const [h, m] = String(hhmm).split(':').map(Number); return h * 60 + (m || 0); };
+const horaLinda = hhmm => { const [h, m] = String(hhmm).split(':'); return `${Number(h)}:${m}`; };
+
+/** Tipo de comida sugerido según la hora: el horario más cercano */
 function tipoPorHora(d = new Date()) {
-  const h = d.getHours();
-  if (h < 11) return 'desayuno';
-  if (h < 16) return 'almuerzo';
-  if (h < 19) return 'merienda';
-  return 'cena';
+  const ahora = d.getHours() * 60 + d.getMinutes();
+  let mejor = TIPOS[0].id, dist = Infinity;
+  for (const t of TIPOS) {
+    const x = Math.abs(aMinutos(horaDe(t.id)) - ahora);
+    const diff = Math.min(x, 1440 - x);
+    if (diff < dist) { dist = diff; mejor = t.id; }
+  }
+  return mejor;
 }
 
 /** Comidas guardadas de un día (clave AAAA-MM-DD) */
@@ -191,9 +202,96 @@ const Recordatorios = {
   }
 };
 
+/* ---------- Editar horarios y la hora de una comida ---------- */
+const Horarios = {
+  init() {
+    // Horarios de las 4 comidas
+    document.getElementById('dlg-horarios-campos').innerHTML = TIPOS.map(t => `
+      <div class="field"><label for="hora-${t.id}">${t.nombre}</label>
+        <input id="hora-${t.id}" name="${t.id}" type="time" required></div>`).join('');
+    document.getElementById('form-horarios').addEventListener('submit', e => {
+      e.preventDefault();
+      const f = e.target;
+      Store.update(u => { u.horarios = Object.fromEntries(TIPOS.map(t => [t.id, f[t.id].value || t.hora])); });
+      Modal.cerrar();
+      UI.toast('Horarios guardados');
+      UI.route();
+    });
+    document.getElementById('horarios-reset').addEventListener('click', () => {
+      TIPOS.forEach(t => { document.getElementById('hora-' + t.id).value = t.hora; });
+    });
+
+    // Hora de una comida ya cargada
+    document.getElementById('form-hora-comida').addEventListener('submit', e => {
+      e.preventDefault();
+      const hhmm = document.getElementById('hora-comida').value;
+      const tipo = document.getElementById('tipo-comida').value;
+      if (!hhmm) return;
+      Store.update(u => {
+        const c = u.comidas.find(x => x.id === this.comidaId);
+        if (!c) return;
+        const d = new Date(c.fecha);
+        const [h, m] = hhmm.split(':').map(Number);
+        d.setHours(h, m, 0, 0);
+        c.fecha = d.toISOString();
+        c.tipo = tipo;
+        u.comidas.sort((a, b) => a.fecha.localeCompare(b.fecha));
+      });
+      Modal.cerrar();
+      UI.toast('Comida actualizada');
+      UI.route();
+    });
+    document.getElementById('tipo-comida').innerHTML = TIPOS.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('');
+  },
+
+  abrirHorarios() {
+    TIPOS.forEach(t => { document.getElementById('hora-' + t.id).value = horaDe(t.id); });
+    Modal.abrir('dlg-horarios', 'hora-desayuno');
+  },
+
+  abrirComida(id) {
+    const c = Store.u.comidas.find(x => x.id === id);
+    if (!c) return;
+    this.comidaId = id;
+    const d = new Date(c.fecha);
+    document.getElementById('hora-comida').value = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    document.getElementById('tipo-comida').value = c.tipo;
+    Modal.abrir('dlg-comida', 'hora-comida');
+  }
+};
+
+/* Ventanas emergentes simples (una a la vez) */
+const Modal = {
+  abierto: null,
+  abrir(id, foco) {
+    this.anterior = document.activeElement;
+    this.abierto = document.getElementById(id);
+    this.abierto.hidden = false;
+    const f = foco && document.getElementById(foco);
+    if (f) setTimeout(() => f.focus(), 50);
+  },
+  cerrar() {
+    if (!this.abierto) return;
+    this.abierto.hidden = true;
+    this.abierto = null;
+    if (this.anterior && this.anterior.focus) this.anterior.focus();
+  },
+  init() {
+    document.querySelectorAll('.modal').forEach(m => {
+      m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-cerrar]')) this.cerrar(); });
+    });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') this.cerrar(); });
+  }
+};
+
 /* ---------- Pantalla Hoy ---------- */
 Screens.hoy = {
   init() {
+    document.getElementById('hoy-editar-horarios').addEventListener('click', () => Horarios.abrirHorarios());
+    document.getElementById('hoy-comidas').addEventListener('click', e => {
+      const b = e.target.closest('[data-comida]');
+      if (b) Horarios.abrirComida(b.dataset.comida);
+    });
     document.getElementById('hoy-agua-mas').addEventListener('click', () => {
       Agua.sumar(VASO);
       this.render();
@@ -222,20 +320,20 @@ Screens.hoy = {
         return `
           <a class="meal meal--pending" href="#cargar" data-tipo="${t.id}">
             <span class="meal-ico meal-ico--pending"><svg><use href="#i-clock"></use></svg></span>
-            <span class="meal-body"><strong>${t.nombre} · ${t.hora}</strong><span>${t.guia}</span></span>
+            <span class="meal-body"><strong>${t.nombre} · ${horaLinda(horaDe(t.id))}</strong><span>${t.guia}</span></span>
             <span class="meal-action">Cargar</span>
           </a>`;
       }
       const ok = c.analisis && c.analisis.veredicto === 'ok';
       const nombres = c.analisis && c.analisis.items ? c.analisis.items.map(i => i.nombre).join(', ') : (c.descripcion || '');
       return `
-        <div class="meal">
+        <button type="button" class="meal meal--btn" data-comida="${c.id}" aria-label="${t.nombre} a las ${Fechas.hora(c.fecha)}. Tocá para cambiar la hora">
           <span class="meal-ico ${ok ? 'meal-ico--ok' : 'meal-ico--warn'}">
             ${c.foto ? `<img src="${c.foto}" alt="">` : `<svg><use href="#i-${ok ? 'check' : 'alert'}"></use></svg>`}
           </span>
           <span class="meal-body"><strong>${t.nombre} · ${Fechas.hora(c.fecha)}</strong><span>${UI.esc(nombres)}</span></span>
           <span class="tag ${ok ? 'tag--ok' : 'tag--warn'}">${ok ? 'Va bien' : 'Ajustar'}</span>
-        </div>`;
+        </button>`;
     }).join('');
 
     document.querySelectorAll('#hoy-comidas a[data-tipo]').forEach(a => {

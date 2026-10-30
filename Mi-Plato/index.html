@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=8">
+  <link rel="stylesheet" href="css/styles.css?v=10">
 </head>
 <body>
 
@@ -206,7 +206,10 @@
           <span><strong>Sacale una foto a tu plato</strong><small>Antes de comer o después, te digo si va</small></span>
         </a>
 
-        <h2 class="subtitle">Tus 4 comidas</h2>
+        <div class="row-between">
+          <h2 class="subtitle">Tus 4 comidas</h2>
+          <button type="button" class="link-btn" id="hoy-editar-horarios">Editar horarios</button>
+        </div>
         <div class="stack-sm" id="hoy-comidas"></div>
 
         <div class="grid-3" id="hoy-contadores"></div>
@@ -405,6 +408,7 @@
         <div class="card list">
           <a class="list-link" href="#salud"><span><strong>Condiciones de salud</strong><small class="muted" id="perfil-salud"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
           <a class="list-link" href="#pautas"><span><strong>Pautas de alimentación</strong><small class="muted" id="perfil-pautas"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
+          <button type="button" class="list-link" id="perfil-horarios"><span><strong>Horarios de comidas</strong><small class="muted" id="perfil-horarios-txt"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></button>
           <a class="list-link" href="#nutri"><span><strong>Mi nutricionista</strong><small class="muted" id="perfil-nutri-txt"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
         </div>
         <div class="field">
@@ -490,13 +494,41 @@
     <!-- Navegación inferior -->
     <nav class="tabbar" id="tabbar" aria-label="Navegación principal" hidden>
       <a href="#hoy" data-tab="hoy"><svg><use href="#i-home"></use></svg>Hoy</a>
-      <a href="#cargar" data-tab="cargar"><svg><use href="#i-camera"></use></svg>Foto</a>
       <a href="#agua" data-tab="agua"><svg><use href="#i-drop"></use></svg>Agua</a>
       <a href="#chat" data-tab="chat"><svg><use href="#i-chat"></use></svg>Asistente</a>
       <a href="#semana" data-tab="semana"><svg><use href="#i-calendar"></use></svg>Semana</a>
     </nav>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- Editar horarios de las 4 comidas -->
+    <div class="modal" id="dlg-horarios" hidden>
+      <form class="modal-card" id="form-horarios" role="dialog" aria-modal="true" aria-labelledby="dlg-horarios-titulo">
+        <h2 class="title-sm" id="dlg-horarios-titulo">Horarios de tus comidas</h2>
+        <p class="small muted">Se usan en "Hoy" y para sugerir qué comida estás cargando.</p>
+        <div class="grid-2" id="dlg-horarios-campos"></div>
+        <button type="button" class="link-btn" id="horarios-reset">Volver a los horarios de fábrica</button>
+        <div class="grid-2">
+          <button type="button" class="btn btn--outline" data-cerrar>Cancelar</button>
+          <button type="submit" class="btn btn--primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Cambiar la hora (o el tipo) de una comida ya cargada -->
+    <div class="modal" id="dlg-comida" hidden>
+      <form class="modal-card" id="form-hora-comida" role="dialog" aria-modal="true" aria-labelledby="dlg-comida-titulo">
+        <h2 class="title-sm" id="dlg-comida-titulo">Editar comida</h2>
+        <div class="grid-2">
+          <div class="field"><label for="hora-comida">Hora</label><input id="hora-comida" type="time" required></div>
+          <div class="field"><label for="tipo-comida">Comida</label><select id="tipo-comida"></select></div>
+        </div>
+        <div class="grid-2">
+          <button type="button" class="btn btn--outline" data-cerrar>Cancelar</button>
+          <button type="submit" class="btn btn--primary">Guardar</button>
+        </div>
+      </form>
+    </div>
 
     <!-- Festejo al llegar a los 2 L -->
     <div class="festejo" id="festejo" hidden>
@@ -515,15 +547,15 @@
   <!-- jsPDF para exportar la semana -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script src="js/storage.js?v=8"></script>
-  <script src="js/ui.js?v=8"></script>
-  <script src="js/api.js?v=8"></script>
-  <script src="js/auth.js?v=8"></script>
-  <script src="js/hoy.js?v=8"></script>
-  <script src="js/comidas.js?v=8"></script>
-  <script src="js/semana.js?v=8"></script>
-  <script src="js/chat.js?v=8"></script>
-  <script src="js/perfil.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/storage.js?v=10"></script>
+  <script src="js/ui.js?v=10"></script>
+  <script src="js/api.js?v=10"></script>
+  <script src="js/auth.js?v=10"></script>
+  <script src="js/hoy.js?v=10"></script>
+  <script src="js/comidas.js?v=10"></script>
+  <script src="js/semana.js?v=10"></script>
+  <script src="js/chat.js?v=10"></script>
+  <script src="js/perfil.js?v=10"></script>
+  <script src="js/app.js?v=10"></script>
 </body>
 </html>

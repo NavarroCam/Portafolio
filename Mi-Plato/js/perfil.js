@@ -20,6 +20,7 @@ Screens.perfil = {
       UI.toast('Notas guardadas');
     });
     document.getElementById('perfil-tema').addEventListener('change', e => UI.setTema(e.target.value));
+    document.getElementById('perfil-horarios').addEventListener('click', () => Horarios.abrirHorarios());
     document.getElementById('form-apodo').addEventListener('submit', e => {
       e.preventDefault();
       const input = document.getElementById('perfil-apodo');
@@ -82,6 +83,7 @@ Screens.perfil = {
     document.getElementById('perfil-pautas').textContent = `${u.pautas.archivos.length} PDF · ${u.pautas.reglas.length} reglas`;
     document.getElementById('perfil-nutri-txt').textContent = n.tiene ? (n.nombre || 'Cargado') : 'No estoy en seguimiento';
     document.getElementById('perfil-notas').value = u.notas || '';
+    document.getElementById('perfil-horarios-txt').textContent = TIPOS.map(t => horaLinda(horaDe(t.id))).join(' · ');
     document.getElementById('perfil-tema').value = Store.theme;
   }
 };

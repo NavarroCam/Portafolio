@@ -540,7 +540,7 @@ h1, h2, h3, p { margin: 0; }
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 480px;
   background: var(--surface); border-top: 1px solid var(--line);
-  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr));
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
   padding-bottom: env(safe-area-inset-bottom); z-index: 10;
 }
 .tabbar a {
@@ -585,3 +585,26 @@ h1, h2, h3, p { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   .festejo, .festejo-card { animation: none; }
 }
+
+/* ---------- Ventanas emergentes ---------- */
+.modal {
+  position: fixed; inset: 0; z-index: 30;
+  background: rgba(10, 16, 12, 0.55);
+  display: flex; align-items: flex-end; justify-content: center;
+  animation: aparecer 0.15s ease-out;
+}
+.modal-card {
+  background: var(--surface); color: var(--ink);
+  width: 100%; max-width: 480px; border-radius: 24px 24px 0 0;
+  padding: 22px 20px calc(20px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 14px;
+  max-height: 90dvh; overflow-y: auto;
+}
+@media (min-width: 520px) {
+  .modal { align-items: center; }
+  .modal-card { border-radius: 24px; }
+}
+.field input[type="time"]::-webkit-date-and-time-value { text-align: left; min-height: 1.4em; }
+.meal--btn { width: 100%; text-align: left; cursor: pointer; font: inherit; }
+.list-link { width: 100%; background: none; border: none; border-bottom: 1px solid var(--divider); padding: 12px 0; text-align: left; font: inherit; cursor: pointer; }
+.list > .list-link:last-child { border-bottom: none; }
