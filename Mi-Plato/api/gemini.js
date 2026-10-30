@@ -129,7 +129,7 @@ const ESQUEMA_PAUTAS = {
 // Si el modelo configurado no acepta ese parámetro, se reintenta sin él.
 let usarThinking = true;
 
-async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
+async function gemini(key, { system, contents, esquema, temperatura = 0.4, limiteMs = 45000 }) {
   const body = {
     systemInstruction: { parts: [{ text: system }] },
     contents,
@@ -140,23 +140,39 @@ async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
     body.generationConfig.responseSchema = esquema;
   }
 
+  // Tiempo total disponible: Vercel corta la función a los 60 s,
+  // así que cortamos antes y respondemos con un error claro.
+  const fin = Date.now() + limiteMs;
+  const quedan = () => fin - Date.now();
+
   const pedir = async (modelo, conThinking) => {
     const b = JSON.parse(JSON.stringify(body));
     if (conThinking) b.generationConfig.thinkingConfig = { thinkingLevel: 'low' };
-    const r = await fetch(URL_API(modelo), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
-      body: JSON.stringify(b)
-    });
-    const json = await r.json().catch(() => ({}));
-    return { r, json };
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), Math.max(1000, Math.min(25000, quedan() - 500)));
+    try {
+      const r = await fetch(URL_API(modelo), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify(b),
+        signal: ctrl.signal
+      });
+      const json = await r.json().catch(() => ({}));
+      return { r, json };
+    } catch (e) {
+      // No respondió a tiempo: lo tratamos como "saturado"
+      return { r: { ok: false, status: 503 }, json: { error: { message: 'Gemini tardó demasiado en responder (' + modelo + ').', status: 'UNAVAILABLE' } } };
+    } finally {
+      clearTimeout(t);
+    }
   };
 
   const modelos = modeloOk ? [modeloOk, ...MODELOS.filter(m => m !== modeloOk)] : MODELOS;
-  let r, json;
+  let r = { ok: false, status: 503 }, json = { error: { message: 'Gemini tardó demasiado en responder.', status: 'UNAVAILABLE' } };
   buscar:
   for (const modelo of modelos) {
     for (let intento = 0; intento < 2; intento++) {
+      if (quedan() < 3000) break buscar;
       ({ r, json } = await pedir(modelo, usarThinking));
       if (!r.ok && usarThinking && r.status === 400 && /think/i.test(JSON.stringify(json))) {
         usarThinking = false;
@@ -165,14 +181,14 @@ async function gemini(key, { system, contents, esquema, temperatura = 0.4 }) {
       if (r.ok) { modeloOk = modelo; break buscar; }
       const msg = JSON.stringify(json.error || {});
       const sinCuota = r.status === 429 && /limit: 0/i.test(msg);
-      const saturado = r.status === 503 || r.status === 500 || /overloaded|high demand|UNAVAILABLE/i.test(msg);
-      // Límite por minuto: si Google pide esperar poco, esperamos y reintentamos
+      const saturado = r.status === 503 || r.status === 500 || r.status === 504 || /overloaded|high demand|UNAVAILABLE|DEADLINE/i.test(msg);
+      // Límite por minuto: si Google pide esperar poco (y hay tiempo), esperamos y reintentamos
       if (r.status === 429 && !sinCuota && intento === 0) {
         const espera = segundosDeEspera(json);
-        if (espera <= 15) { await dormir(espera * 1000 + 300); continue; }
+        if (espera <= 10 && quedan() > espera * 1000 + 8000) { await dormir(espera * 1000 + 300); continue; }
       }
       // Modelo saturado: un reintento corto y, si sigue, pasamos a otro modelo
-      if (saturado && intento === 0) { await dormir(1500); continue; }
+      if (saturado && intento === 0 && quedan() > 10000) { await dormir(1000); continue; }
       const probarOtro = r.status === 404 || r.status === 429 || saturado ||
         (r.status === 400 && /not (found|supported)|is not available/i.test(msg));
       if (!probarOtro) break buscar; // otro tipo de error: no tiene sentido probar otro modelo
@@ -383,25 +399,58 @@ function explicar(err) {
 
 /* ---------- Diagnóstico: abrí /api/gemini en el navegador ---------- */
 async function diagnostico(res) {
+  // Prueba rápida (máx. ~20 s): un pedido corto a cada modelo, todos a la vez, sin reintentos
   const key = leerClave();
+  const sbUrl = (process.env.SUPABASE_URL || '').trim().replace(/\/$/, '');
+  const sbKey = (process.env.SUPABASE_ANON_KEY || '').trim();
   const info = {
     clave_configurada: !!key,
     clave_formato_ok: /^AIza[0-9A-Za-z_\-]{30,}$/.test(key),
-    modelos_que_prueba: MODELOS,
-    supabase_configurado: !!((process.env.SUPABASE_URL || '').trim() && (process.env.SUPABASE_ANON_KEY || '').trim()),
-    prueba: null
+    supabase_configurado: !!(sbUrl && sbKey),
+    supabase_responde: null,
+    prueba: null,
+    modelos: {}
   };
+
+  const conTiempo = async (url, opts, ms) => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), ms);
+    try { return await fetch(url, { ...opts, signal: ctrl.signal }); } finally { clearTimeout(t); }
+  };
+
+  const tareas = [];
+  if (sbUrl && sbKey) {
+    tareas.push(conTiempo(sbUrl + '/auth/v1/settings', { headers: { apikey: sbKey } }, 8000)
+      .then(r => { info.supabase_responde = r.ok ? 'OK' : 'ERROR ' + r.status + (r.status === 401 ? ' (revisá SUPABASE_ANON_KEY)' : ''); })
+      .catch(() => { info.supabase_responde = 'ERROR: no responde (revisá SUPABASE_URL)'; }));
+  }
   if (key) {
-    try {
-      const t = await gemini(key, { system: 'Respondé solo con la palabra OK.', contents: [{ role: 'user', parts: [{ text: 'Probando' }] }], temperatura: 0 });
-      info.prueba = 'OK: Gemini respondió "' + String(t).trim().slice(0, 20) + '"';
-      info.modelo_usado = modeloOk;
-    } catch (err) {
-      info.prueba = 'ERROR: ' + explicar(err).error;
-      info.detalle_google = String(err.message || err).slice(0, 300);
+    for (const m of MODELOS) {
+      tareas.push(conTiempo(URL_API(m), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: 'Respondé solo: OK' }] }], generationConfig: { temperature: 0, maxOutputTokens: 20 } })
+      }, 15000)
+        .then(async r => {
+          const j = await r.json().catch(() => ({}));
+          info.modelos[m] = r.ok ? 'OK' : `ERROR ${r.status}: ${String((j.error && j.error.message) || '').slice(0, 140)}`;
+        })
+        .catch(() => { info.modelos[m] = 'ERROR: no respondió en 15 s'; }));
     }
-  } else {
+  }
+  await Promise.all(tareas);
+
+  if (!key) {
     info.prueba = 'ERROR: falta GEMINI_API_KEY. Cargala en Vercel › Settings › Environment Variables y hacé Redeploy.';
+  } else {
+    const ok = Object.entries(info.modelos).filter(([, v]) => v === 'OK').map(([m]) => m);
+    if (ok.length) {
+      info.prueba = 'OK: Gemini responde con ' + ok.join(', ');
+    } else {
+      const primero = Object.values(info.modelos)[0] || '';
+      const st = Number((/ERROR (\d+)/.exec(primero) || [])[1]) || 502;
+      info.prueba = 'ERROR: ' + explicar({ status: st, message: primero }).error;
+    }
   }
   res.setHeader('Cache-Control', 'no-store');
   res.status(200).json(info);
