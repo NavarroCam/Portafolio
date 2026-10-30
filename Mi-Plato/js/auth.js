@@ -2,18 +2,21 @@
    auth.js — ingreso, registro y configuración inicial
    (salud, nutricionista y pautas en PDF)
 
-   Nota: el login es local (los datos quedan en este
-   dispositivo). La contraseña se guarda como hash SHA-256,
-   nunca en texto plano.
+   La cuenta vive en Supabase (ver nube.js): podés entrar con
+   el mismo email y contraseña desde cualquier dispositivo.
    ========================================================== */
 
-async function hashPass(email, pass) {
-  const datos = new TextEncoder().encode(email.toLowerCase() + '::' + pass);
-  const buf = await crypto.subtle.digest('SHA-256', datos);
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function ocupado(btn, si, texto) {
+  if (si) { btn.dataset.texto = btn.textContent; btn.textContent = texto; btn.disabled = true; }
+  else { btn.textContent = btn.dataset.texto || btn.textContent; btn.disabled = false; }
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+function mostrarMensaje(el, texto, aviso) {
+  el.textContent = texto;
+  el.classList.toggle('form-aviso', !!aviso);
+}
 
 /* ---------- Ingresar ---------- */
 Screens.login = {
@@ -23,15 +26,40 @@ Screens.login = {
       const f = e.target;
       const email = f.email.value.trim().toLowerCase();
       const err = document.getElementById('login-error');
-      err.textContent = '';
-      if (!EMAIL_RE.test(email)) { err.textContent = 'Revisá el email.'; return; }
-      if (!Store.existe(email)) { err.textContent = 'No hay una cuenta con ese email en este dispositivo.'; return; }
-      const h = await hashPass(email, f.pass.value);
-      if (h !== Store.hash(email)) { err.textContent = 'La contraseña no es correcta.'; return; }
-      Store.login(email);
-      f.reset();
-      UI.ir(Store.u.onboarding ? 'hoy' : 'salud');
+      mostrarMensaje(err, '');
+      if (Nube.estado === 'sin-config') { mostrarMensaje(err, 'La app todavía no está conectada a la nube (faltan las variables de Supabase en Vercel).'); return; }
+      if (!EMAIL_RE.test(email)) { mostrarMensaje(err, 'Revisá el email.'); return; }
+      if (!f.pass.value) { mostrarMensaje(err, 'Escribí tu contraseña.'); return; }
+      const btn = f.querySelector('button[type=submit]');
+      ocupado(btn, true, 'Ingresando…');
+      try {
+        const r = await Nube.ingresar(email, f.pass.value);
+        if (!r.ok) { mostrarMensaje(err, r.error, r.aviso); return; }
+        f.reset();
+        if (r.migrado) UI.toast('¡Listo! Tu cuenta y tus datos ya están en la nube.', 4500);
+        UI.ir(Store.u.onboarding ? 'hoy' : 'salud');
+      } catch (er) {
+        mostrarMensaje(err, Nube.traducir(er));
+      } finally {
+        ocupado(btn, false);
+      }
     });
+
+    document.getElementById('login-olvide').addEventListener('click', async () => {
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      const err = document.getElementById('login-error');
+      if (!EMAIL_RE.test(email)) { mostrarMensaje(err, 'Escribí tu email arriba y volvé a tocar "Me olvidé la contraseña".'); return; }
+      try {
+        await Nube.recuperar(email);
+        mostrarMensaje(err, `Te mandamos un mail a ${email} para crear una contraseña nueva.`, true);
+      } catch (er) { mostrarMensaje(err, er.message); }
+    });
+  },
+
+  render() {
+    document.getElementById('login-legado').hidden = !Legado.hay();
+    const err = document.getElementById('login-error');
+    if (Nube.estado === 'sin-config') mostrarMensaje(err, 'La app todavía no está conectada a la nube (faltan las variables de Supabase en Vercel).');
   }
 };
 
@@ -42,25 +70,34 @@ Screens.registro = {
       e.preventDefault();
       const f = e.target;
       const err = document.getElementById('registro-error');
-      err.textContent = '';
+      mostrarMensaje(err, '');
       const email = f.email.value.trim().toLowerCase();
-      if (!f.nombre.value.trim()) { err.textContent = 'Completá tu nombre.'; return; }
-      if (!EMAIL_RE.test(email)) { err.textContent = 'Revisá el email.'; return; }
-      if (Store.existe(email)) { err.textContent = 'Ya existe una cuenta con ese email. Ingresá.'; return; }
-      if (f.pass.value.length < 8) { err.textContent = 'La contraseña tiene que tener al menos 8 caracteres.'; return; }
-      if (f.pass.value !== f.pass2.value) { err.textContent = 'Las contraseñas no coinciden.'; return; }
-      if (!f.terminos.checked) { err.textContent = 'Tenés que aceptar para continuar.'; return; }
+      if (!f.nombre.value.trim()) { mostrarMensaje(err, 'Completá tu nombre.'); return; }
+      if (!EMAIL_RE.test(email)) { mostrarMensaje(err, 'Revisá el email.'); return; }
+      if (f.pass.value.length < 8) { mostrarMensaje(err, 'La contraseña tiene que tener al menos 8 caracteres.'); return; }
+      if (f.pass.value !== f.pass2.value) { mostrarMensaje(err, 'Las contraseñas no coinciden.'); return; }
+      if (!f.terminos.checked) { mostrarMensaje(err, 'Tenés que aceptar para continuar.'); return; }
+      if (Nube.estado === 'sin-config') { mostrarMensaje(err, 'La app todavía no está conectada a la nube (faltan las variables de Supabase en Vercel).'); return; }
 
-      Store.crear(email, {
-        passHash: await hashPass(email, f.pass.value),
+      const perfil = {
         nombre: f.nombre.value.trim(),
         apellido: f.apellido.value.trim(),
         apodo: f.apodo.value.trim(),
         nacimiento: f.nacimiento.value,
         altura: f.altura.value
-      });
-      f.reset();
-      UI.ir('salud');
+      };
+      const btn = f.querySelector('button[type=submit]');
+      ocupado(btn, true, 'Creando cuenta…');
+      try {
+        const r = await Nube.registrar(email, f.pass.value, perfil);
+        if (!r.ok) { mostrarMensaje(err, r.error, r.aviso); return; }
+        f.reset();
+        UI.ir('salud');
+      } catch (er) {
+        mostrarMensaje(err, Nube.traducir(er));
+      } finally {
+        ocupado(btn, false);
+      }
     });
   }
 };

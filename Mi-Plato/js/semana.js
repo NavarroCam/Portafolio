@@ -61,6 +61,7 @@ const Semana = {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const u = Store.u;
     const d = this.datos(lunes);
+    if (op.comidas) await Fotos.asegurar(d.comidas.map(c => c.fotoId).filter(Boolean));
     const W = 210, M = 16;
     let y = 18;
 
@@ -120,8 +121,9 @@ const Semana = {
           const alto = Math.max(20, 6 + (lineas.length + nota.length) * 4.4);
           salto(alto + 2);
           const inicio = y;
-          if (c.foto) {
-            try { doc.addImage(c.foto, 'JPEG', M, y - 4, 18, 18); } catch (e) { /* imagen inválida */ }
+          const foto = fotoDe(c);
+          if (foto) {
+            try { doc.addImage(foto, 'JPEG', M, y - 4, 18, 18); } catch (e) { /* imagen inválida */ }
           }
           const x = M + 22;
           texto(`${tipo} · ${Fechas.hora(c.fecha)}`, x, 10, tinta, 'bold');

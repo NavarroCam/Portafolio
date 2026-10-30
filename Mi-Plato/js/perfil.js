@@ -30,8 +30,11 @@ Screens.perfil = {
       UI.toast(apodo ? `¡Listo, ${apodo}!` : 'Apodo borrado: te vamos a decir por tu nombre');
       this.render();
     });
-    document.getElementById('perfil-salir').addEventListener('click', () => {
-      Store.logout();
+    document.getElementById('perfil-salir').addEventListener('click', async e => {
+      const btn = e.currentTarget;
+      btn.disabled = true;
+      await Nube.salir();
+      btn.disabled = false;
       UI.ir('login');
     });
   },
@@ -83,6 +86,8 @@ Screens.perfil = {
     document.getElementById('perfil-pautas').textContent = `${u.pautas.archivos.length} PDF · ${u.pautas.reglas.length} reglas`;
     document.getElementById('perfil-nutri-txt').textContent = n.tiene ? (n.nombre || 'Cargado') : 'No estoy en seguimiento';
     document.getElementById('perfil-notas').value = u.notas || '';
+    document.getElementById('perfil-email').textContent = Store.email || '';
+    document.getElementById('perfil-sync').textContent = Nube.textoEstado();
     document.getElementById('perfil-horarios-txt').textContent = TIPOS.map(t => horaLinda(horaDe(t.id))).join(' · ');
     document.getElementById('perfil-tema').value = Store.theme;
   }

@@ -28,12 +28,17 @@ const UI = (() => {
     }
     document.querySelectorAll('.screen').forEach(s => { s.hidden = s.id !== 'screen-' + nombre; });
 
+    // Celular: barra de abajo solo en las 4 pantallas principales.
+    // Compu: menú lateral siempre (una vez terminada la configuración inicial).
     const tabbar = document.getElementById('tabbar');
-    const conTabs = CON_TABS.includes(nombre);
+    const escritorio = window.matchMedia('(min-width: 960px)').matches;
+    const listo = !!(Store.u && Store.u.onboarding);
+    const conTabs = listo && (escritorio ? !PUBLICAS.includes(nombre) : CON_TABS.includes(nombre));
     tabbar.hidden = !conTabs;
     document.querySelector('.app').classList.toggle('has-tabbar', conTabs);
+    const seccion = { resultado: 'cargar', exportar: 'semana', progreso: 'perfil', consulta: 'perfil', salud: 'perfil', nutri: 'perfil', pautas: 'perfil' }[nombre] || nombre;
     tabbar.querySelectorAll('a').forEach(a => {
-      if (a.dataset.tab === nombre) a.setAttribute('aria-current', 'page');
+      if (a.dataset.tab === seccion) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
     });
 

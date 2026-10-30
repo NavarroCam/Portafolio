@@ -329,7 +329,7 @@ Screens.hoy = {
       return `
         <button type="button" class="meal meal--btn" data-comida="${c.id}" aria-label="${t.nombre} a las ${Fechas.hora(c.fecha)}. Tocá para cambiar la hora">
           <span class="meal-ico ${ok ? 'meal-ico--ok' : 'meal-ico--warn'}">
-            ${c.foto ? `<img src="${c.foto}" alt="">` : `<svg><use href="#i-${ok ? 'check' : 'alert'}"></use></svg>`}
+            ${fotoDe(c) ? `<img src="${fotoDe(c)}" alt="">` : `<svg><use href="#i-${ok ? 'check' : 'alert'}"></use></svg>`}
           </span>
           <span class="meal-body"><strong>${t.nombre} · ${Fechas.hora(c.fecha)}</strong><span>${UI.esc(nombres)}</span></span>
           <span class="tag ${ok ? 'tag--ok' : 'tag--warn'}">${ok ? 'Va bien' : 'Ajustar'}</span>

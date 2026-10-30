@@ -388,6 +388,7 @@ async function diagnostico(res) {
     clave_configurada: !!key,
     clave_formato_ok: /^AIza[0-9A-Za-z_\-]{30,}$/.test(key),
     modelos_que_prueba: MODELOS,
+    supabase_configurado: !!((process.env.SUPABASE_URL || '').trim() && (process.env.SUPABASE_ANON_KEY || '').trim()),
     prueba: null
   };
   if (key) {
@@ -406,12 +407,33 @@ async function diagnostico(res) {
   res.status(200).json(info);
 }
 
+/* ---------- Solo usuarios logueados ----------
+   Si Supabase está configurado, el pedido tiene que traer el token de la
+   sesión. Así nadie que no tenga cuenta puede gastar tu cuota de Gemini. */
+async function usuarioValido(req) {
+  const url = (process.env.SUPABASE_URL || '').trim();
+  const key = (process.env.SUPABASE_ANON_KEY || '').trim();
+  if (!url || !key) return true; // sin Supabase configurado no se puede verificar
+  const auth = req.headers.authorization || req.headers.Authorization || '';
+  if (!/^Bearer\s+\S+/.test(auth)) return false;
+  try {
+    const r = await fetch(url.replace(/\/$/, '') + '/auth/v1/user', { headers: { apikey: key, Authorization: auth } });
+    return r.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
 /* ---------- Handler ---------- */
 module.exports = async function handler(req, res) {
   if (req.method === 'GET') { await diagnostico(res); return; }
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'GET, POST');
     res.status(405).json({ error: 'Método no permitido.' });
+    return;
+  }
+  if (!(await usuarioValido(req))) {
+    res.status(401).json({ error: 'Tenés que iniciar sesión para usar el asistente.', sesion: true });
     return;
   }
   const key = leerClave();

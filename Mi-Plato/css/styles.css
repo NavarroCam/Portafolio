@@ -608,3 +608,101 @@ h1, h2, h3, p { margin: 0; }
 .meal--btn { width: 100%; text-align: left; cursor: pointer; font: inherit; }
 .list-link { width: 100%; background: none; border: none; border-bottom: 1px solid var(--divider); padding: 12px 0; text-align: left; font: inherit; cursor: pointer; }
 .list > .list-link:last-child { border-bottom: none; }
+
+/* ---------- Cuenta en la nube ---------- */
+.note--info { background: var(--accent-soft); color: var(--accent-soft-ink); border-color: transparent; }
+.form-error.form-aviso { color: var(--accent-soft-ink); background: var(--accent-soft); padding: 10px 12px; border-radius: 12px; font-weight: 600; }
+.link-btn--end { align-self: flex-end; text-decoration: none; }
+.sync-box { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); overflow-wrap: anywhere; }
+.arranque {
+  position: fixed; inset: 0; z-index: 60; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px;
+}
+.logo--sm { width: 30px; height: 30px; display: inline-block; flex-shrink: 0; }
+
+/* ---------- Columnas: en celular no existen (todo en una columna) ---------- */
+.dos-col, .dos-col > .col { display: contents; }
+#hoy-contadores { order: 10; } /* en celular, los contadores van al final */
+.solo-escritorio { display: none !important; }
+.viewfinder.arrastrando { outline: 3px dashed #7FC29B; outline-offset: -10px; }
+
+/* ==========================================================
+   ESCRITORIO (computadora y tablets en horizontal)
+   ========================================================== */
+@media (min-width: 960px) {
+  body { background: var(--bg); }
+  .app { max-width: none; box-shadow: none; }
+  .solo-escritorio { display: flex !important; }
+  .solo-celular { display: none !important; }
+  #screen-hoy .topbar .icon-btn { display: none; } /* "Mi usuario" ya está en el menú */
+
+  /* Menú lateral */
+  .tabbar {
+    top: 0; bottom: 0; left: 0; transform: none;
+    width: 248px; max-width: none;
+    display: flex; flex-direction: column; gap: 4px;
+    padding: 24px 14px; border-top: none; border-right: 1px solid var(--line);
+  }
+  .tabbar a {
+    flex-direction: row; gap: 12px; padding: 12px 14px; border-radius: 12px;
+    font-size: 15px; justify-content: flex-start;
+  }
+  .tabbar a:hover { background: var(--surface-2); }
+  .tabbar a[aria-current="page"] { background: var(--accent-soft); color: var(--accent-soft-ink); }
+  .tabbar-brand {
+    align-items: center; gap: 10px; padding: 4px 12px 22px;
+    font-family: var(--font-display); font-size: 22px; font-weight: 700; color: var(--ink);
+  }
+  .tabbar a.tabbar-cta { background: var(--accent); color: var(--accent-ink); font-weight: 700; margin-bottom: 14px; }
+  .tabbar a.tabbar-cta:hover { background: var(--accent); opacity: 0.92; }
+  .tabbar a.tabbar-cta[aria-current="page"] { background: var(--accent); color: var(--accent-ink); }
+  .tabbar-usuario { margin-top: auto; }
+  .has-tabbar .main { margin-left: 248px; }
+
+  /* Contenido */
+  .screen { width: 100%; max-width: 1100px; margin: 0 auto; padding: 40px 48px 56px; gap: 20px; }
+  .has-tabbar .screen { padding-bottom: 56px; }
+  .tabbar ~ .toast, .toast { bottom: 32px; }
+
+  /* Dos columnas */
+  .dos-col { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 24px 36px; align-items: start; }
+  .dos-col > .col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  #hoy-contadores { order: 0; }
+
+  /* Ingresar y registro: tarjeta centrada */
+  #screen-login, #screen-registro {
+    max-width: 480px; margin: 48px auto; flex: none;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 28px; box-shadow: var(--shadow);
+    padding: 36px 40px;
+  }
+  #screen-login .foot-link, #screen-registro .foot-link { margin-top: 8px; }
+
+  /* Pantallas de formulario: más angostas, se leen mejor */
+  #screen-salud, #screen-nutri, #screen-pautas, #screen-resultado, #screen-exportar, #screen-consulta { max-width: 760px; }
+  #screen-pautas .sticky-action { margin: 0; padding: 12px 0 0; background: none; position: static; }
+  .grid-2--wrap { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Cargar comida: visor más chico y centrado */
+  #screen-cargar { max-width: 720px; margin: 24px auto; border-radius: 28px; flex: none; min-height: calc(100vh - 48px); }
+  .viewfinder { min-height: 360px; max-height: 52vh; }
+
+  /* Agua y semana */
+  .glass { height: 64px; }
+  #semana-metricas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+  #screen-semana > .btn { align-self: flex-start; padding: 0 28px; }
+  .week { padding: 20px; }
+  .day-dot { width: 48px; height: 48px; font-size: 13px; }
+
+  /* Asistente */
+  .screen--chat { max-width: 900px; margin: 0 auto; border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+  .has-tabbar .screen--chat { padding-bottom: 0; }
+  .msg { max-width: 70%; }
+
+  /* Ventanas emergentes centradas */
+  .modal { align-items: center; }
+  .modal-card { border-radius: 24px; }
+}
+
+@media (min-width: 1400px) {
+  .screen { max-width: 1200px; }
+}

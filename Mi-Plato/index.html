@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=10">
+  <link rel="stylesheet" href="css/styles.css?v=12">
 </head>
 <body>
 
@@ -52,6 +52,7 @@
           <h1 class="display">Mi Plato</h1>
           <p class="muted lead">Sacale foto a lo que comés y seguí las pautas de tu nutricionista.</p>
         </div>
+        <p class="note note--info" id="login-legado" hidden>Ahora tu cuenta se guarda en la nube para que puedas entrar desde cualquier dispositivo. Ingresá con tu email y contraseña de siempre y tus datos se pasan solos.</p>
         <form id="form-login" class="stack" novalidate>
           <div class="field">
             <label for="login-email">Email</label>
@@ -61,6 +62,7 @@
             <label for="login-pass">Contraseña</label>
             <input id="login-pass" name="pass" type="password" autocomplete="current-password" required>
           </div>
+          <button type="button" class="link-btn link-btn--end" id="login-olvide">Me olvidé la contraseña</button>
           <p class="form-error" id="login-error" role="alert"></p>
           <button class="btn btn--primary" type="submit">Ingresar</button>
         </form>
@@ -92,7 +94,7 @@
           </div>
           <div class="field"><label for="reg-pass">Contraseña</label><input id="reg-pass" name="pass" type="password" autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres" required></div>
           <div class="field"><label for="reg-pass2">Repetir contraseña</label><input id="reg-pass2" name="pass2" type="password" autocomplete="new-password" required></div>
-          <label class="check"><input type="checkbox" name="terminos" required> Acepto que mis datos se guarden en este dispositivo. Mis datos de salud solo los veo yo.</label>
+          <label class="check"><input type="checkbox" name="terminos" required> Acepto que mis datos se guarden en mi cuenta para usarlos desde cualquier dispositivo. Mis datos de salud solo los veo yo.</label>
           <p class="form-error" id="registro-error" role="alert"></p>
           <button class="btn btn--primary" type="submit">Crear cuenta</button>
         </form>
@@ -189,6 +191,8 @@
           <a class="icon-btn" href="#perfil" aria-label="Mi usuario"><svg><use href="#i-user"></use></svg></a>
         </div>
 
+        <div class="dos-col">
+        <div class="col">
         <div class="water-card">
           <div class="row-between">
             <div>
@@ -205,14 +209,17 @@
           <span class="cta-icon"><svg><use href="#i-camera"></use></svg></span>
           <span><strong>Sacale una foto a tu plato</strong><small>Antes de comer o después, te digo si va</small></span>
         </a>
-
+        <div class="grid-3" id="hoy-contadores"></div>
+        </div>
+        <div class="col">
         <div class="row-between">
           <h2 class="subtitle">Tus 4 comidas</h2>
           <button type="button" class="link-btn" id="hoy-editar-horarios">Editar horarios</button>
         </div>
         <div class="stack-sm" id="hoy-comidas"></div>
+        </div>
+        </div>
 
-        <div class="grid-3" id="hoy-contadores"></div>
       </section>
 
       <!-- ===================== CARGAR COMIDA ===================== -->
@@ -230,7 +237,8 @@
           <img id="cargar-preview" alt="Foto del plato" hidden>
           <div class="viewfinder-empty" id="cargar-vacio">
             <div class="ring"></div>
-            <span>Encuadrá el plato entero, desde arriba</span>
+            <span class="solo-celular">Encuadrá el plato entero, desde arriba</span>
+            <span class="solo-escritorio">Arrastrá una foto acá o tocá el botón redondo para elegirla</span>
           </div>
         </div>
         <div class="field field--dark">
@@ -295,6 +303,8 @@
       <!-- ===================== AGUA ===================== -->
       <section class="screen" id="screen-agua" hidden>
         <h1 class="display-sm">Agua</h1>
+        <div class="dos-col">
+        <div class="col">
         <div class="card stack">
           <div class="row-between baseline">
             <span class="big-number water-text" id="agua-total">0 L</span>
@@ -307,6 +317,8 @@
             <button class="btn btn--water-outline" type="button" data-ml="500">+ Botella 500 ml</button>
           </div>
         </div>
+        </div>
+        <div class="col">
         <h2 class="subtitle">Recordatorios</h2>
         <div class="card list">
           <label class="switch-row"><span><strong>Cada 2 horas</strong><small class="muted">de 9:00 a 21:00, mientras la app esté abierta</small></span><input type="checkbox" class="switch" id="rec-cada2"></label>
@@ -314,6 +326,8 @@
           <label class="switch-row"><span><strong>Si voy atrasada</strong><small class="muted">aviso a las 18:00 si no llegué a 1 L</small></span><input type="checkbox" class="switch" id="rec-atrasada"></label>
         </div>
         <p class="note" id="agua-permiso"></p>
+        </div>
+        </div>
       </section>
 
       <!-- ===================== SEMANA ===================== -->
@@ -384,6 +398,8 @@
           <a class="icon-btn" href="#hoy" aria-label="Volver"><svg><use href="#i-back"></use></svg></a>
           <button class="pill-btn js-theme-toggle" type="button"></button>
         </div>
+        <div class="dos-col">
+        <div class="col">
         <div class="profile-head">
           <span class="avatar" id="perfil-iniciales"></span>
           <div>
@@ -404,6 +420,8 @@
           <div class="row-between"><strong>Progreso y metas</strong><svg class="chev"><use href="#i-chevron"></use></svg></div>
           <div class="grid-3" id="perfil-progreso"></div>
         </a>
+        </div>
+        <div class="col">
         <h2 class="subtitle">Información relevante</h2>
         <div class="card list">
           <a class="list-link" href="#salud"><span><strong>Condiciones de salud</strong><small class="muted" id="perfil-salud"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
@@ -419,7 +437,13 @@
           <label for="perfil-tema">Apariencia</label>
           <select id="perfil-tema"><option value="auto">Automática (como el celular)</option><option value="light">Claro</option><option value="dark">Oscuro</option></select>
         </div>
+        <div class="sync-box">
+          <span class="small"><span class="muted">Cuenta:</span> <strong id="perfil-email"></strong></span>
+          <span class="small muted" id="perfil-sync" aria-live="polite"></span>
+        </div>
         <button class="btn btn--text danger" type="button" id="perfil-salir">Cerrar sesión</button>
+        </div>
+        </div>
       </section>
 
       <!-- ===================== PROGRESO ===================== -->
@@ -428,6 +452,8 @@
           <a class="icon-btn" href="#perfil" aria-label="Volver"><svg><use href="#i-back"></use></svg></a>
           <h1 class="title-sm">Progreso y metas</h1>
         </div>
+        <div class="dos-col">
+        <div class="col">
         <div class="card stack-sm">
           <div class="row-between baseline">
             <span class="big-number" id="prog-actual">— kg</span>
@@ -446,6 +472,8 @@
           <button class="btn btn--primary" type="submit">Guardar registro</button>
         </form>
         <ul class="card list" id="prog-historial"></ul>
+        </div>
+        <div class="col">
         <div class="row-between"><h2 class="subtitle">Mis metas</h2></div>
         <div class="stack-sm" id="prog-metas"></div>
         <form class="card stack-sm" id="form-meta">
@@ -465,6 +493,8 @@
           <div class="field" id="meta-texto-wrap" hidden><label for="meta-texto">Descripción</label><input id="meta-texto" name="texto"></div>
           <button class="btn btn--outline" type="submit">Agregar meta</button>
         </form>
+        </div>
+        </div>
       </section>
 
       <!-- ===================== CONSULTA ===================== -->
@@ -493,13 +523,33 @@
 
     <!-- Navegación inferior -->
     <nav class="tabbar" id="tabbar" aria-label="Navegación principal" hidden>
+      <div class="tabbar-brand solo-escritorio"><span class="logo logo--sm" aria-hidden="true"></span>Mi Plato</div>
+      <a href="#cargar" data-tab="cargar" class="solo-escritorio tabbar-cta"><svg><use href="#i-camera"></use></svg>Cargar comida</a>
       <a href="#hoy" data-tab="hoy"><svg><use href="#i-home"></use></svg>Hoy</a>
       <a href="#agua" data-tab="agua"><svg><use href="#i-drop"></use></svg>Agua</a>
       <a href="#chat" data-tab="chat"><svg><use href="#i-chat"></use></svg>Asistente</a>
       <a href="#semana" data-tab="semana"><svg><use href="#i-calendar"></use></svg>Semana</a>
+      <a href="#perfil" data-tab="perfil" class="solo-escritorio tabbar-usuario"><svg><use href="#i-user"></use></svg>Mi usuario</a>
     </nav>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <!-- Nueva contraseña (al volver del mail de recuperación) -->
+    <div class="modal" id="dlg-clave" hidden>
+      <form class="modal-card" id="form-clave" role="dialog" aria-modal="true" aria-labelledby="dlg-clave-titulo">
+        <h2 class="title-sm" id="dlg-clave-titulo">Nueva contraseña</h2>
+        <div class="field"><label for="clave-nueva">Contraseña nueva</label><input id="clave-nueva" type="password" autocomplete="new-password" minlength="8"></div>
+        <div class="field"><label for="clave-nueva2">Repetir contraseña</label><input id="clave-nueva2" type="password" autocomplete="new-password"></div>
+        <p class="form-error" id="clave-error" role="alert"></p>
+        <button type="submit" class="btn btn--primary">Guardar contraseña</button>
+      </form>
+    </div>
+
+    <!-- Pantalla de carga mientras se conecta con la nube -->
+    <div class="arranque" id="arranque" role="status" aria-label="Cargando">
+      <div class="logo" aria-hidden="true"></div>
+      <div class="spinner" aria-hidden="true"></div>
+    </div>
 
     <!-- Editar horarios de las 4 comidas -->
     <div class="modal" id="dlg-horarios" hidden>
@@ -547,15 +597,20 @@
   <!-- jsPDF para exportar la semana -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script src="js/storage.js?v=10"></script>
-  <script src="js/ui.js?v=10"></script>
-  <script src="js/api.js?v=10"></script>
-  <script src="js/auth.js?v=10"></script>
-  <script src="js/hoy.js?v=10"></script>
-  <script src="js/comidas.js?v=10"></script>
-  <script src="js/semana.js?v=10"></script>
-  <script src="js/chat.js?v=10"></script>
-  <script src="js/perfil.js?v=10"></script>
-  <script src="js/app.js?v=10"></script>
+  <!-- Supabase: cuenta y datos en la nube -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <script src="js/storage.js?v=12"></script>
+  <script src="js/ui.js?v=12"></script>
+  <script src="js/fotos.js?v=12"></script>
+  <script src="js/nube.js?v=12"></script>
+  <script src="js/api.js?v=12"></script>
+  <script src="js/auth.js?v=12"></script>
+  <script src="js/hoy.js?v=12"></script>
+  <script src="js/comidas.js?v=12"></script>
+  <script src="js/semana.js?v=12"></script>
+  <script src="js/chat.js?v=12"></script>
+  <script src="js/perfil.js?v=12"></script>
+  <script src="js/app.js?v=12"></script>
 </body>
 </html>

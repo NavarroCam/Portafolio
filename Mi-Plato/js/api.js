@@ -25,9 +25,10 @@ const Api = (() => {
   async function llamar(accion, datos) {
     let res;
     try {
+      const token = await Nube.token();
       res = await fetch(ENDPOINT, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
         body: JSON.stringify({ accion, ...contexto(), ...datos })
       });
     } catch (e) {
@@ -36,6 +37,9 @@ const Api = (() => {
     let json = null;
     try { json = await res.json(); } catch (e) { /* respuesta no JSON */ }
     if (!res.ok || !json) {
+      if (res.status === 401 && json && json.sesion) {
+        throw new Error('Tu sesión venció. Cerrá sesión y volvé a ingresar.');
+      }
       if (res.status === 404) {
         throw new Error('No se encontró el servidor de la app (/api/gemini). Si la abriste como archivo local, usá "vercel dev" o la versión publicada.');
       }

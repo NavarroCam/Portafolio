@@ -19,6 +19,17 @@ Screens.cargar = {
       }
     };
     document.getElementById('cargar-camara').addEventListener('change', onFile);
+    // En la compu: arrastrar y soltar una foto sobre el visor
+    const visor = document.getElementById('cargar-visor');
+    visor.addEventListener('dragover', e => { e.preventDefault(); visor.classList.add('arrastrando'); });
+    visor.addEventListener('dragleave', () => visor.classList.remove('arrastrando'));
+    visor.addEventListener('drop', e => {
+      e.preventDefault();
+      visor.classList.remove('arrastrando');
+      const file = [...(e.dataTransfer.files || [])].find(f => f.type.startsWith('image/'));
+      if (file) onFile({ target: { files: [file], value: '' } });
+      else UI.toast('Soltá una imagen (JPG o PNG).');
+    });
     document.getElementById('cargar-galeria').addEventListener('change', onFile);
     document.getElementById('cargar-desc').addEventListener('input', () => this.actualizarBoton());
 
@@ -99,13 +110,14 @@ Screens.resultado = {
       const btn = document.getElementById('res-guardar');
       btn.disabled = true;
       const mini = p.foto ? await Api.miniatura(p.foto, 360) : null;
+      const fotoId = mini ? await Fotos.guardar(mini) : null;
       const ok = Store.update(u => {
         u.comidas.push({
           id: UI.uid(),
           fecha: new Date().toISOString(),
           tipo: p.tipo,
           momento: p.momento,
-          foto: mini,
+          fotoId,
           descripcion: p.descripcion,
           analisis: this.analisis
         });

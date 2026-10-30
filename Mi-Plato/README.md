@@ -1,13 +1,14 @@
 # 🥗 Mi Plato - Seguimiento de comidas
 
-Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de tu nutricionista, desarrollada con **HTML5**, **CSS3** y **JavaScript**. Le sacás una foto al plato y la app, con la API de **Gemini**, te dice si está bien o qué ajustar según tus pautas. Pensada para usarse desde el celular.
+Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de tu nutricionista, desarrollada con **HTML5**, **CSS3** y **JavaScript**. Le sacás una foto al plato y la app, con la API de **Gemini**, te dice si está bien o qué ajustar según tus pautas. Funciona en el celular y en la computadora, con tu cuenta guardada en la nube (**Supabase**).
 
 🌐 **Ver app en vivo:** https://mi-plato-cmno.vercel.app/
 
 
 ## 🚀 Características
 
-* **Ingreso y registro:** Cuenta con email y contraseña (guardada como hash SHA-256) y apodo opcional: si lo cargás, la app te saluda así.
+* **Cuenta en la nube:** Ingreso y registro con email y contraseña (Supabase Auth). Entrás desde cualquier dispositivo y ves los mismos datos; los cambios se sincronizan solos y, sin internet, se guardan y se suben cuando vuelve la conexión.
+* **Apodo opcional:** si lo cargás, la app te saluda así.
 * **Configuración inicial:** Condiciones de salud, alergias, datos de tu nutricionista y tu objetivo.
 * **Pautas en PDF:** Subís varios PDFs a la vez (hasta 25 MB cada uno). El texto se extrae en el celular y Gemini los lee todos en un solo pedido para armar tus reglas, que podés editar. Si te equivocás de archivo, lo eliminás y se van también sus reglas.
 * **Análisis por foto:** Cargás lo que vas a comer o ya comiste y la app te dice si "va bien" o "ajustalo", con la distribución del plato, lo que detectó y una sugerencia.
@@ -17,7 +18,7 @@ Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de 
 * **Asistente:** Chat con Gemini para pedir recetas y consultar ingredientes, respondiendo según tus pautas.
 * **Mi usuario:** Progreso de peso y medidas con gráfico, metas y acceso directo a tu nutricionista por WhatsApp o email.
 * **Modo claro y oscuro:** Automático según el celular o elegido a mano.
-* **Diseño mobile first:** Respeta la barra de estado y la del navegador, y los formularios se apilan en pantallas chicas.
+* **Celular y escritorio:** En el celular, barra de navegación abajo; en la computadora, menú lateral, pantallas a dos columnas y arrastrar y soltar la foto del plato.
 
 
 ## 🛠️ Tecnologías Utilizadas
@@ -26,7 +27,9 @@ Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de 
 * **CSS3:** Variables CSS para los temas, Flexbox, Grid, `prefers-color-scheme` y `prefers-reduced-motion`.
 * **JavaScript (Vanilla):** DOM, eventos, `fetch` y `async/await`, `localStorage`, Canvas (fotos y confeti), Web Crypto, Notifications y Web Share.
 * **Gemini API:** Análisis de fotos, lectura de pautas y chat. Si un modelo está saturado o sin cuota, la función prueba con otro.
-* **Vercel:** Publicación del sitio y función serverless que protege la clave de la API.
+* **Supabase:** Autenticación y base de datos Postgres con Row Level Security (cada usuario solo accede a lo suyo).
+* **Vercel:** Publicación del sitio y funciones serverless que protegen la clave de Gemini.
+* **IndexedDB:** Copia local de las fotos para que la app abra rápido y funcione sin conexión.
 * **pdf.js:** Lectura de los PDFs de pautas en el navegador.
 * **jsPDF:** Generación del resumen semanal en PDF.
 
@@ -43,7 +46,9 @@ Mi-Plato/
 ├── index.html
 ├── css/styles.css
 ├── js/
-│   ├── storage.js     # datos en localStorage, apodo y fechas
+│   ├── storage.js     # copia local de los datos, apodo y fechas
+│   ├── nube.js        # cuenta y sincronización con Supabase
+│   ├── fotos.js       # fotos de los platos (IndexedDB + nube)
 │   ├── ui.js          # navegación, tema y utilidades
 │   ├── api.js         # llamadas a /api/gemini, imágenes y PDFs
 │   ├── auth.js        # ingreso, registro, salud, nutri y pautas
@@ -53,7 +58,9 @@ Mi-Plato/
 │   ├── chat.js        # asistente
 │   ├── perfil.js      # mi usuario, progreso, metas y consultas
 │   └── app.js         # arranque
-├── api/gemini.js      # función serverless (Vercel)
+├── api/gemini.js      # función serverless de Gemini (solo usuarios logueados)
+├── api/config.js      # le pasa a la app la URL y la clave pública de Supabase
+├── supabase.sql       # tablas y reglas de seguridad para Supabase
 ├── vercel.json        # tiempo máximo de la función
 ├── vista-previa.png
 ├── .env.example
@@ -72,14 +79,29 @@ Mi-Plato/
 
 ## 🔑 Configuración
 
-1. Crear una clave en [Google AI Studio](https://aistudio.google.com/apikey).
-2. En Vercel: **Settings › Environment Variables** → agregar `GEMINI_API_KEY` (tipo Secret) y hacer **Redeploy**.
-3. Root Directory del proyecto en Vercel: `Mi-Plato`.
-4. Para probar en tu compu: copiar `.env.example` como `.env.local`, pegar la clave y correr `vercel dev`.
+**Supabase (cuenta y datos)**
+1. Crear un proyecto en [supabase.com](https://supabase.com).
+2. En **SQL Editor**, pegar el contenido de `supabase.sql` y ejecutarlo.
+3. En **Authentication › URL Configuration**, poner la URL de la app como *Site URL*.
+4. Opcional: en **Authentication › Sign In / Providers › Email**, desactivar *Confirm email* para entrar sin confirmar el mail.
+5. En **Project Settings › API Keys**, copiar la URL del proyecto y la clave pública (*publishable* / *anon*).
 
-**Diagnóstico:** abrí [`/api/gemini`](https://mi-plato-cmno.vercel.app/api/gemini) en el navegador para ver si la clave está configurada y si Gemini responde (no muestra la clave).
+**Gemini**
+1. Crear una clave en [Google AI Studio](https://aistudio.google.com/apikey).
+
+**Vercel** (Settings › Environment Variables) y después **Redeploy**:
+
+| Variable | Valor |
+|---|---|
+| `GEMINI_API_KEY` | clave de Gemini (Secret) |
+| `SUPABASE_URL` | URL del proyecto de Supabase |
+| `SUPABASE_ANON_KEY` | clave pública de Supabase |
+
+Root Directory del proyecto en Vercel: `Mi-Plato`. Para probar en tu compu: copiar `.env.example` como `.env.local`, completar y correr `vercel dev`.
+
+**Diagnóstico:** abrí [`/api/gemini`](https://mi-plato-cmno.vercel.app/api/gemini) en el navegador para ver si Gemini y Supabase están configurados (no muestra las claves).
 
 
 ## 📌 Nota
 
-Proyecto con fines educativos. Los datos (incluida la salud) se guardan solo en el navegador del dispositivo. Las respuestas de la IA son orientativas y no reemplazan la indicación de un profesional.
+Proyecto con fines educativos. Los datos (incluida la salud) se guardan en la cuenta de Supabase de cada usuario, protegidos para que solo esa persona pueda verlos. Las respuestas de la IA son orientativas y no reemplazan la indicación de un profesional.
