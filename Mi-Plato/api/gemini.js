@@ -14,11 +14,10 @@
 // disponible para la clave, se pasa al siguiente y se recuerda el que anduvo.
 const MODELOS = [...new Set([
   (process.env.GEMINI_MODEL || '').trim(),
-  'gemini-flash-latest',
-  'gemini-3.6-flash',
+  'gemini-3.6-flash',       // probados: responden con la clave gratuita
   'gemini-3.5-flash',
-  'gemini-2.5-flash',
-  'gemini-2.5-flash-lite'
+  'gemini-3.5-flash-lite',  // más liviano, suele tener más cuota
+  'gemini-flash-latest'     // apunta al más nuevo; a veces sin cuota gratuita
 ].filter(Boolean))];
 let modeloOk = null;
 const URL_API = m => `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent`;
@@ -385,7 +384,7 @@ function explicar(err) {
   }
   if (st === 429) {
     return /limit: 0/i.test(m)
-      ? { status: 429, error: 'Tu clave no tiene cuota para este modelo en el plan gratuito. Probá poniendo GEMINI_MODEL = gemini-2.5-flash en Vercel.' }
+      ? { status: 429, error: 'Tu clave no tiene cuota para este modelo en el plan gratuito. Probá poniendo GEMINI_MODEL = gemini-3.5-flash en Vercel.' }
       : { status: 429, error: 'Gemini está recibiendo muchos pedidos (límite del plan gratuito). Esperá un minuto y tocá Reintentar.' };
   }
   if (st === 503 || st === 500 || /overloaded|high demand|UNAVAILABLE/i.test(m)) {
@@ -405,7 +404,7 @@ async function diagnostico(res) {
   const sbKey = (process.env.SUPABASE_ANON_KEY || '').trim();
   const info = {
     clave_configurada: !!key,
-    clave_formato_ok: /^AIza[0-9A-Za-z_\-]{30,}$/.test(key),
+    clave_formato_ok: key.length >= 20 && !/\s/.test(key), // sin espacios ni saltos de línea
     supabase_configurado: !!(sbUrl && sbKey),
     supabase_responde: null,
     prueba: null,
