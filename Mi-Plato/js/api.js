@@ -182,8 +182,16 @@ const Api = (() => {
 
   return {
     /** Analiza la foto (o descripción) de un plato */
-    analizarPlato({ foto, descripcion, tipo, momento }) {
-      return llamar('analizar-plato', { imagen: partes(foto), descripcion, tipo, momento });
+    async analizarPlato({ foto, descripcion, tipo, momento }) {
+      const c = Plan.get(tipo) || { nombre: Plan.nombre(tipo), guia: '', estilo: 'libre' };
+      const a = await llamar('analizar-plato', {
+        imagen: partes(foto), descripcion, tipo, momento,
+        comida: { nombre: c.nombre, guia: c.guia, estilo: c.estilo },
+        limites: Plan.limites().map(l => ({ id: l.id, nombre: l.nombre }))
+      });
+      // Conteos: de [{ id, cantidad }] a { id: cantidad }
+      if (Array.isArray(a.conteos)) a.conteos = Object.fromEntries(a.conteos.map(x => [x.id, Number(x.cantidad) || 0]));
+      return a;
     },
     /** Chat de recetas / ingredientes */
     chat(mensajes) {

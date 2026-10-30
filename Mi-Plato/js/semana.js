@@ -10,6 +10,8 @@ const Semana = {
     const hoyClave = Fechas.clave();
     const desdeClave = Fechas.clave(new Date(u.creado)); // no contamos días antes de crear la cuenta
     const finSemana = Fechas.sumarDias(lunes, 7);
+    const idsPlan = new Set(Plan.comidas().map(c => c.id));
+    const nComidas = idsPlan.size;
     const comidas = u.comidas.filter(c => {
       const f = new Date(c.fecha);
       return f >= lunes && f < finSemana;
@@ -18,7 +20,7 @@ const Semana = {
     const porDia = dias.map(d => {
       const clave = Fechas.clave(d);
       const lista = comidas.filter(c => Fechas.clave(new Date(c.fecha)) === clave);
-      const tipos = new Set(lista.map(c => c.tipo));
+      const tipos = new Set(lista.map(c => c.tipo).filter(t => idsPlan.has(t)));
       return {
         fecha: d,
         clave,
@@ -33,19 +35,22 @@ const Semana = {
     });
 
     const pasados = porDia.filter(d => d.pasado);
-    const conteo = k => comidas.reduce((n, c) => n + ((c.analisis && c.analisis.conteos && Number(c.analisis.conteos[k])) || 0), 0);
+    // Límites semanales del usuario (p. ej. papa/choclo: máx. 2) y cuánto lleva
+    const limitesSemana = Plan.limites().filter(l => l.periodo === 'semana').map(l => ({
+      ...l, total: comidas.reduce((n, c) => n + conteoDe(c, l.id), 0)
+    }));
     const metaAct = u.metas.find(m => m.tipo === 'actividad');
 
     return {
       lunes, dias: porDia, comidas,
       totalOk: comidas.filter(c => c.analisis && c.analisis.veredicto === 'ok').length,
-      tuberculos: conteo('tuberculos'),
+      limitesSemana, nComidas,
       actividad: porDia.reduce((n, d) => n + d.actividad, 0),
       metaActividad: metaAct ? Number(metaAct.valor) || 3 : 3,
       diasAgua: pasados.filter(d => d.agua >= META_AGUA).length,
       aguaPromedio: pasados.length ? pasados.reduce((n, d) => n + d.agua, 0) / pasados.length : 0,
-      diasCompletos: pasados.filter(d => d.completas >= 4).length,
-      diasIncompletos: pasados.filter(d => d.completas < 4 && !d.esHoy),
+      diasCompletos: pasados.filter(d => d.completas >= nComidas).length,
+      diasIncompletos: pasados.filter(d => d.completas < nComidas && !d.esHoy),
       diasPasados: pasados.length,
       medidas: u.medidas.filter(m => {
         const f = Fechas.desdeClave(m.fecha);
@@ -92,7 +97,9 @@ const Semana = {
       [`${d.totalOk}/${d.comidas.length}`, 'comidas "va bien"'],
       [UI.litros(Math.round(d.aguaPromedio)), 'agua promedio'],
       [`${d.actividad}`, 'entrenamientos'],
-      [`${d.tuberculos}/2`, 'papa, choclo, batata']
+      d.limitesSemana.length
+        ? [`${d.limitesSemana[0].total}${d.limitesSemana[0].max != null ? '/' + d.limitesSemana[0].max : ''}`, d.limitesSemana[0].nombre.toLowerCase()]
+        : [`${d.diasAgua}/${d.diasPasados}`, 'días con 2 L de agua']
     ];
     const cw = (W - 2 * M - 9) / 4;
     cajas.forEach(([v, l], i) => {
@@ -113,7 +120,7 @@ const Semana = {
         texto(Fechas.largo(dia.fecha), M, 11, verde, 'bold'); y += 6;
         for (const c of dia.comidas) {
           const a = c.analisis || {};
-          const tipo = (TIPOS.find(t => t.id === c.tipo) || {}).nombre || '';
+          const tipo = Plan.nombre(c.tipo, c);
           const items = (a.items || []).map(i => i.nombre).join(', ') || c.descripcion || '';
           const lineas = doc.splitTextToSize(items, W - 2 * M - 52);
           const nota = a.veredicto !== 'ok' && a.problemas && a.problemas.length
@@ -254,20 +261,24 @@ Screens.semana = {
 
     const letras = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
     document.getElementById('semana-dias').innerHTML = d.dias.map((dia, i) => {
-      const cls = !dia.comidas.length ? '' : dia.ok >= 4 ? 'good' : 'mid';
+      const cls = !dia.comidas.length ? '' : dia.ok >= d.nComidas ? 'good' : 'mid';
       return `<div class="day ${dia.esHoy ? 'today' : ''}"><span>${letras[i]}</span>
-        <span class="day-dot ${cls}" aria-label="${Fechas.largo(dia.fecha)}: ${dia.ok} de 4 comidas bien">${dia.comidas.length ? dia.ok + '/4' : ''}</span></div>`;
+        <span class="day-dot ${cls}" aria-label="${Fechas.largo(dia.fecha)}: ${dia.ok} de ${d.nComidas} comidas bien">${dia.comidas.length ? dia.ok + '/' + d.nComidas : ''}</span></div>`;
     }).join('');
 
     const barra = (v, max, color = 'var(--accent)') => `<div class="bar"><div style="width:${Math.min(100, max ? v / max * 100 : 0)}%;background:${color}"></div></div>`;
     const faltantes = d.diasIncompletos.map(x => x.fecha.toLocaleDateString('es-AR', { weekday: 'long' })).join(', ');
 
-    document.getElementById('semana-metricas').innerHTML = `
+    document.getElementById('semana-ayuda').textContent = `Comidas que fueron "va bien" sobre las ${d.nComidas} del día`;
+    document.getElementById('semana-metricas').innerHTML = d.limitesSemana.map(l => {
+      const tope = l.max != null ? l.max : (l.min || 1);
+      return `
       <div class="card metric">
-        <div class="row-between"><span>Papa, choclo, batata, mandioca</span><b>${d.tuberculos} de 2</b></div>
-        ${barra(d.tuberculos, 2, d.tuberculos > 2 ? 'var(--warn)' : 'var(--carb)')}
-        <small>Máximo semanal · siempre al horno y con vegetales</small>
-      </div>
+        <div class="row-between"><span>${UI.esc(l.nombre)}</span><b>${l.total} ${l.max != null ? 'de ' + l.max : ''}</b></div>
+        ${barra(l.total, tope, Plan.excedido(l, l.total) ? 'var(--warn)' : 'var(--carb)')}
+        <small>${l.max != null ? 'Máximo' : 'Mínimo'} semanal según tus pautas</small>
+      </div>`;
+    }).join('') + `
       <div class="card metric">
         <div class="row-between"><span>Actividad física</span><b>${d.actividad} de ${d.metaActividad}</b></div>
         ${barra(d.actividad, d.metaActividad, 'var(--prot)')}
@@ -279,7 +290,7 @@ Screens.semana = {
         ${barra(d.diasAgua, d.diasPasados, 'var(--water)')}
       </div>
       <div class="card metric">
-        <div class="row-between"><span>Las 4 comidas cargadas</span><b>${d.diasCompletos} de ${d.diasPasados} días</b></div>
+        <div class="row-between"><span>Todas tus comidas cargadas</span><b>${d.diasCompletos} de ${d.diasPasados} días</b></div>
         ${barra(d.diasCompletos, d.diasPasados)}
         ${faltantes ? `<small>Faltaron comidas el ${UI.esc(faltantes)}</small>` : ''}
       </div>`;

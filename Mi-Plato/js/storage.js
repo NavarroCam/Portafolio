@@ -91,7 +91,9 @@ function usuarioVacio(perfil = {}) {
     metas: [],        // { id, tipo, valor, fecha, texto }
     notas: '',
     chat: [],         // { role: 'user' | 'model', text }
-    horarios: {},
+    comidasPlan: null,  // se arma con los PDFs de pautas (ver plan.js); null = comidas de ejemplo
+    limites: [],        // { id, nombre, min, max, periodo }
+    planEditado: false,
     recordatorios: { cada2: false, comidas: true, atrasada: false }
   };
 }
@@ -115,7 +117,10 @@ const Legado = (() => {
       if (!u) return null;
       const copia = JSON.parse(JSON.stringify(u));
       delete copia.passHash;
-      return { ...usuarioVacio(copia.perfil), ...copia };
+      const base = usuarioVacio(copia.perfil);
+      // Sin plan propio: así Plan.migrar() le arma las comidas y límites que ya veía
+      delete base.comidasPlan; delete base.limites; delete base.planEditado;
+      return { ...base, ...copia };
     },
     borrar(email) {
       const db = leer();

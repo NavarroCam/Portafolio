@@ -294,7 +294,7 @@ h1, h2, h3, p { margin: 0; }
 }
 .chip[aria-pressed="true"], .chip[aria-checked="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 700; }
 .chip svg { width: 14px; height: 14px; }
-.chips--dark { margin-top: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+.chips--dark { margin-top: 8px; display: grid; grid-template-columns: repeat(auto-fit, minmax(84px, 1fr)); gap: 6px; }
 .chips--dark .chip { background: transparent; color: #FFFFFF; border-color: rgba(255, 255, 255, 0.25); justify-content: center; padding: 0 4px; font-size: 13px; min-height: 40px; }
 .chips--dark .chip[aria-checked="true"] { background: #7FC29B; color: #102018; border-color: #7FC29B; }
 
@@ -706,3 +706,8 @@ h1, h2, h3, p { margin: 0; }
 @media (min-width: 1400px) {
   .screen { max-width: 1200px; }
 }
+
+/* ---------- Mis comidas ---------- */
+.stat--warn strong { color: var(--warn); }
+#mc-sugerencia .btn { align-self: flex-start; }
+#hoy-contadores:empty { display: none; }

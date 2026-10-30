@@ -80,6 +80,7 @@ const Nube = {
     }
 
     await this.migrarFotosViejas();
+    Plan.migrar();
     await this.subir();
   },
 

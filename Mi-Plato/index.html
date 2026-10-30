@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=12">
+  <link rel="stylesheet" href="css/styles.css?v=13">
 </head>
 <body>
 
@@ -170,6 +170,7 @@
           <h2 class="subtitle">Reglas que sigue la app</h2>
         </div>
         <ul class="rules" id="pautas-reglas"></ul>
+        <div class="card stack-xs" id="pautas-plan" hidden></div>
         <form id="form-regla" class="inline-form">
           <label for="regla-nueva" class="visually-hidden">Nueva regla</label>
           <input id="regla-nueva" placeholder="Agregar una regla a mano">
@@ -213,8 +214,8 @@
         </div>
         <div class="col">
         <div class="row-between">
-          <h2 class="subtitle">Tus 4 comidas</h2>
-          <button type="button" class="link-btn" id="hoy-editar-horarios">Editar horarios</button>
+          <h2 class="subtitle" id="hoy-comidas-titulo">Tus comidas</h2>
+          <a class="link-btn" href="#mis-comidas">Editar comidas</a>
         </div>
         <div class="stack-sm" id="hoy-comidas"></div>
         </div>
@@ -341,7 +342,7 @@
           <button class="icon-btn flip" type="button" id="semana-next" aria-label="Semana siguiente"><svg><use href="#i-back"></use></svg></button>
         </div>
         <div class="card week" id="semana-dias"></div>
-        <p class="small muted">Comidas que fueron "va bien" sobre las 4 del día</p>
+        <p class="small muted" id="semana-ayuda">Comidas que fueron "va bien" sobre las del día</p>
         <h2 class="subtitle">Límites y metas de la semana</h2>
         <div class="stack-sm" id="semana-metricas"></div>
         <a class="btn btn--outline-dark" href="#exportar"><svg><use href="#i-download"></use></svg>Exportar semana en PDF</a>
@@ -426,7 +427,7 @@
         <div class="card list">
           <a class="list-link" href="#salud"><span><strong>Condiciones de salud</strong><small class="muted" id="perfil-salud"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
           <a class="list-link" href="#pautas"><span><strong>Pautas de alimentación</strong><small class="muted" id="perfil-pautas"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
-          <button type="button" class="list-link" id="perfil-horarios"><span><strong>Horarios de comidas</strong><small class="muted" id="perfil-horarios-txt"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></button>
+          <a class="list-link" href="#mis-comidas"><span><strong>Mis comidas y límites</strong><small class="muted" id="perfil-plan-txt"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
           <a class="list-link" href="#nutri"><span><strong>Mi nutricionista</strong><small class="muted" id="perfil-nutri-txt"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
         </div>
         <div class="field">
@@ -519,6 +520,29 @@
         </div>
       </section>
 
+      <!-- ===================== MIS COMIDAS ===================== -->
+      <section class="screen" id="screen-mis-comidas" hidden>
+        <div class="topbar topbar--start">
+          <a class="icon-btn" href="#perfil" aria-label="Volver"><svg><use href="#i-back"></use></svg></a>
+          <h1 class="title-sm">Mis comidas y límites</h1>
+        </div>
+        <p class="muted">Se arman con las pautas de tu nutricionista y las podés cambiar cuando quieras.</p>
+        <div class="note note--info stack-xs" id="mc-sugerencia" hidden></div>
+        <div class="dos-col">
+        <div class="col">
+          <h2 class="subtitle">Comidas del día</h2>
+          <div class="card list" id="mc-comidas"></div>
+          <button class="btn btn--outline" type="button" id="mc-agregar-comida"><svg><use href="#i-plus"></use></svg>Agregar comida</button>
+        </div>
+        <div class="col">
+          <h2 class="subtitle">Límites a controlar</h2>
+          <p class="small muted">La app los cuenta en cada foto y te los muestra en Hoy y en Semana. Por ejemplo: huevo, máximo 1 por día.</p>
+          <div class="card list" id="mc-limites"></div>
+          <button class="btn btn--outline" type="button" id="mc-agregar-limite"><svg><use href="#i-plus"></use></svg>Agregar límite</button>
+        </div>
+        </div>
+      </section>
+
     </main>
 
     <!-- Navegación inferior -->
@@ -551,17 +575,47 @@
       <div class="spinner" aria-hidden="true"></div>
     </div>
 
-    <!-- Editar horarios de las 4 comidas -->
-    <div class="modal" id="dlg-horarios" hidden>
-      <form class="modal-card" id="form-horarios" role="dialog" aria-modal="true" aria-labelledby="dlg-horarios-titulo">
-        <h2 class="title-sm" id="dlg-horarios-titulo">Horarios de tus comidas</h2>
-        <p class="small muted">Se usan en "Hoy" y para sugerir qué comida estás cargando.</p>
-        <div class="grid-2" id="dlg-horarios-campos"></div>
-        <button type="button" class="link-btn" id="horarios-reset">Volver a los horarios de fábrica</button>
+    <!-- Editar una comida del plan -->
+    <div class="modal" id="dlg-plan" hidden>
+      <form class="modal-card" id="form-plan" role="dialog" aria-modal="true" aria-labelledby="dlg-plan-titulo">
+        <h2 class="title-sm" id="dlg-plan-titulo">Comida</h2>
+        <div class="grid-2">
+          <div class="field"><label for="plan-nombre">Nombre</label><input id="plan-nombre" maxlength="30" required placeholder="Ej.: Colación"></div>
+          <div class="field"><label for="plan-hora">Hora</label><input id="plan-hora" type="time" required></div>
+        </div>
+        <div class="field">
+          <label for="plan-estilo">Cómo evaluar la foto</label>
+          <select id="plan-estilo"></select>
+        </div>
+        <div class="field">
+          <label for="plan-guia">Guía <span class="muted">(lo que indicó tu nutri)</span></label>
+          <textarea id="plan-guia" rows="2" maxlength="140" placeholder="Ej.: 1 fruta + 1 yogur"></textarea>
+        </div>
+        <p class="form-error" id="plan-error" role="alert"></p>
         <div class="grid-2">
           <button type="button" class="btn btn--outline" data-cerrar>Cancelar</button>
           <button type="submit" class="btn btn--primary">Guardar</button>
         </div>
+        <button type="button" class="btn btn--text danger" id="plan-borrar">Eliminar esta comida</button>
+      </form>
+    </div>
+
+    <!-- Editar un límite -->
+    <div class="modal" id="dlg-limite" hidden>
+      <form class="modal-card" id="form-limite" role="dialog" aria-modal="true" aria-labelledby="dlg-limite-titulo">
+        <h2 class="title-sm" id="dlg-limite-titulo">Límite</h2>
+        <div class="field"><label for="lim-nombre">Qué controlar</label><input id="lim-nombre" maxlength="30" required placeholder="Ej.: Huevo"></div>
+        <div class="grid-3">
+          <div class="field"><label for="lim-min">Mínimo</label><input id="lim-min" type="number" min="0" step="1" inputmode="numeric" placeholder="—"></div>
+          <div class="field"><label for="lim-max">Máximo</label><input id="lim-max" type="number" min="0" step="1" inputmode="numeric" placeholder="—"></div>
+          <div class="field"><label for="lim-periodo">Por</label><select id="lim-periodo"><option value="dia">día</option><option value="semana">semana</option></select></div>
+        </div>
+        <p class="form-error" id="lim-error" role="alert"></p>
+        <div class="grid-2">
+          <button type="button" class="btn btn--outline" data-cerrar>Cancelar</button>
+          <button type="submit" class="btn btn--primary">Guardar</button>
+        </div>
+        <button type="button" class="btn btn--text danger" id="lim-borrar">Eliminar este límite</button>
       </form>
     </div>
 
@@ -600,17 +654,19 @@
   <!-- Supabase: cuenta y datos en la nube -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="js/storage.js?v=12"></script>
-  <script src="js/ui.js?v=12"></script>
-  <script src="js/fotos.js?v=12"></script>
-  <script src="js/nube.js?v=12"></script>
-  <script src="js/api.js?v=12"></script>
-  <script src="js/auth.js?v=12"></script>
-  <script src="js/hoy.js?v=12"></script>
-  <script src="js/comidas.js?v=12"></script>
-  <script src="js/semana.js?v=12"></script>
-  <script src="js/chat.js?v=12"></script>
-  <script src="js/perfil.js?v=12"></script>
-  <script src="js/app.js?v=12"></script>
+  <script src="js/storage.js?v=13"></script>
+  <script src="js/ui.js?v=13"></script>
+  <script src="js/fotos.js?v=13"></script>
+  <script src="js/nube.js?v=13"></script>
+  <script src="js/plan.js?v=13"></script>
+  <script src="js/api.js?v=13"></script>
+  <script src="js/auth.js?v=13"></script>
+  <script src="js/hoy.js?v=13"></script>
+  <script src="js/comidas.js?v=13"></script>
+  <script src="js/semana.js?v=13"></script>
+  <script src="js/chat.js?v=13"></script>
+  <script src="js/perfil.js?v=13"></script>
+  <script src="js/mis-comidas.js?v=13"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 </html>

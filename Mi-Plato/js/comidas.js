@@ -67,8 +67,8 @@ Screens.cargar = {
   },
 
   pintarTipos() {
-    document.getElementById('cargar-tipo').innerHTML = TIPOS.map(t =>
-      `<button type="button" class="chip" role="radio" data-tipo="${t.id}" aria-checked="${t.id === this.tipoElegido}">${t.nombre}</button>`
+    document.getElementById('cargar-tipo').innerHTML = Plan.comidas().map(t =>
+      `<button type="button" class="chip" role="radio" data-tipo="${UI.esc(t.id)}" aria-checked="${t.id === this.tipoElegido}">${UI.esc(t.nombre)}</button>`
     ).join('');
   },
 
@@ -78,7 +78,7 @@ Screens.cargar = {
   },
 
   render() {
-    if (!this.tipoElegido) this.tipoElegido = tipoPorHora();
+    if (!this.tipoElegido || !Plan.get(this.tipoElegido)) this.tipoElegido = Plan.porHora();
     this.pintarTipos();
     this.pintarFoto();
   }
@@ -116,6 +116,7 @@ Screens.resultado = {
           id: UI.uid(),
           fecha: new Date().toISOString(),
           tipo: p.tipo,
+          nombreComida: Plan.nombre(p.tipo),
           momento: p.momento,
           fotoId,
           descripcion: p.descripcion,
@@ -140,7 +141,7 @@ Screens.resultado = {
     const p = this.pendiente;
     if (!p) { UI.ir('cargar'); return; }
 
-    const tipo = TIPOS.find(t => t.id === p.tipo);
+    const tipo = Plan.get(p.tipo) || { nombre: Plan.nombre(p.tipo) };
     document.getElementById('res-contexto').textContent =
       `${tipo ? tipo.nombre : ''} · ${p.momento === 'antes' ? 'lo vas a comer' : 'ya lo comiste'}`;
 

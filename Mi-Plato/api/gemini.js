@@ -98,13 +98,13 @@ const ESQUEMA_PLATO = {
     sugerencia: { type: 'STRING', description: 'Cómo mejorar el plato. Vacío si está todo bien.' },
     consejo: { type: 'STRING', description: 'Un tip corto (agua, condimentos, masticar despacio...)' },
     conteos: {
-      type: 'OBJECT',
-      properties: {
-        frutas: { type: 'INTEGER' },
-        huevos: { type: 'INTEGER' },
-        tuberculos: { type: 'INTEGER', description: 'Porciones de papa, batata, choclo, mandioca o boniato' }
-      },
-      required: ['frutas', 'huevos', 'tuberculos']
+      type: 'ARRAY',
+      description: 'Una entrada por cada ítem a contar que se pidió (vacío si no se pidió ninguno)',
+      items: {
+        type: 'OBJECT',
+        properties: { id: { type: 'STRING' }, cantidad: { type: 'INTEGER' } },
+        required: ['id', 'cantidad']
+      }
     },
     es_comida: { type: 'BOOLEAN', description: 'false si la imagen no muestra comida' }
   },
@@ -220,20 +220,36 @@ async function analizarPlato(key, b) {
   if (!tieneFoto && desc.length < 3) {
     return { status: 400, json: { error: 'Mandá una foto o una descripción del plato.' } };
   }
-  const tipo = ['desayuno', 'almuerzo', 'merienda', 'cena'].includes(b.tipo) ? b.tipo : 'comida';
+  // Comida del plan del usuario (nombre, guía de su nutri y cómo evaluarla)
+  const c = b.comida && typeof b.comida === 'object' ? b.comida : {};
+  const nombre = String(c.nombre || b.tipo || 'comida').slice(0, 30).replace(/["\n]/g, '');
+  const guia = String(c.guia || '').slice(0, 140).replace(/\n/g, ' ');
+  const estilo = ['plato', 'estructura', 'libre'].includes(c.estilo) ? c.estilo : 'libre';
+  const comoEvaluar = {
+    plato: 'Evaluá la distribución del plato: idealmente ½ vegetales, ¼ proteína magra y ¼ cereal integral o legumbre.',
+    estructura: 'Es una comida tipo desayuno/merienda: evaluá si tiene infusión + 1 hidrato + 1 proteína + 1 fibra (o lo que diga la guía). No exijas ½ plato de vegetales.',
+    libre: 'Evaluala solo contra sus pautas y la guía, sin exigir una distribución de plato.'
+  }[estilo];
+  const limites = (Array.isArray(b.limites) ? b.limites : []).slice(0, 12)
+    .filter(l => l && l.id && l.nombre)
+    .map(l => ({ id: String(l.id).slice(0, 40), nombre: String(l.nombre).slice(0, 30).replace(/["\n]/g, '') }));
   const momento = b.momento === 'despues' ? 'ya lo comió' : 'lo va a comer';
 
   const parts = [];
   if (tieneFoto) parts.push({ inlineData: { mimeType: b.imagen.mime, data: b.imagen.data } });
   parts.push({
-    text: `Analizá este plato. Es su ${tipo} y ${momento}.` +
+    text: `Analizá este plato. Es su comida "${nombre}" y ${momento}.` +
+      (guia ? `\nGuía de su nutricionista para esta comida: "${guia}".` : '') +
+      `\n${comoEvaluar}` +
       (desc ? `\nAclaración del usuario: "${desc}"` : '') +
+      (limites.length
+        ? `\nEn "conteos", contá cuántas porciones hay de cada uno de estos ítems (0 si no hay): ${limites.map(l => `id="${l.id}" (${l.nombre})`).join(', ')}.`
+        : '\nDevolvé "conteos" vacío.') +
       `\n\nIdentificá cada alimento, estimá la distribución del plato y decidí:
 - "ok" si respeta sus pautas (o tiene un detalle menor).
 - "ajustar" si incumple alguna pauta importante (frituras, ultraprocesados, porciones, faltan vegetales, etc.).
 En "problemas" poné solo lo que no cumple, citando la pauta en palabras simples.
 Si ${momento === 'lo va a comer' ? 'todavía no lo comió, la sugerencia tiene que ser un cambio concreto para hacer ahora' : 'ya lo comió, la sugerencia es para la próxima vez'}.
-Para desayuno y merienda evaluá la estructura (infusión + hidrato + proteína + fibra) si está en las pautas, no la del plato de almuerzo.
 Si la imagen no muestra comida, poné es_comida=false y explicalo en el título.`
   });
 
@@ -309,6 +325,34 @@ Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté
 const ESQUEMA_LOTE = {
   type: 'OBJECT',
   properties: {
+    comidas: {
+      type: 'ARRAY',
+      description: 'Comidas del día que indica la nutricionista (vacío si no lo dice)',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          nombre: { type: 'STRING', description: 'Ej.: Desayuno, Colación, Almuerzo' },
+          hora: { type: 'STRING', description: 'HH:MM si el documento lo indica; si no, vacío' },
+          guia: { type: 'STRING', description: 'Qué debe tener, en una línea corta (máx. 12 palabras)' },
+          estilo: { type: 'STRING', enum: ['plato', 'estructura', 'libre'], description: 'plato: almuerzo/cena con distribución de plato; estructura: desayuno/merienda tipo infusión+hidrato+proteína+fibra; libre: otra' }
+        },
+        required: ['nombre', 'guia', 'estilo']
+      }
+    },
+    limites: {
+      type: 'ARRAY',
+      description: 'Cantidades a controlar que el documento indica con números (ej.: huevo máx. 1 por día)',
+      items: {
+        type: 'OBJECT',
+        properties: {
+          nombre: { type: 'STRING', description: 'Corto: Frutas, Huevo, Papa/choclo/batata, Frutos secos...' },
+          min: { type: 'INTEGER' },
+          max: { type: 'INTEGER' },
+          periodo: { type: 'STRING', enum: ['dia', 'semana'] }
+        },
+        required: ['nombre', 'periodo']
+      }
+    },
     documentos: {
       type: 'ARRAY',
       items: {
@@ -321,7 +365,7 @@ const ESQUEMA_LOTE = {
       }
     }
   },
-  required: ['documentos']
+  required: ['documentos', 'comidas', 'limites']
 };
 
 async function leerPautasLote(key, b) {
@@ -348,7 +392,11 @@ async function leerPautasLote(key, b) {
   if (pesoImgs > MAX_BASE64) return { status: 413, json: { error: 'Los documentos escaneados son demasiado pesados para leerlos juntos.' } };
   parts.push({
     text: `Para CADA documento de arriba (usá su id), devolvé sus pautas de alimentación como reglas cortas y concretas, por ejemplo: "Papa, choclo o batata: máximo 2 por semana", "Evitar frituras", "Huevo: máximo 1 por día", "Tomar 2 litros de agua por día".
-Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté en el documento. No repitas en un documento una regla que ya pusiste en otro. Si un documento no tiene pautas, devolvé su lista vacía. Máximo 25 reglas por documento.`
+Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté en el documento. No repitas en un documento una regla que ya pusiste en otro. Si un documento no tiene pautas, devolvé su lista vacía. Máximo 25 reglas por documento.
+
+Además, mirando TODOS los documentos juntos:
+- "comidas": las comidas del día que indica la nutricionista (por ejemplo "realizar las 4 comidas: desayuno, almuerzo, merienda y cena", o si agrega colaciones), en orden, con una guía corta de qué debe tener cada una. Si no lo dice, devolvé la lista vacía.
+- "limites": solo cantidades con número que se puedan contar en un plato, por día o por semana (por ejemplo frutas 3 a 4 por día → min 3, max 4; huevo máximo 1 por día → max 1; papa/choclo/batata 2 por semana → max 2). No incluyas el agua. Si no hay, lista vacía.`
   });
   const r = await gemini(key, {
     system: 'Extraés pautas de alimentación de documentos de nutricionistas. Respondés en español rioplatense.',
@@ -360,7 +408,14 @@ Incluí cantidades y frecuencias cuando aparezcan. No agregues nada que no esté
   (r.documentos || []).forEach(d => {
     porId[String(d.id)] = (d.reglas || []).map(x => String(x).trim()).filter(Boolean).slice(0, 25);
   });
-  return { status: 200, json: { documentos: ids.map(id => ({ id, reglas: porId[id] || [] })) } };
+  return {
+    status: 200,
+    json: {
+      documentos: ids.map(id => ({ id, reglas: porId[id] || [] })),
+      comidas: Array.isArray(r.comidas) ? r.comidas.slice(0, 8) : [],
+      limites: Array.isArray(r.limites) ? r.limites.slice(0, 10) : []
+    }
+  };
 }
 
 /* ---------- Errores en palabras simples ---------- */

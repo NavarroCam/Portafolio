@@ -2,32 +2,7 @@
    hoy.js — pantalla "Hoy", agua y recordatorios
    ========================================================== */
 
-const TIPOS = [
-  { id: 'desayuno', nombre: 'Desayuno', hora: '08:00', guia: 'Infusión + 1 hidrato + 1 proteína + 1 fibra' },
-  { id: 'almuerzo', nombre: 'Almuerzo', hora: '13:00', guia: '½ vegetales · ¼ proteína · ¼ cereal' },
-  { id: 'merienda', nombre: 'Merienda', hora: '17:00', guia: 'Infusión + 1 hidrato + 1 proteína + 1 fibra' },
-  { id: 'cena', nombre: 'Cena', hora: '21:00', guia: '½ vegetales · ¼ proteína · ¼ cereal' }
-];
-
-/** Horario de cada comida ('HH:MM'): el que eligió el usuario o el de fábrica */
-function horaDe(tipo) {
-  const propios = (Store.u && Store.u.horarios) || {};
-  return propios[tipo] || TIPOS.find(t => t.id === tipo).hora;
-}
-const aMinutos = hhmm => { const [h, m] = String(hhmm).split(':').map(Number); return h * 60 + (m || 0); };
-const horaLinda = hhmm => { const [h, m] = String(hhmm).split(':'); return `${Number(h)}:${m}`; };
-
-/** Tipo de comida sugerido según la hora: el horario más cercano */
-function tipoPorHora(d = new Date()) {
-  const ahora = d.getHours() * 60 + d.getMinutes();
-  let mejor = TIPOS[0].id, dist = Infinity;
-  for (const t of TIPOS) {
-    const x = Math.abs(aMinutos(horaDe(t.id)) - ahora);
-    const diff = Math.min(x, 1440 - x);
-    if (diff < dist) { dist = diff; mejor = t.id; }
-  }
-  return mejor;
-}
+/* Las comidas y los límites de cada usuario están en plan.js */
 
 /** Comidas guardadas de un día (clave AAAA-MM-DD) */
 function comidasDelDia(clave) {
@@ -202,25 +177,9 @@ const Recordatorios = {
   }
 };
 
-/* ---------- Editar horarios y la hora de una comida ---------- */
+/* ---------- Cambiar la hora (o la comida) de algo ya cargado ---------- */
 const Horarios = {
   init() {
-    // Horarios de las 4 comidas
-    document.getElementById('dlg-horarios-campos').innerHTML = TIPOS.map(t => `
-      <div class="field"><label for="hora-${t.id}">${t.nombre}</label>
-        <input id="hora-${t.id}" name="${t.id}" type="time" required></div>`).join('');
-    document.getElementById('form-horarios').addEventListener('submit', e => {
-      e.preventDefault();
-      const f = e.target;
-      Store.update(u => { u.horarios = Object.fromEntries(TIPOS.map(t => [t.id, f[t.id].value || t.hora])); });
-      Modal.cerrar();
-      UI.toast('Horarios guardados');
-      UI.route();
-    });
-    document.getElementById('horarios-reset').addEventListener('click', () => {
-      TIPOS.forEach(t => { document.getElementById('hora-' + t.id).value = t.hora; });
-    });
-
     // Hora de una comida ya cargada
     document.getElementById('form-hora-comida').addEventListener('submit', e => {
       e.preventDefault();
@@ -241,12 +200,6 @@ const Horarios = {
       UI.toast('Comida actualizada');
       UI.route();
     });
-    document.getElementById('tipo-comida').innerHTML = TIPOS.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('');
-  },
-
-  abrirHorarios() {
-    TIPOS.forEach(t => { document.getElementById('hora-' + t.id).value = horaDe(t.id); });
-    Modal.abrir('dlg-horarios', 'hora-desayuno');
   },
 
   abrirComida(id) {
@@ -255,6 +208,9 @@ const Horarios = {
     this.comidaId = id;
     const d = new Date(c.fecha);
     document.getElementById('hora-comida').value = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const opciones = Plan.comidas().map(t => `<option value="${UI.esc(t.id)}">${UI.esc(t.nombre)}</option>`);
+    if (!Plan.get(c.tipo)) opciones.push(`<option value="${UI.esc(c.tipo)}">${UI.esc(Plan.nombre(c.tipo, c))}</option>`);
+    document.getElementById('tipo-comida').innerHTML = opciones.join('');
     document.getElementById('tipo-comida').value = c.tipo;
     Modal.abrir('dlg-comida', 'hora-comida');
   }
@@ -287,7 +243,6 @@ const Modal = {
 /* ---------- Pantalla Hoy ---------- */
 Screens.hoy = {
   init() {
-    document.getElementById('hoy-editar-horarios').addEventListener('click', () => Horarios.abrirHorarios());
     document.getElementById('hoy-comidas').addEventListener('click', e => {
       const b = e.target.closest('[data-comida]');
       if (b) Horarios.abrirComida(b.dataset.comida);
@@ -312,46 +267,55 @@ Screens.hoy = {
       ? '¡Meta cumplida!'
       : `Te faltan ${Agua.faltanVasos()} vasos`;
 
-    // Comidas
+    // Comidas del plan del usuario
     const delDia = comidasDelDia(Fechas.clave(hoy));
-    document.getElementById('hoy-comidas').innerHTML = TIPOS.map(t => {
+    const plan = Plan.comidas();
+    document.getElementById('hoy-comidas-titulo').textContent = `Tus ${plan.length} comidas`;
+    document.getElementById('hoy-comidas').innerHTML = plan.map(t => {
       const c = delDia.filter(x => x.tipo === t.id).pop();
       if (!c) {
         return `
-          <a class="meal meal--pending" href="#cargar" data-tipo="${t.id}">
+          <a class="meal meal--pending" href="#cargar" data-tipo="${UI.esc(t.id)}">
             <span class="meal-ico meal-ico--pending"><svg><use href="#i-clock"></use></svg></span>
-            <span class="meal-body"><strong>${t.nombre} · ${horaLinda(horaDe(t.id))}</strong><span>${t.guia}</span></span>
+            <span class="meal-body"><strong>${UI.esc(t.nombre)} · ${horaLinda(t.hora)}</strong><span>${UI.esc(t.guia || 'Sacale una foto y te digo si va')}</span></span>
             <span class="meal-action">Cargar</span>
           </a>`;
       }
-      const ok = c.analisis && c.analisis.veredicto === 'ok';
-      const nombres = c.analisis && c.analisis.items ? c.analisis.items.map(i => i.nombre).join(', ') : (c.descripcion || '');
-      return `
-        <button type="button" class="meal meal--btn" data-comida="${c.id}" aria-label="${t.nombre} a las ${Fechas.hora(c.fecha)}. Tocá para cambiar la hora">
-          <span class="meal-ico ${ok ? 'meal-ico--ok' : 'meal-ico--warn'}">
-            ${fotoDe(c) ? `<img src="${fotoDe(c)}" alt="">` : `<svg><use href="#i-${ok ? 'check' : 'alert'}"></use></svg>`}
-          </span>
-          <span class="meal-body"><strong>${t.nombre} · ${Fechas.hora(c.fecha)}</strong><span>${UI.esc(nombres)}</span></span>
-          <span class="tag ${ok ? 'tag--ok' : 'tag--warn'}">${ok ? 'Va bien' : 'Ajustar'}</span>
-        </button>`;
-    }).join('');
+      return filaComida(c, t.nombre);
+    }).join('') +
+    // Comidas cargadas hoy de una comida que ya no está en el plan
+    delDia.filter(c => !Plan.get(c.tipo)).map(c => filaComida(c, Plan.nombre(c.tipo, c))).join('');
 
     document.querySelectorAll('#hoy-comidas a[data-tipo]').forEach(a => {
       a.addEventListener('click', () => { Screens.cargar.tipoElegido = a.dataset.tipo; });
     });
 
-    // Contadores del día (salen del análisis de cada comida)
-    const sum = k => delDia.reduce((n, c) => n + ((c.analisis && c.analisis.conteos && Number(c.analisis.conteos[k])) || 0), 0);
+    // Contadores: salen de los límites de cada usuario (sus pautas)
     const lunes = Fechas.lunes(hoy);
-    const tuberculosSemana = Store.u.comidas
-      .filter(c => new Date(c.fecha) >= lunes)
-      .reduce((n, c) => n + ((c.analisis && c.analisis.conteos && Number(c.analisis.conteos.tuberculos)) || 0), 0);
-    document.getElementById('hoy-contadores').innerHTML = `
-      <div class="mini-card stat"><span>Frutas</span><strong>${sum('frutas')} <small>de 3–4</small></strong></div>
-      <div class="mini-card stat"><span>Huevo</span><strong>${sum('huevos')} <small>máx. 1</small></strong></div>
-      <div class="mini-card stat"><span>Papa/choclo</span><strong>${tuberculosSemana} <small>de 2/sem</small></strong></div>`;
+    const deSemana = u.comidas.filter(c => new Date(c.fecha) >= lunes);
+    const limites = Plan.limites();
+    const cont = document.getElementById('hoy-contadores');
+    cont.hidden = limites.length === 0;
+    cont.innerHTML = limites.map(l => {
+      const lista = l.periodo === 'semana' ? deSemana : delDia;
+      const n = lista.reduce((s, c) => s + conteoDe(c, l.id), 0);
+      return `<div class="mini-card stat ${Plan.excedido(l, n) ? 'stat--warn' : ''}"><span>${UI.esc(l.nombre)}</span><strong>${n} <small>${Plan.objetivo(l)}</small></strong></div>`;
+    }).join('');
   }
 };
+
+function filaComida(c, nombre) {
+  const ok = c.analisis && c.analisis.veredicto === 'ok';
+  const nombres = c.analisis && c.analisis.items ? c.analisis.items.map(i => i.nombre).join(', ') : (c.descripcion || '');
+  return `
+    <button type="button" class="meal meal--btn" data-comida="${c.id}" aria-label="${UI.esc(nombre)} a las ${Fechas.hora(c.fecha)}. Tocá para cambiar la hora">
+      <span class="meal-ico ${ok ? 'meal-ico--ok' : 'meal-ico--warn'}">
+        ${fotoDe(c) ? `<img src="${fotoDe(c)}" alt="">` : `<svg><use href="#i-${ok ? 'check' : 'alert'}"></use></svg>`}
+      </span>
+      <span class="meal-body"><strong>${UI.esc(nombre)} · ${Fechas.hora(c.fecha)}</strong><span>${UI.esc(nombres)}</span></span>
+      <span class="tag ${ok ? 'tag--ok' : 'tag--warn'}">${ok ? 'Va bien' : 'Ajustar'}</span>
+    </button>`;
+}
 
 /* ---------- Pantalla Agua ---------- */
 Screens.agua = {

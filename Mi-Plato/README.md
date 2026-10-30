@@ -10,10 +10,11 @@ Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de 
 * **Cuenta en la nube:** Ingreso y registro con email y contraseña (Supabase Auth). Entrás desde cualquier dispositivo y ves los mismos datos; los cambios se sincronizan solos y, sin internet, se guardan y se suben cuando vuelve la conexión.
 * **Apodo opcional:** si lo cargás, la app te saluda así.
 * **Configuración inicial:** Condiciones de salud, alergias, datos de tu nutricionista y tu objetivo.
+* **Mis comidas y límites:** Cada usuario tiene sus propias comidas (nombre, horario, guía y cómo se evalúa la foto) y sus límites a controlar (por ejemplo, huevo máx. 1 por día). Se arman solos a partir de los PDFs de pautas y se pueden editar.
 * **Pautas en PDF:** Subís varios PDFs a la vez (hasta 25 MB cada uno). El texto se extrae en el celular y Gemini los lee todos en un solo pedido para armar tus reglas, que podés editar. Si te equivocás de archivo, lo eliminás y se van también sus reglas.
 * **Análisis por foto:** Cargás lo que vas a comer o ya comiste y la app te dice si "va bien" o "ajustalo", con la distribución del plato, lo que detectó y una sugerencia.
 * **Agua diaria:** Seguimiento de los 2 L con vasos, recordatorios (cada 2 horas, con almuerzo y cena, y si vas atrasada) y festejo con confeti al cumplir la meta.
-* **Mi semana:** Comidas "va bien" por día, límites semanales (papa, choclo, batata), actividad física y días con 2 L.
+* **Mi semana:** Comidas "va bien" por día, límites semanales de tus pautas, actividad física y días con 2 L.
 * **Exportar en PDF:** Resumen semanal con fotos para descargar o compartir con tu nutricionista.
 * **Asistente:** Chat con Gemini para pedir recetas y consultar ingredientes, respondiendo según tus pautas.
 * **Mi usuario:** Progreso de peso y medidas con gráfico, metas y acceso directo a tu nutricionista por WhatsApp o email.
@@ -49,6 +50,7 @@ Mi-Plato/
 │   ├── storage.js     # copia local de los datos, apodo y fechas
 │   ├── nube.js        # cuenta y sincronización con Supabase
 │   ├── fotos.js       # fotos de los platos (IndexedDB + nube)
+│   ├── plan.js        # comidas y límites de cada usuario
 │   ├── ui.js          # navegación, tema y utilidades
 │   ├── api.js         # llamadas a /api/gemini, imágenes y PDFs
 │   ├── auth.js        # ingreso, registro, salud, nutri y pautas
@@ -57,6 +59,7 @@ Mi-Plato/
 │   ├── semana.js      # semana y PDF
 │   ├── chat.js        # asistente
 │   ├── perfil.js      # mi usuario, progreso, metas y consultas
+│   ├── mis-comidas.js # pantalla para editar comidas y límites
 │   └── app.js         # arranque
 ├── api/gemini.js      # función serverless de Gemini (solo usuarios logueados)
 ├── api/config.js      # le pasa a la app la URL y la clave pública de Supabase

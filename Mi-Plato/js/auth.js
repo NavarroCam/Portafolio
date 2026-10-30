@@ -285,6 +285,23 @@ Screens.pautas = {
     });
   },
 
+  /** Comidas y límites que detectó Gemini en los PDFs */
+  aplicarPlan(r) {
+    const { plan, lim } = Plan.desdeDetectado(r.comidas || [], r.limites || []);
+    if (!plan.length && !lim.length) return;
+    const editado = Store.u.planEditado;
+    Store.update(u => {
+      u.pautas.sugerido = { comidas: plan, limites: lim, fecha: new Date().toISOString(), aplicado: !editado };
+      // Si nunca editó sus comidas a mano, las armamos directamente con lo que dicen sus pautas
+      if (!editado) {
+        if (plan.length) u.comidasPlan = plan;
+        if (lim.length) u.limites = lim;
+      }
+    });
+    if (!editado) UI.toast(`Armé tus ${Plan.comidas().length} comidas con tus pautas. Podés revisarlas en "Mis comidas".`, 4500);
+    else UI.toast('En tus PDFs encontré comidas y límites: los podés usar desde "Mis comidas".', 4500);
+  },
+
   pendientes() {
     return this.cola.filter(x => x.estado !== 'error').length;
   },
@@ -369,6 +386,7 @@ Screens.pautas = {
       });
       this.cola = this.cola.filter(x => !lote.includes(x));
       if (sinPautas.length) UI.toast(`No encontré pautas en ${sinPautas.join(', ')}.`, 4500);
+      this.aplicarPlan(r);
     } catch (err) {
       lote.forEach(x => { if (x.estado === 'leyendo') { x.estado = 'error'; x.error = err.message; } });
     } finally {
@@ -434,6 +452,16 @@ Screens.pautas = {
       <li>${UI.esc(r)}<button type="button" data-i="${i}" aria-label="Quitar regla: ${UI.esc(r)}">×</button></li>`).join('');
 
     document.getElementById('pautas-borrar-todo').hidden = filas.length < 2;
+
+    // Resumen de comidas y límites (se arman solos con los PDFs)
+    const resumen = document.getElementById('pautas-plan');
+    resumen.hidden = !(Store.u.comidasPlan || Plan.limites().length);
+    if (!resumen.hidden) {
+      resumen.innerHTML = `
+        <div class="row-between"><strong>Tus comidas</strong><a class="link-btn" href="#mis-comidas">Revisar</a></div>
+        <span class="small">${UI.esc(Plan.comidas().map(c => `${c.nombre} ${horaLinda(c.hora)}`).join(' · '))}</span>
+        ${Plan.limites().length ? `<span class="small muted">Límites: ${UI.esc(Plan.limites().map(l => `${l.nombre} ${Plan.objetivo(l)}`).join(' · '))}</span>` : ''}`;
+    }
 
     const pend = this.pendientes();
     const btn = document.getElementById('pautas-listo');

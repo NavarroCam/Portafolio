@@ -20,7 +20,6 @@ Screens.perfil = {
       UI.toast('Notas guardadas');
     });
     document.getElementById('perfil-tema').addEventListener('change', e => UI.setTema(e.target.value));
-    document.getElementById('perfil-horarios').addEventListener('click', () => Horarios.abrirHorarios());
     document.getElementById('form-apodo').addEventListener('submit', e => {
       e.preventDefault();
       const input = document.getElementById('perfil-apodo');
@@ -88,7 +87,8 @@ Screens.perfil = {
     document.getElementById('perfil-notas').value = u.notas || '';
     document.getElementById('perfil-email').textContent = Store.email || '';
     document.getElementById('perfil-sync').textContent = Nube.textoEstado();
-    document.getElementById('perfil-horarios-txt').textContent = TIPOS.map(t => horaLinda(horaDe(t.id))).join(' · ');
+    const nL = Plan.limites().length;
+    document.getElementById('perfil-plan-txt').textContent = `${Plan.comidas().length} comidas · ${nL} ${nL === 1 ? 'límite' : 'límites'}`;
     document.getElementById('perfil-tema').value = Store.theme;
   }
 };

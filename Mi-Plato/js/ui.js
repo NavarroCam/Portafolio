@@ -6,7 +6,7 @@ const Screens = {}; // cada módulo registra: Screens.nombre = { init(), render(
 
 const UI = (() => {
   const PUBLICAS = ['login', 'registro'];
-  const ONBOARDING = ['salud', 'nutri', 'pautas'];
+  const ONBOARDING = ['salud', 'nutri', 'pautas', 'mis-comidas'];
   const CON_TABS = ['hoy', 'agua', 'chat', 'semana'];
   let actual = null;
 
@@ -36,7 +36,7 @@ const UI = (() => {
     const conTabs = listo && (escritorio ? !PUBLICAS.includes(nombre) : CON_TABS.includes(nombre));
     tabbar.hidden = !conTabs;
     document.querySelector('.app').classList.toggle('has-tabbar', conTabs);
-    const seccion = { resultado: 'cargar', exportar: 'semana', progreso: 'perfil', consulta: 'perfil', salud: 'perfil', nutri: 'perfil', pautas: 'perfil' }[nombre] || nombre;
+    const seccion = { resultado: 'cargar', exportar: 'semana', progreso: 'perfil', consulta: 'perfil', 'mis-comidas': 'perfil', salud: 'perfil', nutri: 'perfil', pautas: 'perfil' }[nombre] || nombre;
     tabbar.querySelectorAll('a').forEach(a => {
       if (a.dataset.tab === seccion) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
