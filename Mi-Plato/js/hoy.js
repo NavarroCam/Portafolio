@@ -34,10 +34,9 @@ const Agua = {
     const antes = this.hoy();
     const clave = Fechas.clave();
     Store.update(u => { u.agua[clave] = Math.max(0, Math.min(ml, 5000)); });
-    const llego = antes < META_AGUA && this.hoy() >= META_AGUA;
-    // Festejamos una sola vez por día (si desmarcás y volvés a marcar, no se repite)
-    if (llego && !(Store.u.festejos || {})[clave]) {
-      Store.update(u => { u.festejos = { ...(u.festejos || {}), [clave]: true }; });
+    // Cada vez que se pasa de menos de 2 L a 2 L o más, festejamos
+    // (igual desde "Hoy" que desde "Agua")
+    if (antes < META_AGUA && this.hoy() >= META_AGUA) {
       Festejo.mostrar();
       return true;
     }

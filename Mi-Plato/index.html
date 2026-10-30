@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=7">
+  <link rel="stylesheet" href="css/styles.css?v=8">
 </head>
 <body>
 
@@ -388,6 +388,14 @@
             <span class="muted small" id="perfil-objetivo"></span>
           </div>
         </div>
+        <form class="card stack-xs" id="form-apodo">
+          <label class="strong" for="perfil-apodo">Apodo <span class="muted small">(opcional)</span></label>
+          <div class="inline-form">
+            <input id="perfil-apodo" maxlength="24" autocomplete="nickname" placeholder="¿Cómo querés que te digamos?">
+            <button class="btn btn--primary btn--sm" type="submit">Guardar</button>
+          </div>
+          <small class="hint">Así te saluda la app. Si lo dejás vacío, usamos tu nombre.</small>
+        </form>
         <div class="nutri-card" id="perfil-nutri"></div>
         <a class="card link-card" href="#progreso">
           <div class="row-between"><strong>Progreso y metas</strong><svg class="chev"><use href="#i-chevron"></use></svg></div>
@@ -398,11 +406,6 @@
           <a class="list-link" href="#salud"><span><strong>Condiciones de salud</strong><small class="muted" id="perfil-salud"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
           <a class="list-link" href="#pautas"><span><strong>Pautas de alimentación</strong><small class="muted" id="perfil-pautas"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
           <a class="list-link" href="#nutri"><span><strong>Mi nutricionista</strong><small class="muted" id="perfil-nutri-txt"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
-        </div>
-        <div class="field">
-          <label for="perfil-apodo">Apodo <span class="muted">(opcional)</span></label>
-          <input id="perfil-apodo" maxlength="24" autocomplete="nickname" placeholder="¿Cómo querés que te digamos?">
-          <small class="hint">Si lo dejás vacío, usamos tu nombre.</small>
         </div>
         <div class="field">
           <label for="perfil-notas">Notas y dudas para el próximo control</label>
@@ -512,15 +515,15 @@
   <!-- jsPDF para exportar la semana -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <script src="js/storage.js?v=7"></script>
-  <script src="js/ui.js?v=7"></script>
-  <script src="js/api.js?v=7"></script>
-  <script src="js/auth.js?v=7"></script>
-  <script src="js/hoy.js?v=7"></script>
-  <script src="js/comidas.js?v=7"></script>
-  <script src="js/semana.js?v=7"></script>
-  <script src="js/chat.js?v=7"></script>
-  <script src="js/perfil.js?v=7"></script>
-  <script src="js/app.js?v=7"></script>
+  <script src="js/storage.js?v=8"></script>
+  <script src="js/ui.js?v=8"></script>
+  <script src="js/api.js?v=8"></script>
+  <script src="js/auth.js?v=8"></script>
+  <script src="js/hoy.js?v=8"></script>
+  <script src="js/comidas.js?v=8"></script>
+  <script src="js/semana.js?v=8"></script>
+  <script src="js/chat.js?v=8"></script>
+  <script src="js/perfil.js?v=8"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 </html>

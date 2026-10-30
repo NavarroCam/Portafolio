@@ -20,8 +20,11 @@ Screens.perfil = {
       UI.toast('Notas guardadas');
     });
     document.getElementById('perfil-tema').addEventListener('change', e => UI.setTema(e.target.value));
-    document.getElementById('perfil-apodo').addEventListener('change', e => {
-      const apodo = e.target.value.trim().slice(0, 24);
+    document.getElementById('form-apodo').addEventListener('submit', e => {
+      e.preventDefault();
+      const input = document.getElementById('perfil-apodo');
+      input.blur();
+      const apodo = input.value.trim().slice(0, 24);
       Store.update(u => { u.perfil.apodo = apodo; });
       UI.toast(apodo ? `¡Listo, ${apodo}!` : 'Apodo borrado: te vamos a decir por tu nombre');
       this.render();
