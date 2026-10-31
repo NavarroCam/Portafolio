@@ -250,8 +250,23 @@ h1, h2, h3, p { margin: 0; }
   display: block;
   line-height: normal;
 }
-.field input[type="date"]::-webkit-date-and-time-value { text-align: left; min-height: 1.4em; }
-.field input[type="date"]::-webkit-calendar-picker-indicator { opacity: 0.6; }
+/* iOS deja el texto de fecha/hora arriba y centrado horizontalmente: lo fijamos
+   a la misma altura que el resto de los campos y alineado a la izquierda */
+.field input[type="date"], .field input[type="time"], .field select {
+  height: 48px; min-height: 48px; line-height: 46px; padding-top: 0; padding-bottom: 0;
+}
+.field input[type="date"]::-webkit-date-and-time-value,
+.field input[type="time"]::-webkit-date-and-time-value { text-align: left; margin: 0; min-height: 0; line-height: 46px; }
+.field input[type="date"]::-webkit-datetime-edit,
+.field input[type="time"]::-webkit-datetime-edit { padding: 0; line-height: 46px; }
+.field input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.field input[type="time"]::-webkit-datetime-edit-fields-wrapper { padding: 0; }
+.field input[type="date"]::-webkit-calendar-picker-indicator,
+.field input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0.6; margin: 0; }
+/* Números: sin flechitas, el texto queda alineado igual que en los demás */
+.field input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+.field input[type="number"]::-webkit-inner-spin-button,
+.field input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .field select {
   background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
   background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%;
@@ -604,7 +619,6 @@ h1, h2, h3, p { margin: 0; }
   .modal { align-items: center; }
   .modal-card { border-radius: 24px; }
 }
-.field input[type="time"]::-webkit-date-and-time-value { text-align: left; min-height: 1.4em; }
 .meal--btn { width: 100%; text-align: left; cursor: pointer; font: inherit; }
 .list-link { width: 100%; background: none; border: none; border-bottom: 1px solid var(--divider); padding: 12px 0; text-align: left; font: inherit; cursor: pointer; }
 .list > .list-link:last-child { border-bottom: none; }
