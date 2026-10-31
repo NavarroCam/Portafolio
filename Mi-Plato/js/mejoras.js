@@ -11,7 +11,7 @@ const MEJORAS = [
   { id: 'avisos-cerrada', estado: 'camino', titulo: 'Recordatorios con la app cerrada', detalle: 'Avisos de agua y comidas aunque no tengas la app abierta.' },
   { id: 'borrar-cuenta', estado: 'camino', titulo: 'Borrar mi cuenta y mis datos', detalle: 'Un botón para eliminar todo desde Mi usuario.' },
   { id: 'compartir-nutri', estado: 'planeado', titulo: 'Compartir con tu nutri', detalle: 'Un link para que vea tu semana sin mandarle el PDF.', nuevo: true },
-  { id: 'instalar-app', estado: 'planeado', titulo: 'Instalarla como app', detalle: 'Ícono en la pantalla de inicio y que funcione sin internet.' },
+  { id: 'instalar-app', estado: 'planeado', titulo: 'Que funcione sin internet', detalle: 'Ver tu día y cargar comidas aunque no tengas conexión.' },
   { id: 'lista-compras', estado: 'idea', titulo: 'Lista de compras', detalle: 'Armada con tus pautas y las recetas del asistente.' },
   { id: 'pasos', estado: 'idea', titulo: 'Contar pasos y actividad', detalle: 'Sumar la actividad del celular o del reloj al resumen semanal.' }
 ];

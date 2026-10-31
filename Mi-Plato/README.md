@@ -23,6 +23,7 @@ Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de 
 * **Mi usuario:** Progreso de peso y medidas con gráfico, metas y acceso directo a tu nutricionista por WhatsApp o email.
 * **Colores a elección:** 9 paletas (Salvia, Terracota, Petróleo, Lavanda, Ciruela, Frambuesa, Azul, Marrón y Mono, apta para daltónicos) guardadas en la cuenta, y modo claro, oscuro o automático.
 * **Próximas mejoras:** Lista de mejoras para votar y formulario para sugerir nuevas; cada sugerencia se guarda en Supabase y llega por mail (Resend).
+* **Se instala como app:** Con su ícono en la pantalla de inicio y a pantalla completa, sin pasar por ninguna tienda (iPhone: Compartir › "Agregar a inicio"; Android: menú › "Instalar app").
 * **Celular y escritorio:** En el celular, barra de navegación abajo; en la computadora, menú lateral, pantallas a dos columnas y arrastrar y soltar la foto del plato.
 
 
@@ -73,6 +74,10 @@ Mi-Plato/
 ├── api/config.js      # le pasa a la app la URL y la clave pública de Supabase
 ├── api/sugerencia.js  # guarda las sugerencias y las manda por mail
 ├── img/demo/          # fotos de los platos de ejemplo
+├── img/logo.svg       # logo de la app
+├── img/iconos/        # íconos para la pestaña y la pantalla de inicio
+├── manifest.webmanifest # nombre, colores e íconos de la app instalada
+├── sw.js              # service worker mínimo (necesario para instalarla)
 ├── supabase.sql       # tablas y reglas de seguridad para Supabase
 ├── vercel.json        # tiempo máximo de la función
 ├── vista-previa.png

@@ -372,7 +372,7 @@ h1, h2, h3, p { margin: 0; }
 
 /* ---------- Ingreso ---------- */
 .brand { display: flex; flex-direction: column; gap: 14px; margin: 12px 0 8px; }
-.logo { width: 64px; height: 64px; border-radius: 50%; background: conic-gradient(var(--veg) 0 50%, var(--prot) 50% 75%, var(--carb) 75% 100%); }
+.logo { width: 64px; height: 64px; border-radius: 24%; background: url("../img/logo.svg") center / contain no-repeat; }
 .steps { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; max-width: 220px; }
 .steps span { height: 6px; border-radius: 3px; background: var(--line); }
 .steps span.on { background: var(--accent); }

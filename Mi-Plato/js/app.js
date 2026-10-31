@@ -35,4 +35,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('hashchange', UI.route);
   UI.route();
   Recordatorios.iniciar();
+
+  // Para poder instalarla en el celular como una app
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('/sw.js').catch(() => { /* sin service worker igual funciona */ });
+  }
 });
