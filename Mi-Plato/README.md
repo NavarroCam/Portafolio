@@ -17,6 +17,7 @@ Aplicación web para hacer seguimiento de lo que comés siguiendo las pautas de 
 * **Comidas extra:** Colaciones, postres o algo que picaste fuera del plan, con su propio nombre y hora.
 * **Agua diaria:** Seguimiento de los 2 L con vasos, recordatorios (cada 2 horas, con almuerzo y cena, y si vas atrasada) y festejo con confeti al cumplir la meta.
 * **Mi semana:** Comidas "va bien" por día, límites semanales de tus pautas, actividad física y días con 2 L.
+* **Actividad física:** Registrás cada entrenamiento con el tipo (gym, caminata, natación…), el día, los minutos y una nota; se puede editar o borrar y sale detallado en el PDF.
 * **Exportar en PDF:** Resumen semanal con fotos para descargar o compartir con tu nutricionista.
 * **Asistente:** Chat con Gemini para pedir recetas y consultar ingredientes, respondiendo según tus pautas.
 * **Mi usuario:** Progreso de peso y medidas con gráfico, metas y acceso directo a tu nutricionista por WhatsApp o email.
@@ -63,6 +64,7 @@ Mi-Plato/
 │   ├── chat.js        # asistente
 │   ├── perfil.js      # mi usuario, progreso, metas y consultas
 │   ├── mis-comidas.js # pantalla para editar comidas y límites
+│   ├── actividad.js   # actividad física: registrar, editar y borrar
 │   ├── temas.js       # paletas de colores y pantalla "Colores de la app"
 │   ├── demo.js        # usuario de demo con datos de ejemplo
 │   ├── mejoras.js     # próximas mejoras (votos) y sugerencias

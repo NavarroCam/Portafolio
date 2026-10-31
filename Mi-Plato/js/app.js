@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   Horarios.init();
   Clave.init();
   Demo.init();
+  Actividad.init();
 
   // Botones de tema (login, registro, perfil): alternan claro/oscuro
   document.querySelectorAll('.js-theme-toggle').forEach(b => {

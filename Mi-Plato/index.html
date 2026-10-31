@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=15">
+  <link rel="stylesheet" href="css/styles.css?v=16">
 </head>
 <body>
 
@@ -726,6 +726,29 @@
       </form>
     </div>
 
+    <!-- Registrar o editar actividad física -->
+    <div class="modal" id="dlg-actividad" hidden>
+      <form class="modal-card" id="form-actividad" role="dialog" aria-modal="true" aria-labelledby="dlg-actividad-titulo" novalidate>
+        <h2 class="title-sm" id="dlg-actividad-titulo">Registrar actividad</h2>
+        <div class="stack-xs">
+          <span class="strong" id="act-tipos-label">¿Qué hiciste?</span>
+          <div class="chips" id="act-tipos" role="radiogroup" aria-labelledby="act-tipos-label"></div>
+        </div>
+        <div class="field" id="act-otro-wrap" hidden><label for="act-otro">¿Cuál?</label><input id="act-otro" maxlength="30" placeholder="Ej.: pilates, fútbol, tenis"></div>
+        <div class="grid-2">
+          <div class="field"><label for="act-fecha">Día</label><input id="act-fecha" type="date" required></div>
+          <div class="field"><label for="act-minutos">Minutos <span class="muted">(opcional)</span></label><input id="act-minutos" type="number" min="1" max="600" step="5" inputmode="numeric" placeholder="—"></div>
+        </div>
+        <div class="field"><label for="act-nota">Nota <span class="muted">(opcional)</span></label><input id="act-nota" maxlength="140" placeholder="Ej.: piernas y glúteos, 2 km de pileta"></div>
+        <p class="form-error" id="act-error" role="alert"></p>
+        <div class="grid-2">
+          <button type="button" class="btn btn--outline" data-cerrar>Cancelar</button>
+          <button type="submit" class="btn btn--primary">Guardar</button>
+        </div>
+        <button type="button" class="btn btn--text danger" id="act-borrar">Borrar esta actividad</button>
+      </form>
+    </div>
+
     <!-- Demo: elegir un plato de ejemplo -->
     <div class="modal" id="dlg-demo" hidden>
       <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dlg-demo-titulo">
@@ -790,22 +813,23 @@
   <!-- Supabase: cuenta y datos en la nube -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="js/storage.js?v=15"></script>
-  <script src="js/ui.js?v=15"></script>
-  <script src="js/fotos.js?v=15"></script>
-  <script src="js/nube.js?v=15"></script>
-  <script src="js/plan.js?v=15"></script>
-  <script src="js/api.js?v=15"></script>
-  <script src="js/auth.js?v=15"></script>
-  <script src="js/hoy.js?v=15"></script>
-  <script src="js/comidas.js?v=15"></script>
-  <script src="js/semana.js?v=15"></script>
-  <script src="js/chat.js?v=15"></script>
-  <script src="js/perfil.js?v=15"></script>
-  <script src="js/mis-comidas.js?v=15"></script>
-  <script src="js/temas.js?v=15"></script>
-  <script src="js/demo.js?v=15"></script>
-  <script src="js/mejoras.js?v=15"></script>
-  <script src="js/app.js?v=15"></script>
+  <script src="js/storage.js?v=16"></script>
+  <script src="js/ui.js?v=16"></script>
+  <script src="js/fotos.js?v=16"></script>
+  <script src="js/nube.js?v=16"></script>
+  <script src="js/plan.js?v=16"></script>
+  <script src="js/api.js?v=16"></script>
+  <script src="js/auth.js?v=16"></script>
+  <script src="js/hoy.js?v=16"></script>
+  <script src="js/comidas.js?v=16"></script>
+  <script src="js/semana.js?v=16"></script>
+  <script src="js/chat.js?v=16"></script>
+  <script src="js/perfil.js?v=16"></script>
+  <script src="js/mis-comidas.js?v=16"></script>
+  <script src="js/actividad.js?v=16"></script>
+  <script src="js/temas.js?v=16"></script>
+  <script src="js/demo.js?v=16"></script>
+  <script src="js/mejoras.js?v=16"></script>
+  <script src="js/app.js?v=16"></script>
 </body>
 </html>

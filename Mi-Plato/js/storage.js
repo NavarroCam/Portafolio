@@ -89,7 +89,8 @@ function usuarioVacio(perfil = {}) {
     pautas: { archivos: [], reglas: [] },
     comidas: [],      // { id, fecha, tipo, momento, fotoId, descripcion, analisis }
     agua: {},         // { 'AAAA-MM-DD': ml }
-    actividad: {},    // { 'AAAA-MM-DD': cantidad }
+    actividad: {},    // (versión anterior: se pasa a "entrenos")
+    entrenos: [],     // { id, fecha 'AAAA-MM-DD', tipo, minutos, nota } (ver actividad.js)
     medidas: [],      // { fecha, peso, cintura, cadera }
     metas: [],        // { id, tipo, valor, fecha, texto }
     notas: '',

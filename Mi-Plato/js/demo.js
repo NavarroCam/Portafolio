@@ -132,7 +132,11 @@ const Demo = {
     // Agua: días cumplidos y otros no tanto
     [2000, 2250, 1500, 2000, 1750, 2000].forEach((ml, i) => { u.agua[Fechas.clave(dia(i - 6))] = ml; });
     u.agua[Fechas.clave(dia(0))] = Math.min(1500, Math.max(250, Math.floor(ahora / 60 - 7) * 250));
-    u.actividad[Fechas.clave(dia(-5))] = 1; u.actividad[Fechas.clave(dia(-3))] = 1; u.actividad[Fechas.clave(dia(-1))] = 1;
+    u.entrenos = [
+      { id: 'demo-a1', fecha: Fechas.clave(dia(-5)), tipo: 'Gym', minutos: 50, nota: 'Piernas y glúteos' },
+      { id: 'demo-a2', fecha: Fechas.clave(dia(-3)), tipo: 'Natación', minutos: 40, nota: '1,5 km' },
+      { id: 'demo-a3', fecha: Fechas.clave(dia(-1)), tipo: 'Caminata', minutos: 35, nota: '' }
+    ];
     u.medidas = [
       { fecha: Fechas.clave(dia(-28)), peso: 71.4, cintura: 85, cadera: 102 },
       { fecha: Fechas.clave(dia(-14)), peso: 70.6, cintura: 84, cadera: 101 },

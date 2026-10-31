@@ -28,7 +28,8 @@ const Semana = {
         ok: lista.filter(c => idsPlan.has(c.tipo) && c.analisis && c.analisis.veredicto === 'ok').length,
         completas: tipos.size,
         agua: u.agua[clave] || 0,
-        actividad: u.actividad[clave] || 0,
+        entrenos: Actividad.delDia(clave),
+        actividad: Actividad.delDia(clave).length,
         pasado: clave <= hoyClave && clave >= desdeClave,
         esHoy: clave === hoyClave
       };
@@ -46,6 +47,7 @@ const Semana = {
       totalOk: comidas.filter(c => c.analisis && c.analisis.veredicto === 'ok').length,
       limitesSemana, nComidas,
       actividad: porDia.reduce((n, d) => n + d.actividad, 0),
+      entrenos: porDia.flatMap(d => d.entrenos),
       metaActividad: metaAct ? Number(metaAct.valor) || 3 : 3,
       diasAgua: pasados.filter(d => d.agua >= META_AGUA).length,
       aguaPromedio: pasados.length ? pasados.reduce((n, d) => n + d.agua, 0) / pasados.length : 0,
@@ -155,8 +157,11 @@ const Semana = {
         texto(Fechas.largo(dia.fecha), M, 10);
         let x = W - M;
         if (op.actividad) {
-          doc.setTextColor(...gris); doc.text(dia.actividad ? `${dia.actividad} entreno${dia.actividad > 1 ? 's' : ''}` : '—', x, y, { align: 'right' });
-          x -= 40;
+          // "Natación 40 min, Gym" (recortado para que entre en la columna)
+          const txt = dia.entrenos.map(e => e.tipo ? e.tipo + (e.minutos ? ` ${e.minutos} min` : '') : 'Entrenamiento').join(', ');
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
+          doc.setTextColor(...gris); doc.text(txt ? doc.splitTextToSize(txt, 68)[0] : '—', x, y, { align: 'right' });
+          x -= 76;
         }
         if (op.agua) {
           doc.setTextColor(...(dia.agua >= META_AGUA ? verde : gris));
@@ -242,11 +247,12 @@ Screens.semana = {
     document.getElementById('semana-prev').addEventListener('click', () => { this.offset--; this.render(); });
     document.getElementById('semana-next').addEventListener('click', () => { if (this.offset < 0) { this.offset++; this.render(); } });
     document.getElementById('semana-metricas').addEventListener('click', e => {
+      const ed = e.target.closest('[data-entreno]');
+      if (ed) { Actividad.abrir(ed.dataset.entreno); return; }
       if (!e.target.closest('[data-accion="actividad"]')) return;
-      const k = Fechas.clave();
-      Store.update(u => { u.actividad[k] = (u.actividad[k] || 0) + 1; });
-      UI.toast('Entrenamiento registrado. ¡Bien ahí!');
-      this.render();
+      // En una semana pasada, por defecto el domingo de esa semana
+      const dom = Fechas.clave(Fechas.sumarDias(this.lunes(), 6));
+      Actividad.abrir(null, dom < Fechas.clave() ? dom : Fechas.clave());
     });
   },
 
@@ -282,8 +288,14 @@ Screens.semana = {
       <div class="card metric">
         <div class="row-between"><span>Actividad física</span><b>${d.actividad} de ${d.metaActividad}</b></div>
         ${barra(d.actividad, d.metaActividad, 'var(--prot)')}
-        <div class="row-between"><small>Musculación + aeróbico</small>
-          ${this.offset === 0 ? '<button type="button" class="mini" data-accion="actividad">+ Registrar hoy</button>' : ''}</div>
+        ${d.entrenos.length ? `<div class="entrenos">${d.entrenos.map(e => `
+          <button type="button" class="entreno" data-entreno="${e.id}" aria-label="Editar: ${UI.esc(Actividad.texto(e))}, ${Fechas.largo(Fechas.desdeClave(e.fecha))}">
+            <span class="entreno-dia">${Fechas.desdeClave(e.fecha).toLocaleDateString('es-AR', { weekday: 'short' }).replace('.', '')}</span>
+            <span class="entreno-txt"><strong>${UI.esc(Actividad.texto(e))}</strong>${e.nota ? `<small>${UI.esc(e.nota)}</small>` : ''}</span>
+            <svg><use href="#i-pen"></use></svg>
+          </button>`).join('')}</div>` : ''}
+        <div class="row-between"><small>${d.entrenos.length ? 'Tocá una para editarla o borrarla' : 'Gym, caminata, natación…'}</small>
+          <button type="button" class="mini" data-accion="actividad">+ Registrar</button></div>
       </div>
       <div class="card metric">
         <div class="row-between"><span>Días con 2 L de agua</span><b>${d.diasAgua} de ${d.diasPasados}</b></div>

@@ -81,6 +81,7 @@ const Nube = {
 
     await this.migrarFotosViejas();
     Plan.migrar();
+    Actividad.migrar();
     await this.subir();
   },
 
