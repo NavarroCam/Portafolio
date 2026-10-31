@@ -86,6 +86,23 @@ Mi-Plato/
 ```
 
 
+## 📲 Instalar en el celular
+
+Mi Plato se instala desde el navegador, sin pasar por ninguna tienda. Queda con su ícono en la pantalla de inicio y se abre a pantalla completa, como cualquier app.
+
+**iPhone (con Safari, tiene que ser Safari)**
+1. Entrá a [mi-plato-cmno.vercel.app](https://mi-plato-cmno.vercel.app/).
+2. Tocá **Compartir** (el cuadrado con la flecha hacia arriba).
+3. Elegí **"Agregar a inicio"** y después **Agregar**.
+
+**Android (con Chrome)**
+1. Entrá a [mi-plato-cmno.vercel.app](https://mi-plato-cmno.vercel.app/).
+2. Tocá el menú **⋮**.
+3. Elegí **"Instalar app"** o **"Agregar a la pantalla de inicio"**. A veces Chrome muestra solo un cartel abajo que dice **"Instalar"**.
+
+Ingresás con la misma cuenta que en la compu y ves los mismos datos. Por ahora necesita internet para funcionar.
+
+
 ## ▶️ Cómo usar
 
 1. Probar la demo, o crear una cuenta (con apodo, si querés) y completar salud, nutricionista y pautas en PDF.
