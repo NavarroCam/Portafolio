@@ -25,7 +25,7 @@ const Semana = {
         fecha: d,
         clave,
         comidas: lista,
-        ok: lista.filter(c => c.analisis && c.analisis.veredicto === 'ok').length,
+        ok: lista.filter(c => idsPlan.has(c.tipo) && c.analisis && c.analisis.veredicto === 'ok').length,
         completas: tipos.size,
         agua: u.agua[clave] || 0,
         actividad: u.actividad[clave] || 0,

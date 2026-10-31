@@ -37,6 +37,9 @@ const Store = (() => {
   return {
     get theme() { return db.theme || 'auto'; },
     set theme(v) { db.theme = v; guardar(); },
+    /** Última paleta usada en este dispositivo (para la pantalla de ingreso) */
+    get paleta() { return db.paleta || null; },
+    set paleta(v) { db.paleta = v; guardar(); },
 
     /** Datos del usuario logueado (o null) */
     get u() { return db.cache ? db.cache.datos : null; },
@@ -94,6 +97,8 @@ function usuarioVacio(perfil = {}) {
     comidasPlan: null,  // se arma con los PDFs de pautas (ver plan.js); null = comidas de ejemplo
     limites: [],        // { id, nombre, min, max, periodo }
     planEditado: false,
+    paleta: null,       // colores de la app (ver temas.js)
+    votos: [],          // mejoras que votó (ids, ver mejoras.js)
     recordatorios: { cada2: false, comidas: true, atrasada: false }
   };
 }

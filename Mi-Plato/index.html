@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css?v=14">
+  <link rel="stylesheet" href="css/styles.css?v=15">
 </head>
 <body>
 
@@ -37,9 +37,25 @@
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
     <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
     <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 7l9 6 9-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5l2 2M20 12a8 8 0 0 1-14 5l-2-2" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><path d="M20 4v5h-5M4 20v-5h5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-heart-fill" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.8 1.5-1.5 0-1.2-1-1.5-1-2.5s.8-1.5 2-1.5h2A4.5 4.5 0 0 0 21 11c0-4.4-4-8-9-8z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></symbol>
   </svg>
 
   <div class="app">
+    <div class="demo-banner" id="demo-banner" hidden>
+      <span class="demo-tag">DEMO</span>
+      <span class="demo-banner-txt">Datos de ejemplo. Nada se guarda.</span>
+      <a class="solo-escritorio demo-banner-link" href="#mejoras">Ver próximas mejoras</a>
+      <button type="button" class="demo-banner-btn" id="demo-crear">Crear mi cuenta</button>
+    </div>
     <main id="main" class="main">
 
       <!-- ===================== INGRESAR ===================== -->
@@ -52,6 +68,12 @@
           <h1 class="display">Mi Plato</h1>
           <p class="muted lead">Sacale foto a lo que comés y seguí las pautas de tu nutricionista.</p>
         </div>
+        <button type="button" class="demo-cta" id="login-demo">
+          <span class="demo-cta-ico"><svg><use href="#i-eye"></use></svg></span>
+          <span class="demo-cta-txt"><strong>Probar la demo</strong><small>Mirá cómo funciona con datos de ejemplo, sin registrarte</small></span>
+          <svg class="chev"><use href="#i-chevron"></use></svg>
+        </button>
+        <div class="separador"><span>o ingresá con tu cuenta</span></div>
         <p class="note note--info" id="login-legado" hidden>Ahora tu cuenta se guarda en la nube para que puedas entrar desde cualquier dispositivo. Ingresá con tu email y contraseña de siempre y tus datos se pasan solos.</p>
         <form id="form-login" class="stack" novalidate>
           <div class="field">
@@ -218,42 +240,47 @@
           <a class="link-btn" href="#mis-comidas">Editar comidas</a>
         </div>
         <div class="stack-sm" id="hoy-comidas"></div>
+        <a class="btn btn--outline" href="#cargar" id="hoy-extra"><svg><use href="#i-plus"></use></svg>Cargar una comida extra</a>
         </div>
         </div>
 
       </section>
 
       <!-- ===================== CARGAR COMIDA ===================== -->
-      <section class="screen screen--dark" id="screen-cargar" hidden>
-        <div class="topbar">
-          <a class="icon-btn icon-btn--ghost" href="#hoy" aria-label="Cerrar"><svg><use href="#i-back"></use></svg></a>
-          <span class="strong">Cargar comida</span>
-          <span style="width:44px"></span>
-        </div>
-        <div class="segmented segmented--dark" role="radiogroup" aria-label="Momento">
-          <label><input type="radio" name="momento" value="antes" checked><span>Lo voy a comer</span></label>
-          <label><input type="radio" name="momento" value="despues"><span>Ya lo comí</span></label>
-        </div>
-        <div class="viewfinder" id="cargar-visor">
+      <section class="screen screen--camara" id="screen-cargar" hidden>
+        <div class="cam-fondo" id="cargar-visor">
+          <video id="cargar-video" playsinline muted autoplay hidden></video>
           <img id="cargar-preview" alt="Foto del plato" hidden>
-          <div class="viewfinder-empty" id="cargar-vacio">
-            <div class="ring"></div>
-            <span class="solo-celular">Encuadrá el plato entero, desde arriba</span>
+          <div class="cam-vacio" id="cargar-vacio">
+            <span class="solo-celular">Tocá el botón redondo para sacar la foto</span>
             <span class="solo-escritorio">Arrastrá una foto acá o tocá el botón redondo para elegirla</span>
           </div>
+          <div class="cam-guia" id="cargar-guia" aria-hidden="true"></div>
         </div>
-        <div class="field field--dark">
-          <label for="cargar-desc">¿Querés aclarar algo? <span class="muted-dark">(opcional)</span></label>
-          <input id="cargar-desc" placeholder="Ej.: la carne es peceto al horno">
+        <div class="cam-top">
+          <a class="cam-btn cam-btn--icono" href="#hoy" id="cargar-cerrar" aria-label="Cerrar"><svg><use href="#i-close"></use></svg></a>
+          <button class="cam-btn" type="button" id="cargar-repetir" hidden><svg><use href="#i-repeat"></use></svg>Repetir</button>
+          <button class="cam-btn" type="button" id="cargar-elegir" aria-haspopup="dialog"><span id="cargar-elegir-txt"></span><svg><use href="#i-down"></use></svg></button>
+          <button class="cam-btn" type="button" id="cargar-momento" aria-label="Cambiar si lo vas a comer o ya lo comiste"></button>
         </div>
-        <div>
-          <span class="small muted-dark">¿Qué comida es?</span>
-          <div class="chips chips--dark" id="cargar-tipo" role="radiogroup" aria-label="Tipo de comida"></div>
+        <p class="cam-hint" id="cargar-hint">Encuadrá el plato entero, desde arriba</p>
+        <div class="cam-bar" id="cargar-barra">
+          <label class="cam-galeria" for="cargar-galeria" aria-label="Elegir de la galería"><svg><use href="#i-image"></use></svg></label>
+          <button class="shutter" type="button" id="cargar-disparar" aria-label="Sacar foto"><span></span></button>
+          <button class="cam-describir" type="button" id="cargar-describir"><svg><use href="#i-pen"></use></svg>Describir</button>
         </div>
-        <div class="shutter-row">
-          <label class="icon-btn icon-btn--ghost icon-btn--lg" for="cargar-galeria" aria-label="Elegir de la galería"><svg><use href="#i-image"></use></svg></label>
-          <label class="shutter" for="cargar-camara" aria-label="Sacar foto"><span></span></label>
-          <button class="btn btn--accent" type="button" id="cargar-analizar" disabled>Analizar</button>
+        <div class="cam-panel" id="cargar-panel" hidden>
+          <h2 class="title-sm" id="cargar-panel-titulo">¡Buena foto!</h2>
+          <div class="segmented" role="radiogroup" aria-label="Momento">
+            <label><input type="radio" name="momento" value="antes" checked><span>Lo voy a comer</span></label>
+            <label><input type="radio" name="momento" value="despues"><span>Ya lo comí</span></label>
+          </div>
+          <div class="field">
+            <label for="cargar-desc" id="cargar-desc-label">¿Querés aclarar algo? <span class="muted">(opcional)</span></label>
+            <textarea id="cargar-desc" rows="2" maxlength="400" placeholder="Ej.: la carne es peceto al horno"></textarea>
+          </div>
+          <button class="btn btn--primary" type="button" id="cargar-analizar" disabled><svg><use href="#i-sparkle"></use></svg>Analizar mi plato</button>
+          <button class="btn btn--text" type="button" id="cargar-a-camara" hidden>Mejor saco una foto</button>
         </div>
         <input id="cargar-camara" type="file" accept="image/*" capture="environment" class="visually-hidden">
         <input id="cargar-galeria" type="file" accept="image/*" class="visually-hidden">
@@ -434,9 +461,13 @@
           <label for="perfil-notas">Notas y dudas para el próximo control</label>
           <textarea id="perfil-notas" rows="4" placeholder="Escribí lo que le quieras preguntar"></textarea>
         </div>
-        <div class="field">
-          <label for="perfil-tema">Apariencia</label>
-          <select id="perfil-tema"><option value="auto">Automática (como el celular)</option><option value="light">Claro</option><option value="dark">Oscuro</option></select>
+        <div class="card list">
+          <a class="list-link" href="#apariencia"><span><strong>Colores de la app</strong><small class="muted" id="perfil-apariencia-txt"></small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
+        </div>
+        <h2 class="subtitle">Ayudanos a mejorar</h2>
+        <div class="card list">
+          <a class="list-link" href="#mejoras"><span><strong>Próximas mejoras</strong><small class="muted">Votá lo que más te sirva</small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
+          <a class="list-link" href="#sugerir"><span><strong>Sugerir una mejora</strong><small class="muted">Le llega directo a quien hace la app</small></span><svg class="chev"><use href="#i-chevron"></use></svg></a>
         </div>
         <div class="sync-box">
           <span class="small"><span class="muted">Cuenta:</span> <strong id="perfil-email"></strong></span>
@@ -543,6 +574,81 @@
         </div>
       </section>
 
+      <!-- ===================== COLORES DE LA APP ===================== -->
+      <section class="screen" id="screen-apariencia" hidden>
+        <div class="topbar topbar--start">
+          <a class="icon-btn" href="#perfil" aria-label="Volver"><svg><use href="#i-back"></use></svg></a>
+          <h1 class="title-sm">Colores de la app</h1>
+        </div>
+        <p class="muted">Elegí el que más te guste. Se guarda en tu cuenta, así se ve igual en todos tus dispositivos.</p>
+        <div class="paletas" id="apariencia-paletas" role="group" aria-label="Paleta de colores"></div>
+        <div class="stack-xs">
+          <span class="strong">Modo</span>
+          <div class="segmented" role="radiogroup" aria-label="Modo">
+            <label><input type="radio" name="modo" value="light"><span>Claro</span></label>
+            <label><input type="radio" name="modo" value="dark"><span>Oscuro</span></label>
+            <label><input type="radio" name="modo" value="auto"><span>Automático</span></label>
+          </div>
+          <small class="hint">Automático sigue lo que tengas configurado en el celular o la compu.</small>
+        </div>
+        <div class="stack-xs">
+          <span class="strong">Así se ve</span>
+          <div class="card stack-sm" aria-hidden="true">
+            <div class="water-card water-card--mini"><strong>Agua · 1,25 L</strong><span class="btn btn--white btn--sm">+ 1 vaso</span></div>
+            <div class="meal"><span class="meal-ico meal-ico--ok"><svg><use href="#i-check"></use></svg></span><span class="meal-body"><strong>Almuerzo · 13:00</strong><span>Pollo, ensalada, arroz yamaní</span></span><span class="tag tag--ok">Va bien</span></div>
+            <div class="meal meal--warn"><span class="meal-ico meal-ico--warn"><svg><use href="#i-alert"></use></svg></span><span class="meal-body"><strong>Cena · 21:00</strong><span>Milanesa frita, papas fritas</span></span><span class="tag tag--warn">Ajustar</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== PRÓXIMAS MEJORAS ===================== -->
+      <section class="screen" id="screen-mejoras" hidden>
+        <div class="topbar topbar--start">
+          <a class="icon-btn" href="#perfil" id="mejoras-volver" aria-label="Volver"><svg><use href="#i-back"></use></svg></a>
+          <h1 class="title-sm">Próximas mejoras</h1>
+        </div>
+        <p class="muted">Tocá el corazón en lo que más te sirva: lo más votado se hace primero.</p>
+        <div class="stack" id="mejoras-lista"></div>
+        <div class="sticky-action">
+          <a class="btn btn--primary" href="#sugerir"><svg><use href="#i-plus"></use></svg>Sugerir una mejora</a>
+        </div>
+      </section>
+
+      <!-- ===================== SUGERIR UNA MEJORA ===================== -->
+      <section class="screen" id="screen-sugerir" hidden>
+        <div class="topbar topbar--start">
+          <a class="icon-btn" href="#mejoras" aria-label="Volver"><svg><use href="#i-back"></use></svg></a>
+          <h1 class="title-sm">Sugerir una mejora</h1>
+        </div>
+        <form class="stack" id="form-sugerir" novalidate>
+          <div class="stack-xs">
+            <span class="strong" id="sug-tipo-label">¿De qué se trata?</span>
+            <div class="chips" id="sug-tipo" role="radiogroup" aria-labelledby="sug-tipo-label">
+              <button type="button" class="chip" role="radio" data-tipo="nuevo" aria-checked="true">Algo nuevo</button>
+              <button type="button" class="chip" role="radio" data-tipo="error" aria-checked="false">Algo que no anda</button>
+              <button type="button" class="chip" role="radio" data-tipo="diseno" aria-checked="false">Diseño</button>
+              <button type="button" class="chip" role="radio" data-tipo="otra" aria-checked="false">Otra</button>
+            </div>
+          </div>
+          <div class="field"><label for="sug-titulo">En pocas palabras</label><input id="sug-titulo" maxlength="80" required placeholder="Ej.: que cuente las colaciones"></div>
+          <div class="field"><label for="sug-detalle">Contanos más <span class="muted">(opcional)</span></label><textarea id="sug-detalle" rows="5" maxlength="1500" placeholder="¿Qué te gustaría que haga la app? ¿Dónde te trabaste?"></textarea></div>
+          <div class="field" id="sug-email-wrap" hidden><label for="sug-email">Tu email <span class="muted">(opcional, para avisarte)</span></label><input id="sug-email" type="email" autocomplete="email" placeholder="tu@email.com"></div>
+          <label class="check-row"><input type="checkbox" id="sug-avisar" checked><span>Avisarme por mail cuando esté lista</span></label>
+          <p class="form-error" id="sug-error" role="alert"></p>
+          <div class="grid-2">
+            <a class="btn btn--outline" href="#mejoras">Cancelar</a>
+            <button class="btn btn--primary" type="submit" id="sug-enviar">Enviar</button>
+          </div>
+        </form>
+        <div class="gracias" id="sug-gracias" hidden>
+          <span class="gracias-ico"><svg><use href="#i-check"></use></svg></span>
+          <h2 class="title" id="sug-gracias-titulo">¡Gracias!</h2>
+          <p class="muted lead" id="sug-gracias-texto"></p>
+          <div class="card row-gap"><svg class="accent-text"><use href="#i-heart"></use></svg><span class="small muted">Si sirve para todos, la sumamos a la lista para que se pueda votar.</span></div>
+          <a class="btn btn--primary" href="#mejoras">Ver las mejoras</a>
+        </div>
+      </section>
+
     </main>
 
     <!-- Navegación inferior -->
@@ -553,6 +659,7 @@
       <a href="#agua" data-tab="agua"><svg><use href="#i-drop"></use></svg>Agua</a>
       <a href="#chat" data-tab="chat"><svg><use href="#i-chat"></use></svg>Asistente</a>
       <a href="#semana" data-tab="semana"><svg><use href="#i-calendar"></use></svg>Semana</a>
+      <a href="#mejoras" data-tab="mejoras" class="solo-escritorio tabbar-mejoras"><svg><use href="#i-bulb"></use></svg>Próximas mejoras</a>
       <a href="#perfil" data-tab="perfil" class="solo-escritorio tabbar-usuario"><svg><use href="#i-user"></use></svg>Mi usuario</a>
     </nav>
 
@@ -619,6 +726,35 @@
       </form>
     </div>
 
+    <!-- Demo: elegir un plato de ejemplo -->
+    <div class="modal" id="dlg-demo" hidden>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="dlg-demo-titulo">
+        <div class="row-between">
+          <h2 class="title-sm" id="dlg-demo-titulo">Probá con un plato de ejemplo</h2>
+          <button type="button" class="icon-btn" data-cerrar aria-label="Cerrar"><svg><use href="#i-close"></use></svg></button>
+        </div>
+        <p class="muted small">Elegí uno y mirá cómo te lo analiza la app según tus pautas.</p>
+        <div class="demo-platos" id="demo-platos"></div>
+        <div class="note row-gap"><svg><use href="#i-camera"></use></svg><span class="small">Para analizar <strong>tus propias fotos</strong> con IA, creá tu cuenta. Es gratis.</span></div>
+        <button type="button" class="btn btn--primary" id="demo-crear2">Crear mi cuenta</button>
+      </div>
+    </div>
+
+    <!-- Cargar comida: elegir comida, hora y si es extra -->
+    <div class="modal" id="dlg-cargar" hidden>
+      <form class="modal-card" id="form-cargar-comida" role="dialog" aria-modal="true" aria-labelledby="dlg-cargar-titulo">
+        <h2 class="title-sm" id="dlg-cargar-titulo">¿Qué comida es?</h2>
+        <div class="chips" id="cargar-tipos" role="radiogroup" aria-label="Comida"></div>
+        <div class="field" id="cargar-extra-wrap" hidden>
+          <label for="cargar-extra">¿Qué es? <span class="muted">(opcional)</span></label>
+          <input id="cargar-extra" maxlength="30" placeholder="Ej.: colación, postre, snack">
+        </div>
+        <div class="field"><label for="cargar-hora">¿A qué hora?</label><input id="cargar-hora" type="time" required></div>
+        <small class="hint" id="cargar-hora-plan"></small>
+        <button type="submit" class="btn btn--primary">Listo</button>
+      </form>
+    </div>
+
     <!-- Cambiar la hora (o el tipo) de una comida ya cargada -->
     <div class="modal" id="dlg-comida" hidden>
       <form class="modal-card" id="form-hora-comida" role="dialog" aria-modal="true" aria-labelledby="dlg-comida-titulo">
@@ -654,19 +790,22 @@
   <!-- Supabase: cuenta y datos en la nube -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script src="js/storage.js?v=13"></script>
-  <script src="js/ui.js?v=13"></script>
-  <script src="js/fotos.js?v=13"></script>
-  <script src="js/nube.js?v=13"></script>
-  <script src="js/plan.js?v=13"></script>
-  <script src="js/api.js?v=13"></script>
-  <script src="js/auth.js?v=13"></script>
-  <script src="js/hoy.js?v=13"></script>
-  <script src="js/comidas.js?v=13"></script>
-  <script src="js/semana.js?v=13"></script>
-  <script src="js/chat.js?v=13"></script>
-  <script src="js/perfil.js?v=13"></script>
-  <script src="js/mis-comidas.js?v=13"></script>
-  <script src="js/app.js?v=13"></script>
+  <script src="js/storage.js?v=15"></script>
+  <script src="js/ui.js?v=15"></script>
+  <script src="js/fotos.js?v=15"></script>
+  <script src="js/nube.js?v=15"></script>
+  <script src="js/plan.js?v=15"></script>
+  <script src="js/api.js?v=15"></script>
+  <script src="js/auth.js?v=15"></script>
+  <script src="js/hoy.js?v=15"></script>
+  <script src="js/comidas.js?v=15"></script>
+  <script src="js/semana.js?v=15"></script>
+  <script src="js/chat.js?v=15"></script>
+  <script src="js/perfil.js?v=15"></script>
+  <script src="js/mis-comidas.js?v=15"></script>
+  <script src="js/temas.js?v=15"></script>
+  <script src="js/demo.js?v=15"></script>
+  <script src="js/mejoras.js?v=15"></script>
+  <script src="js/app.js?v=15"></script>
 </body>
 </html>

@@ -19,7 +19,6 @@ Screens.perfil = {
       Store.update(u => { u.notas = e.target.value; });
       UI.toast('Notas guardadas');
     });
-    document.getElementById('perfil-tema').addEventListener('change', e => UI.setTema(e.target.value));
     document.getElementById('form-apodo').addEventListener('submit', e => {
       e.preventDefault();
       const input = document.getElementById('perfil-apodo');
@@ -30,6 +29,7 @@ Screens.perfil = {
       this.render();
     });
     document.getElementById('perfil-salir').addEventListener('click', async e => {
+      if (Demo.activo) { Demo.salir(); UI.ir('login'); return; }
       const btn = e.currentTarget;
       btn.disabled = true;
       await Nube.salir();
@@ -86,10 +86,12 @@ Screens.perfil = {
     document.getElementById('perfil-nutri-txt').textContent = n.tiene ? (n.nombre || 'Cargado') : 'No estoy en seguimiento';
     document.getElementById('perfil-notas').value = u.notas || '';
     document.getElementById('perfil-email').textContent = Store.email || '';
-    document.getElementById('perfil-sync').textContent = Nube.textoEstado();
+    document.getElementById('perfil-sync').textContent = Demo.activo ? 'Demo: nada se guarda en la nube' : Nube.textoEstado();
+    document.getElementById('perfil-email').textContent = Demo.activo ? 'Demo' : (Store.email || '');
+    document.getElementById('perfil-salir').textContent = Demo.activo ? 'Salir de la demo' : 'Cerrar sesión';
     const nL = Plan.limites().length;
     document.getElementById('perfil-plan-txt').textContent = `${Plan.comidas().length} comidas · ${nL} ${nL === 1 ? 'límite' : 'límites'}`;
-    document.getElementById('perfil-tema').value = Store.theme;
+    document.getElementById('perfil-apariencia-txt').textContent = textoApariencia();
   }
 };
 

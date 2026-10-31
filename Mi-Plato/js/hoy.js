@@ -247,6 +247,12 @@ Screens.hoy = {
       const b = e.target.closest('[data-comida]');
       if (b) Horarios.abrirComida(b.dataset.comida);
     });
+    // "Sacale una foto" y "Cargar una comida extra" empiezan una carga nueva
+    document.querySelector('#screen-hoy .cta').addEventListener('click', () => Screens.cargar.reset());
+    document.getElementById('hoy-extra').addEventListener('click', () => {
+      Screens.cargar.reset();
+      Screens.cargar.tipoElegido = EXTRA;
+    });
     document.getElementById('hoy-agua-mas').addEventListener('click', () => {
       Agua.sumar(VASO);
       this.render();
@@ -271,23 +277,22 @@ Screens.hoy = {
     const delDia = comidasDelDia(Fechas.clave(hoy));
     const plan = Plan.comidas();
     document.getElementById('hoy-comidas-titulo').textContent = `Tus ${plan.length} comidas`;
-    document.getElementById('hoy-comidas').innerHTML = plan.map(t => {
+    // Las del plan (a su hora) y las extras o de comidas que ya no están en el plan (a la hora en que se cargaron)
+    const minutos = iso => { const d = new Date(iso); return d.getHours() * 60 + d.getMinutes(); };
+    const filas = plan.map(t => {
       const c = delDia.filter(x => x.tipo === t.id).pop();
-      if (!c) {
-        return `
+      const html = c ? filaComida(c, t.nombre) : `
           <a class="meal meal--pending" href="#cargar" data-tipo="${UI.esc(t.id)}">
             <span class="meal-ico meal-ico--pending"><svg><use href="#i-clock"></use></svg></span>
             <span class="meal-body"><strong>${UI.esc(t.nombre)} · ${horaLinda(t.hora)}</strong><span>${UI.esc(t.guia || 'Sacale una foto y te digo si va')}</span></span>
-            <span class="meal-action">Cargar</span>
+            <span class="tag tag--pendiente">Pendiente</span>
           </a>`;
-      }
-      return filaComida(c, t.nombre);
-    }).join('') +
-    // Comidas cargadas hoy de una comida que ya no está en el plan
-    delDia.filter(c => !Plan.get(c.tipo)).map(c => filaComida(c, Plan.nombre(c.tipo, c))).join('');
+      return { min: c ? minutos(c.fecha) : aMinutos(t.hora), html };
+    }).concat(delDia.filter(c => !Plan.get(c.tipo)).map(c => ({ min: minutos(c.fecha), html: filaComida(c, Plan.nombre(c.tipo, c)) })));
+    document.getElementById('hoy-comidas').innerHTML = filas.sort((a, b) => a.min - b.min).map(f => f.html).join('');
 
     document.querySelectorAll('#hoy-comidas a[data-tipo]').forEach(a => {
-      a.addEventListener('click', () => { Screens.cargar.tipoElegido = a.dataset.tipo; });
+      a.addEventListener('click', () => { Screens.cargar.reset(); Screens.cargar.tipoElegido = a.dataset.tipo; });
     });
 
     // Contadores: salen de los límites de cada usuario (sus pautas)
@@ -308,7 +313,7 @@ function filaComida(c, nombre) {
   const ok = c.analisis && c.analisis.veredicto === 'ok';
   const nombres = c.analisis && c.analisis.items ? c.analisis.items.map(i => i.nombre).join(', ') : (c.descripcion || '');
   return `
-    <button type="button" class="meal meal--btn" data-comida="${c.id}" aria-label="${UI.esc(nombre)} a las ${Fechas.hora(c.fecha)}. Tocá para cambiar la hora">
+    <button type="button" class="meal meal--btn${ok ? '' : ' meal--warn'}" data-comida="${c.id}" aria-label="${UI.esc(nombre)} a las ${Fechas.hora(c.fecha)}. Tocá para cambiar la hora">
       <span class="meal-ico ${ok ? 'meal-ico--ok' : 'meal-ico--warn'}">
         ${fotoDe(c) ? `<img src="${fotoDe(c)}" alt="">` : `<svg><use href="#i-${ok ? 'check' : 'alert'}"></use></svg>`}
       </span>

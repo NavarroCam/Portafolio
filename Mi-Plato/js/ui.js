@@ -22,7 +22,12 @@ const UI = (() => {
   }
 
   function route() {
-    const nombre = destino();
+    let nombre = destino();
+    // En la demo no hay cámara: se elige un plato de ejemplo
+    if (nombre === 'cargar' && typeof Demo !== 'undefined' && Demo.activo) {
+      nombre = 'hoy';
+      setTimeout(() => Demo.abrirPlatos(), 0);
+    }
     if (('#' + nombre) !== location.hash) {
       history.replaceState(null, '', '#' + nombre);
     }
@@ -36,7 +41,7 @@ const UI = (() => {
     const conTabs = listo && (escritorio ? !PUBLICAS.includes(nombre) : CON_TABS.includes(nombre));
     tabbar.hidden = !conTabs;
     document.querySelector('.app').classList.toggle('has-tabbar', conTabs);
-    const seccion = { resultado: 'cargar', exportar: 'semana', progreso: 'perfil', consulta: 'perfil', 'mis-comidas': 'perfil', salud: 'perfil', nutri: 'perfil', pautas: 'perfil' }[nombre] || nombre;
+    const seccion = { apariencia: 'perfil', mejoras: 'mejoras', sugerir: 'mejoras', resultado: 'cargar', exportar: 'semana', progreso: 'perfil', consulta: 'perfil', 'mis-comidas': 'perfil', salud: 'perfil', nutri: 'perfil', pautas: 'perfil' }[nombre] || nombre;
     tabbar.querySelectorAll('a').forEach(a => {
       if (a.dataset.tab === seccion) a.setAttribute('aria-current', 'page');
       else a.removeAttribute('aria-current');
@@ -52,6 +57,7 @@ const UI = (() => {
     const backSalud = document.querySelector('#screen-salud .js-onb-back');
     if (backSalud) backSalud.hidden = !!enOnboarding;
 
+    if (actual && actual !== nombre && Screens[actual] && Screens[actual].salir) Screens[actual].salir();
     actual = nombre;
     const s = Screens[nombre];
     if (s && s.render) s.render();
@@ -75,15 +81,16 @@ const UI = (() => {
   function actualizarTema() {
     document.documentElement.dataset.theme = Store.theme;
     const oscuro = esOscuro();
-    document.querySelector('meta[name="theme-color"]').content = oscuro ? '#0F1612' : '#2F6B4F';
+    const colorBarra = typeof Temas !== 'undefined' ? Temas.aplicar(oscuro) : (oscuro ? '#0F1612' : '#2F6B4F');
+    document.querySelector('meta[name="theme-color"]').content = actual === 'cargar' ? '#0E1411' : colorBarra;
     document.querySelectorAll('.js-theme-toggle').forEach(b => {
       b.innerHTML = oscuro
         ? '<svg><use href="#i-sun"></use></svg>Claro'
         : '<svg><use href="#i-moon"></use></svg>Oscuro';
       b.setAttribute('aria-label', oscuro ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
     });
-    const sel = document.getElementById('perfil-tema');
-    if (sel) sel.value = Store.theme;
+    const txt = document.getElementById('perfil-apariencia-txt');
+    if (txt && typeof textoApariencia === 'function') txt.textContent = textoApariencia();
   }
 
   function setTema(t) {

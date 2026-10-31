@@ -64,6 +64,12 @@ Screens.chat = {
     }
     log.scrollTop = log.scrollHeight;
 
+    // En la demo el asistente no responde (usa Gemini y necesita cuenta)
+    const demo = Demo.activo;
+    document.getElementById('chat-input').disabled = demo;
+    document.getElementById('chat-input').placeholder = demo ? 'Creá tu cuenta para chatear con el asistente' : 'Preguntá por una receta o ingrediente';
+    document.querySelector('#form-chat button[type="submit"]').disabled = demo;
+    if (demo) { document.getElementById('chat-sugerencias').innerHTML = ''; return; }
     document.getElementById('chat-sugerencias').innerHTML = msgs.length > 2 ? '' :
       SUGERENCIAS.map(s => `<button type="button" class="chip">${UI.esc(s)}</button>`).join('');
   }

@@ -47,3 +47,57 @@ grant select, insert, update, delete on public.perfiles to authenticated;
 grant select, insert, update, delete on public.fotos    to authenticated;
 revoke all on public.perfiles from anon;
 revoke all on public.fotos    from anon;
+
+-- ==========================================================
+-- Próximas mejoras: votos y sugerencias (agregado en la versión con demo)
+-- ==========================================================
+
+-- Un voto por usuario y mejora (la lista de mejoras está en js/mejoras.js)
+create table if not exists public.votos (
+  user_id   uuid not null references auth.users (id) on delete cascade default auth.uid(),
+  mejora_id text not null check (char_length(mejora_id) <= 40),
+  creado    timestamptz not null default now(),
+  primary key (user_id, mejora_id)
+);
+alter table public.votos enable row level security;
+drop policy if exists "votos: leer lo mío"   on public.votos;
+drop policy if exists "votos: crear lo mío"  on public.votos;
+drop policy if exists "votos: borrar lo mío" on public.votos;
+create policy "votos: leer lo mío"   on public.votos for select to authenticated using ((select auth.uid()) = user_id);
+create policy "votos: crear lo mío"  on public.votos for insert to authenticated with check ((select auth.uid()) = user_id);
+create policy "votos: borrar lo mío" on public.votos for delete to authenticated using ((select auth.uid()) = user_id);
+grant select, insert, delete on public.votos to authenticated;
+revoke all on public.votos from anon;
+
+-- Total de votos por mejora (sin mostrar quién votó)
+create or replace function public.conteo_votos()
+returns table (mejora_id text, votos bigint)
+language sql
+security definer
+set search_path = public
+as $$
+  select mejora_id, count(*) from public.votos group by mejora_id;
+$$;
+revoke all on function public.conteo_votos() from public;
+grant execute on function public.conteo_votos() to anon, authenticated;
+
+-- Sugerencias: cualquiera puede mandar una (también desde la demo), nadie las puede leer desde la app.
+-- Las ves en Supabase › Table Editor › sugerencias (y te llegan por mail).
+create table if not exists public.sugerencias (
+  id       bigint generated always as identity primary key,
+  creado   timestamptz not null default now(),
+  user_id  uuid references auth.users (id) on delete set null,
+  email    text check (char_length(email) <= 200),
+  nombre   text check (char_length(nombre) <= 60),
+  tipo     text not null check (tipo in ('nuevo', 'error', 'diseno', 'otra')),
+  titulo   text not null check (char_length(titulo) between 3 and 80),
+  detalle  text check (char_length(detalle) <= 1500),
+  avisar   boolean not null default false,
+  contexto jsonb,
+  estado   text not null default 'nueva'
+);
+alter table public.sugerencias enable row level security;
+drop policy if exists "sugerencias: cualquiera puede mandar" on public.sugerencias;
+create policy "sugerencias: cualquiera puede mandar" on public.sugerencias for insert to anon, authenticated
+  with check (estado = 'nueva' and (user_id is null or user_id = (select auth.uid())));
+grant insert on public.sugerencias to anon, authenticated;

@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   Modal.init();
   Horarios.init();
   Clave.init();
+  Demo.init();
 
   // Botones de tema (login, registro, perfil): alternan claro/oscuro
   document.querySelectorAll('.js-theme-toggle').forEach(b => {
@@ -26,6 +27,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (e) {
     UI.toast(e.message || 'No se pudo conectar con la nube.', 5000);
   }
+  await Demo.retomar();
+  UI.actualizarTema();
   document.getElementById('arranque').hidden = true;
 
   window.addEventListener('hashchange', UI.route);

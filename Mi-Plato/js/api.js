@@ -182,8 +182,10 @@ const Api = (() => {
 
   return {
     /** Analiza la foto (o descripción) de un plato */
-    async analizarPlato({ foto, descripcion, tipo, momento }) {
-      const c = Plan.get(tipo) || { nombre: Plan.nombre(tipo), guia: '', estilo: 'libre' };
+    async analizarPlato({ foto, descripcion, tipo, momento, nombreExtra }) {
+      const c = tipo === 'extra'
+        ? { nombre: nombreExtra || 'Comida extra', guia: 'Comida fuera del plan (colación, snack, postre o algo que picó): evaluá si es una buena opción según sus pautas y la cantidad.', estilo: 'libre' }
+        : Plan.get(tipo) || { nombre: Plan.nombre(tipo), guia: '', estilo: 'libre' };
       const a = await llamar('analizar-plato', {
         imagen: partes(foto), descripcion, tipo, momento,
         comida: { nombre: c.nombre, guia: c.guia, estilo: c.estilo },
