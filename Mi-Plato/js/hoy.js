@@ -56,7 +56,10 @@ const Festejo = {
     modal.hidden = false;
     document.getElementById('festejo-ok').focus();
     if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) this.confeti();
+    // Muchas compus (sobre todo Windows con "Efectos de animación" apagados) piden
+    // menos movimiento: ahí el confeti es más corto y suave, pero aparece igual
+    const suave = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.confeti(suave ? 2200 : 3200, suave);
   },
 
   cerrar() {
@@ -73,7 +76,7 @@ const Festejo = {
   },
 
   /** Confeti con canvas, sin librerías */
-  confeti(duracion = 3200) {
+  confeti(duracion = 3200, suave = false) {
     const c = document.createElement('canvas');
     c.className = 'confeti';
     c.setAttribute('aria-hidden', 'true');
@@ -99,11 +102,15 @@ const Festejo = {
       forma: Math.random() < 0.3 ? 'circulo' : 'papel',
       osc: Math.random() * Math.PI * 2
     });
-    for (let i = 0; i < 70; i++) {
-      crear(0, H * 0.75, 4 + Math.random() * 8, -(10 + Math.random() * 9));
-      crear(W, H * 0.75, -(4 + Math.random() * 8), -(10 + Math.random() * 9));
+    if (!suave) {
+      for (let i = 0; i < 70; i++) {
+        crear(0, H * 0.75, 4 + Math.random() * 8, -(10 + Math.random() * 9));
+        crear(W, H * 0.75, -(4 + Math.random() * 8), -(10 + Math.random() * 9));
+      }
     }
-    for (let i = 0; i < 60; i++) crear(Math.random() * W, -20 - Math.random() * H * 0.5, (Math.random() - 0.5) * 2, 2 + Math.random() * 3);
+    // En pantallas anchas (compu) más papelitos para que se note
+    const lluvia = Math.round((suave ? 50 : 60) * Math.max(1, W / 600));
+    for (let i = 0; i < lluvia; i++) crear(Math.random() * W, -20 - Math.random() * H * 0.5, (Math.random() - 0.5) * 2, 2 + Math.random() * 3);
 
     const inicio = performance.now();
     const cuadro = ahora => {
