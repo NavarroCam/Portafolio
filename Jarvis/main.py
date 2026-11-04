@@ -39,11 +39,14 @@ def main() -> None:
             print("Jarvis: Memoria de la conversación borrada.\n")
             continue
 
+        print("Jarvis: ", end="", flush=True)
         try:
-            answer = brain.think(user_text)
-            print(f"Jarvis: {answer}\n")
+            # Vamos imprimiendo cada pedacito apenas llega
+            for chunk in brain.think(user_text):
+                print(chunk, end="", flush=True)
+            print("\n")
         except Exception as error:  # en la fase 1 mostramos el error y seguimos
-            print(f"[Error] {error}\n")
+            print(f"\n[Error] {error}\n")
 
 
 if __name__ == "__main__":
