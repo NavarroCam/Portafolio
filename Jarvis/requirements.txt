@@ -1,2 +1,8 @@
 python-dotenv
 requests
+# Fase 2: voz
+faster-whisper
+sounddevice
+soundfile
+numpy
+edge-tts
