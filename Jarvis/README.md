@@ -34,5 +34,5 @@ python main.py
 Antes, instalá **Ollama** desde https://ollama.com y descargá el modelo:
 
 ```bash
-ollama pull qwen3:4b      # o qwen3:1.7b si tu PC tiene 8 GB de RAM
+ollama pull gemma3:4b     # o gemma3:1b si tu PC tiene poca RAM
 ```
