@@ -15,6 +15,7 @@ from collections.abc import Iterator
 import requests
 
 from personality import build_system_prompt
+from tools import run_tools
 
 # Cuántos mensajes del historial se le mandan al modelo.
 # Más mensajes = más memoria de la charla, pero respuestas más lentas.
@@ -55,6 +56,12 @@ class Brain:
         Recibe lo que dijo el usuario y va devolviendo la respuesta de a
         pedacitos (streaming), a medida que el modelo la genera.
         """
+        # Si el mensaje pide un dato real (clima, hora...), lo buscamos y se lo
+        # pasamos al modelo junto con la pregunta para que no invente nada.
+        tool_data = run_tools(user_text)
+        if tool_data:
+            user_text = f"{user_text}\n\n[Datos del sistema: {tool_data}]"
+
         self.history.append({"role": "user", "content": user_text})
         recent = self.history[-MAX_HISTORY:]
 
