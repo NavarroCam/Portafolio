@@ -46,5 +46,8 @@ class Ears:
             language="es",
             vad_filter=True,  # ignora los silencios
             beam_size=1,      # más rápido, casi igual de preciso
+            # Le da contexto a Whisper para que entienda mejor cómo hablás
+            initial_prompt="Conversación en español de Argentina con Jarvis, un asistente personal. "
+                           "Preguntas sobre el clima, la hora, tareas y el día a día.",
         )
         return " ".join(segment.text.strip() for segment in segments).strip()

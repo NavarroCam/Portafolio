@@ -29,6 +29,9 @@ READ_TIMEOUT = 300
 # Evita que el modelo se vaya por las ramas y, de paso, responde más rápido.
 MAX_TOKENS = 400
 
+# Qué tan "creativo" es el modelo. Bajo = inventa menos.
+TEMPERATURE = float(os.getenv("TEMPERATURE", "0.3"))
+
 # Algunos modelos escriben su razonamiento entre <think> y </think>.
 # Esto lo detecta (incluso si el bloque todavía no se cerró) para ocultarlo.
 THINK_BLOCK = re.compile(r"<think>.*?(</think>|$)", re.DOTALL)
@@ -69,7 +72,12 @@ class Brain:
             "model": self.model,
             "messages": [{"role": "system", "content": self.system_prompt}] + recent,
             "stream": True,
-            "options": {"num_predict": MAX_TOKENS},
+            "options": {
+                "num_predict": MAX_TOKENS,
+                # Temperatura baja = respuestas más precisas y menos inventadas
+                # (0 = siempre lo más probable, 1 = más creativo)
+                "temperature": TEMPERATURE,
+            },
         }
         # Los modelos que "razonan" (como qwen3) aceptan que les apaguemos el
         # razonamiento. A los demás no hay que mandarles este parámetro.
