@@ -280,5 +280,8 @@ def run_tools(text: str) -> str:
             try:
                 results.append(function(text))
             except Exception as error:
-                results.append(f"La herramienta de {name} falló ({error}). Avisale a la usuaria.")
+                # Ocultamos los links (pueden ser privados, como el del calendario)
+                message = re.sub(r"https?://\S+", "[link oculto]", f"{type(error).__name__}: {error}")
+                print(f"\n[Error en la herramienta '{name}'] {message}")
+                results.append(f"La herramienta de {name} falló ({message}). Avisale a la usuaria.")
     return " ".join(results)
