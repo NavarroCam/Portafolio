@@ -13,6 +13,7 @@ import io
 import os
 import queue
 import threading
+import time
 
 import edge_tts
 import sounddevice as sd
@@ -22,6 +23,9 @@ import soundfile as sf
 #   es-AR-TomasNeural (Argentina, hombre)   es-AR-ElenaNeural (Argentina, mujer)
 #   es-ES-AlvaroNeural (España, hombre)     es-MX-JorgeNeural (México, hombre)
 DEFAULT_VOICE = "es-AR-TomasNeural"
+
+# Cuántas veces intenta generar la voz antes de rendirse
+RETRIES = 3
 
 
 class Mouth:
@@ -66,5 +70,12 @@ class Mouth:
                     mp3 += chunk["data"]
             return mp3
 
-        mp3_bytes = asyncio.run(fetch())
-        return sf.read(io.BytesIO(mp3_bytes), dtype="float32")
+        # El servicio de voz a veces falla de forma momentánea: reintentamos
+        for attempt in range(1, RETRIES + 1):
+            try:
+                mp3_bytes = asyncio.run(fetch())
+                return sf.read(io.BytesIO(mp3_bytes), dtype="float32")
+            except edge_tts.exceptions.NoAudioReceived:
+                if attempt == RETRIES:
+                    raise
+                time.sleep(0.5 * attempt)
