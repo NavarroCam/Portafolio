@@ -104,6 +104,16 @@ def get_weather(text: str) -> str:
     )
 
 
+# --- Agenda (todavía no conectada) -------------------------------------------
+
+def no_agenda(_: str) -> str:
+    # Protección contra alucinaciones: el modelo tiende a inventar tareas y
+    # reuniones. Hasta que conectemos una agenda real, le decimos que no hay datos.
+    return ("Jarvis NO tiene acceso a la agenda, las tareas ni los pendientes de la usuaria. "
+            "No hay ningún dato sobre eso. Debe decir que todavía no tiene esa información "
+            "y NO inventar tareas, reuniones, proyectos ni nombres.")
+
+
 # --- Registro de herramientas ------------------------------------------------
 
 # (nombre, palabras que la activan, función)
@@ -113,6 +123,9 @@ TOOLS: list[tuple[str, re.Pattern, Callable[[str], str]]] = [
     ("clima", re.compile(
         r"\b(clima|temperatura|grados|pron[oó]stico|llueve|llover|lluvia|paraguas|"
         r"calor|fr[ií]o|humedad|qu[eé] tiempo hace|viento)\b", re.I), get_weather),
+    ("agenda", re.compile(
+        r"\b(tareas?|agenda|pendientes?|reuni[oó]n(es)?|protocolo|calendario|"
+        r"recordatorios?|qu[eé] tengo (para|que)|tengo (algo|que hacer))\b", re.I), no_agenda),
 ]
 
 
