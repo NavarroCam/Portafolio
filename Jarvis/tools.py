@@ -12,6 +12,8 @@ Para agregar una herramienta nueva:
 
 import os
 import re
+import subprocess
+import sys
 from collections.abc import Callable
 from datetime import datetime
 
@@ -104,6 +106,72 @@ def get_weather(text: str) -> str:
     )
 
 
+# --- Abrir programas y páginas ----------------------------------------------
+
+# Lista blanca: Jarvis SOLO abre lo que está acá. Agregá los tuyos así:
+#   "nombre que decís": ("Nombre lindo", "comando, programa o página")
+APPS: dict[str, tuple[str, str]] = {
+    "google chrome": ("Google Chrome", "chrome"),
+    "chrome": ("Google Chrome", "chrome"),
+    "edge": ("Microsoft Edge", "msedge"),
+    "visual studio code": ("Visual Studio Code", "code"),
+    "vs code": ("Visual Studio Code", "code"),
+    "vscode": ("Visual Studio Code", "code"),
+    "visual studio": ("Visual Studio Code", "code"),
+    "spotify": ("Spotify", "spotify:"),
+    "whatsapp": ("WhatsApp", "whatsapp:"),
+    "explorador": ("el Explorador de archivos", "explorer"),
+    "archivos": ("el Explorador de archivos", "explorer"),
+    "calculadora": ("la Calculadora", "calc"),
+    "bloc de notas": ("el Bloc de notas", "notepad"),
+    "word": ("Word", "winword"),
+    "excel": ("Excel", "excel"),
+    "powerpoint": ("PowerPoint", "powerpnt"),
+    "configuración": ("la Configuración de Windows", "ms-settings:"),
+    "youtube": ("YouTube", "https://www.youtube.com"),
+    "gmail": ("Gmail", "https://mail.google.com"),
+    "github": ("GitHub", "https://github.com/NavarroCam"),
+    "portafolio": ("tu portafolio", "https://portafolio-navarro-camila.vercel.app/"),
+    "google": ("Google", "https://www.google.com"),
+}
+
+
+def _launch(target: str) -> None:
+    """Abre un programa, una página o un enlace del sistema."""
+    if sys.platform == "win32":
+        # "start" de Windows encuentra programas instalados, páginas y enlaces
+        subprocess.Popen(f'start "" "{target}"', shell=True)
+    else:
+        subprocess.Popen(["xdg-open", target])
+
+
+def open_app(text: str) -> str:
+    lowered = text.lower()
+    # Buscamos primero los nombres más largos ("visual studio code" antes que "code")
+    found = []
+    for key in sorted(APPS, key=len, reverse=True):
+        pattern = rf"\b{re.escape(key)}\b"
+        if re.search(pattern, lowered):
+            found.append(key)
+            # Borramos lo encontrado para que "google chrome" no abra también "google"
+            lowered = re.sub(pattern, " ", lowered)
+    if not found:
+        available = ", ".join(sorted({name for name, _ in APPS.values()}))
+        return f"No reconocí qué programa abrir. Puede abrir: {available}."
+
+    opened = []
+    for key in found:
+        name, target = APPS[key]
+        if name in opened:
+            continue
+        try:
+            _launch(target)
+            opened.append(name)
+        except Exception as error:
+            return f"Intentó abrir {name} pero falló ({error})."
+    return "Se abrió " + " y ".join(opened) + " correctamente."
+
+
 # --- Agenda (todavía no conectada) -------------------------------------------
 
 def no_agenda(_: str) -> str:
@@ -123,6 +191,8 @@ TOOLS: list[tuple[str, re.Pattern, Callable[[str], str]]] = [
     ("clima", re.compile(
         r"\b(clima|temperatura|grados|pron[oó]stico|llueve|llover|lluvia|paraguas|"
         r"calor|fr[ií]o|humedad|qu[eé] tiempo hace|viento)\b", re.I), get_weather),
+    ("abrir", re.compile(
+        r"\b(abr[ií]|abre|abrir|abrime|[aá]breme|ejecut[aá]|inici[aá]|lanz[aá])\b", re.I), open_app),
     ("agenda", re.compile(
         r"\b(tareas?|agenda|pendientes?|reuni[oó]n(es)?|protocolo|calendario|"
         r"recordatorios?|qu[eé] tengo (para|que)|tengo (algo|que hacer))\b", re.I), no_agenda),

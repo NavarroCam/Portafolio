@@ -6,7 +6,7 @@ Mi asistente personal, construido desde cero. 100% gratis y local: corre en mi P
 
 - [x] **Fase 1** – Chat en texto con personalidad propia
 - [x] **Fase 2** – Voz (escuchar con faster-whisper y hablar con edge-tts)
-- [ ] **Fase 3** – Herramientas: ✅ hora, ✅ fecha, ✅ clima · ⏳ abrir apps, n8n…
+- [ ] **Fase 3** – Herramientas: ✅ hora, ✅ fecha, ✅ clima, ✅ abrir programas · ⏳ agenda, n8n…
 - [ ] **Fase 4** – Palabra de activación ("Jarvis") y memoria persistente
 - [ ] **Fase 5** – Interfaz visual
 
@@ -18,7 +18,7 @@ jarvis/
 ├── brain.py         # Habla con el LLM local (Ollama) y guarda el historial
 ├── ears.py          # Graba el micrófono y lo pasa a texto (faster-whisper, local)
 ├── mouth.py         # Convierte texto en voz y lo reproduce (edge-tts)
-├── tools.py         # Herramientas: hora, fecha y clima (Open-Meteo, sin API key)
+├── tools.py         # Herramientas: hora, fecha, clima (Open-Meteo) y abrir programas
 ├── probar_voces.py  # Para escuchar y elegir la voz de Jarvis
 ├── personality.py   # El prompt de sistema: quién es Jarvis y cómo habla
 ├── requirements.txt
