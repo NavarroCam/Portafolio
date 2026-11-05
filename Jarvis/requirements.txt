@@ -6,3 +6,6 @@ sounddevice
 soundfile
 numpy
 edge-tts
+# Fase 3: agenda (Google Calendar por iCal)
+icalendar
+recurring-ical-events

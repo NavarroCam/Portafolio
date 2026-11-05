@@ -6,7 +6,7 @@ Mi asistente personal, construido desde cero. 100% gratis y local: corre en mi P
 
 - [x] **Fase 1** – Chat en texto con personalidad propia
 - [x] **Fase 2** – Voz (escuchar con faster-whisper y hablar con edge-tts)
-- [ ] **Fase 3** – Herramientas: ✅ hora, ✅ fecha, ✅ clima, ✅ abrir programas · ⏳ agenda, n8n…
+- [ ] **Fase 3** – Herramientas: ✅ hora, ✅ fecha, ✅ clima, ✅ abrir programas, ✅ agenda (lectura) · ⏳ n8n…
 - [ ] **Fase 4** – Palabra de activación ("Jarvis") y memoria persistente
 - [ ] **Fase 5** – Interfaz visual
 

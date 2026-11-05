@@ -16,7 +16,7 @@ import shutil
 import subprocess
 import sys
 from collections.abc import Callable
-from datetime import datetime
+from datetime import date, datetime, timedelta
 
 import requests
 
@@ -114,12 +114,16 @@ def get_weather(text: str) -> str:
 APPS: dict[str, tuple[str, str]] = {
     "google chrome": ("Google Chrome", "chrome"),
     "chrome": ("Google Chrome", "chrome"),
+    "crome": ("Google Chrome", "chrome"),
+    "cromo": ("Google Chrome", "chrome"),
+    "navegador": ("Google Chrome", "chrome"),
     "edge": ("Microsoft Edge", "msedge"),
     "visual studio code": ("Visual Studio Code", "code"),
     "vs code": ("Visual Studio Code", "code"),
     "vscode": ("Visual Studio Code", "code"),
     "visual studio": ("Visual Studio Code", "code"),
     "spotify": ("Spotify", "spotify:"),
+    "spotifai": ("Spotify", "spotify:"),
     "whatsapp": ("WhatsApp", "whatsapp:"),
     "explorador": ("el Explorador de archivos", "explorer"),
     "archivos": ("el Explorador de archivos", "explorer"),
@@ -176,14 +180,79 @@ def open_app(text: str) -> str:
     return "Se abrió " + " y ".join(opened) + " correctamente."
 
 
-# --- Agenda (todavía no conectada) -------------------------------------------
+# --- Agenda (Google Calendar por dirección secreta iCal) ---------------------
 
-def no_agenda(_: str) -> str:
-    # Protección contra alucinaciones: el modelo tiende a inventar tareas y
-    # reuniones. Hasta que conectemos una agenda real, le decimos que no hay datos.
-    return ("Jarvis NO tiene acceso a la agenda, las tareas ni los pendientes de la usuaria. "
-            "No hay ningún dato sobre eso. Debe decir que todavía no tiene esa información "
-            "y NO inventar tareas, reuniones, proyectos ni nombres.")
+NO_AGENDA = ("Jarvis NO tiene acceso a la agenda de la usuaria todavía (falta configurar "
+             "CALENDAR_ICAL_URL en el .env). Debe decirlo y NO inventar tareas, reuniones, "
+             "proyectos ni nombres.")
+
+_calendar_cache: dict = {"time": None, "data": None}
+
+
+def _load_calendar(url: str):
+    """Descarga el calendario (y lo guarda 5 minutos para no pedirlo a cada rato)."""
+    import icalendar  # se importan acá para que el resto funcione sin estas librerías
+
+    cached_at = _calendar_cache["time"]
+    if cached_at is None or datetime.now() - cached_at > timedelta(minutes=5):
+        response = requests.get(url, timeout=15)
+        response.raise_for_status()
+        _calendar_cache["data"] = icalendar.Calendar.from_ical(response.content)
+        _calendar_cache["time"] = datetime.now()
+    return _calendar_cache["data"]
+
+
+def _which_days(text: str) -> tuple[date, int, str]:
+    """Entiende si preguntás por hoy, mañana, pasado mañana o la semana."""
+    lowered = text.lower()
+    today = date.today()
+    if "pasado mañana" in lowered:
+        return today + timedelta(days=2), 1, "pasado mañana"
+    # "mañana" como día, no como "a la mañana" / "por la mañana"
+    if re.search(r"(?<!la )\bmañana\b", lowered):
+        return today + timedelta(days=1), 1, "mañana"
+    if "semana" in lowered:
+        return today, 7, "los próximos 7 días"
+    return today, 1, "hoy"
+
+
+def _describe_event(event, show_day: bool) -> str:
+    title = str(event.get("SUMMARY", "Sin título"))
+    start = event.get("DTSTART").dt
+    end = event.get("DTEND").dt if event.get("DTEND") else None
+    day = ""
+    if show_day:
+        d = start.astimezone().date() if isinstance(start, datetime) else start
+        day = f"el {DIAS[d.weekday()]} {d.day}, "
+    if not isinstance(start, datetime):  # evento de todo el día
+        return f"{day}todo el día: {title}"
+    start = start.astimezone()  # a la hora de tu PC
+    hours = f"de {start:%H:%M} a {end.astimezone():%H:%M}" if isinstance(end, datetime) else f"a las {start:%H:%M}"
+    place = f" (en {event.get('LOCATION')})" if event.get("LOCATION") else ""
+    return f"{day}{hours}: {title}{place}"
+
+
+def get_agenda(text: str) -> str:
+    url = os.getenv("CALENDAR_ICAL_URL", "").strip()
+    if not url:
+        return NO_AGENDA
+
+    import recurring_ical_events
+
+    first_day, days, label = _which_days(text)
+    calendar = _load_calendar(url)
+    events = recurring_ical_events.of(calendar).between(first_day, first_day + timedelta(days=days))
+
+    def sort_key(event):
+        start = event.get("DTSTART").dt
+        return start.astimezone() if isinstance(start, datetime) else datetime.combine(start, datetime.min.time()).astimezone()
+
+    events = sorted(events, key=sort_key)
+    if not events:
+        return f"Agenda de {label}: no hay ningún evento en el calendario. No inventes ninguno."
+    lines = "; ".join(_describe_event(e, show_day=days > 1) for e in events)
+    return (f"Agenda de {label} según Google Calendar ({len(events)} eventos): {lines}. "
+            "Esta es la lista completa: no agregues nada más.")
 
 
 # --- Registro de herramientas ------------------------------------------------
@@ -199,7 +268,7 @@ TOOLS: list[tuple[str, re.Pattern, Callable[[str], str]]] = [
         r"\b(abr[ií]|abre|abrir|abrime|[aá]breme|ejecut[aá]|inici[aá]|lanz[aá])\b", re.I), open_app),
     ("agenda", re.compile(
         r"\b(tareas?|agenda|pendientes?|reuni[oó]n(es)?|protocolo|calendario|"
-        r"recordatorios?|qu[eé] tengo (para|que)|tengo (algo|que hacer))\b", re.I), no_agenda),
+        r"recordatorios?|eventos?|qu[eé] tengo (para|que|hoy|ma[ñn]ana)|tengo (algo|que hacer))\b", re.I), get_agenda),
 ]
 
 
