@@ -12,6 +12,7 @@ Para agregar una herramienta nueva:
 
 import os
 import re
+import shutil
 import subprocess
 import sys
 from collections.abc import Callable
@@ -137,10 +138,12 @@ APPS: dict[str, tuple[str, str]] = {
 
 
 def _launch(target: str) -> None:
-    """Abre un programa, una página o un enlace del sistema."""
+    """Abre un programa, una página o un enlace del sistema. Si falla, lanza un error."""
+    print(f"\n[Abriendo: {target}]")
     if sys.platform == "win32":
-        # "start" de Windows encuentra programas instalados, páginas y enlaces
-        subprocess.Popen(f'start "" "{target}"', shell=True)
+        # Si el programa está en el PATH (como "code"), usamos su ruta completa.
+        # Si no, Windows lo busca entre los programas instalados (como "chrome").
+        os.startfile(shutil.which(target) or target)
     else:
         subprocess.Popen(["xdg-open", target])
 
@@ -168,7 +171,8 @@ def open_app(text: str) -> str:
             _launch(target)
             opened.append(name)
         except Exception as error:
-            return f"Intentó abrir {name} pero falló ({error})."
+            print(f"[Error al abrir {target}: {error}]")
+            return f"Intentó abrir {name} pero NO se pudo: Windows no lo encontró. Debe decir que no pudo abrirlo."
     return "Se abrió " + " y ".join(opened) + " correctamente."
 
 
